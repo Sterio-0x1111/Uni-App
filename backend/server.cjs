@@ -20,7 +20,7 @@ app.get('/api/meals/:mensa', async (req, res) => {
         const $ = cheerio.load(html);
 
         const mealsTable = $('.meals').html();
-
+        console.log(mealsTable);
         if(mealsTable){
             res.json( { table: mealsTable } );
             console.log('Successfully send response!');
