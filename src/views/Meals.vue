@@ -18,7 +18,10 @@
 
             <div v-if="mensaPlan">
                     <h2>{{ selectedMensaName }}</h2>
-                    <div v-html="mensaPlan"></div>
+                    <div v-for="meal in mensaPlan" :key="meal.title">
+                        <p>{{ meal.title }}</p>
+                        <span>{{ meal.priceStudent }} | {{ meal.priceEmployee }} | {{ meal.priceGuest }}</span>
+                    </div>
                 </div>
                 <div v-else>
                     <p>Mensa auswählen oder kein Plan gefunden.</p>
