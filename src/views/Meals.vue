@@ -67,7 +67,7 @@ const loadMensaPlan = async () => {
             
             const meals = await response.json();
             console.log(meals);
-
+            
             if (meals) {
                 mensaPlan.value = meals.table;
             } else {
