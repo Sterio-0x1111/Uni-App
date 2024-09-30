@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-    import onMounted from 'vue';
+    import { onMounted } from 'vue';
 
     onMounted(async () => {
         const semesterPeriods = await fetch('http://lpcalhost:3000/api/semester');
