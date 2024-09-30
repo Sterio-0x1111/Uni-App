@@ -9,7 +9,7 @@
             <ion-grid>
                 <ion-row>
                     <ion-col><strong>Semester</strong></ion-col>
-                    <ion-col><strong>Zeitraum</strong>/ion-col>
+                    <ion-col><strong>Zeitraum</strong></ion-col>
                 </ion-row>
                 <ion-row v-for="sem in semesterPeriods" :key="sem.semester">
                     <ion-col>sem.semester</ion-col>
