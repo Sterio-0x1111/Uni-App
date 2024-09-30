@@ -13,11 +13,6 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Home',
     component: HomePage
   },
-  {
-    path: '/meals',
-    name: 'Meals',
-    component: Meals
-  }
 ]
 
 const router = createRouter({
