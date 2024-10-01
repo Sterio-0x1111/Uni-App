@@ -9,7 +9,7 @@
         <ion-content>
             <p>Hier finden Sie die täglichen Speisepläne.</p>
             <ion-item>
-                <ion-select v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
+                <ion-select class="selection" v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
                     <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.id">
                         {{ mensa.name }}
                     </ion-select-option>
@@ -17,7 +17,7 @@
             </ion-item>
 
             <ion-item v-if="dateSelection && dateSelection.length > 0">
-                <ion-select v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Datum auswählen">
+                <ion-select class="selection" v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Datum auswählen">
                     <ion-select-option v-for="date in dateSelection" :key="date.optionValue" :value="date.optionValue">
                         {{ date.optionText }}
                     </ion-select-option>
@@ -25,10 +25,10 @@
             </ion-item>
 
             <div v-if="mensaPlan">
-                <h2>{{ selectedMensaName }}</h2>
-                <div v-for="meal in mensaPlan" :key="meal.title">
-                    <p>{{ meal.title }}</p>
-                    <span>{{ meal.priceStudent }} | {{ meal.priceEmployee }} | {{ meal.priceGuest }}</span>
+                <h2>Menü</h2>
+                <div class="meals-view" v-for="meal in mensaPlan" :key="meal.title">
+                    <span>{{ meal.title }}</span>
+                    <p>{{ meal.priceStudent }} | {{ meal.priceEmployee }} | {{ meal.priceGuest }}</p>
                 </div>
             </div>
             <div v-else>
@@ -74,7 +74,7 @@ const loadMensaPlan = async () => {
             console.log('Lade Mensaplan für', mensa.name)
             
             //const response = await fetch(`http://localhost:3000/api/meals/${mensa.name}/${selectedDate.value}`);
-            const response = await fetch(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
+            const response = await fetch(`http://192.168.2.148:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
             /*const html = response.data
             const $ = cheerio.load(html)
             const meals = $('.meals').html()*/
@@ -98,7 +98,7 @@ const loadSelectionOptions = async () => {
     const mensaName = selectedMensaName.value.toLowerCase();
 
     try {
-        const response = await fetch(`http://localhost:3000/api/mensa/options/${mensaName}`);
+        const response = await fetch(`http://192.168.2.148:3000/api/mensa/options/${mensaName}`);
         const data = await response.json();
         
         // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
@@ -111,3 +111,29 @@ const loadSelectionOptions = async () => {
     }
 }
 </script>
+
+<style scoped>
+
+p {
+    margin-left: 20px;
+    font-size: 22px;
+}
+
+h2 {
+    margin-left: 20px;
+}
+
+.selection {
+    font-size: 28px;
+    margin-left: 20px;
+    margin-bottom: 30px;
+}
+
+.meals-view{
+    font-size: 24px;
+    margin-left: 30px;
+    margin-right: 20px;
+    margin-top: 75px;
+}
+
+</style>
