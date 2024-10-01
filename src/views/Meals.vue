@@ -9,17 +9,17 @@
         <ion-content>
             <p>Hier finden Sie die täglichen Speisepläne.</p>
             <ion-item>
-                <ion-select v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa aussuchen">
+                <ion-select v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
                     <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.id">
                         {{ mensa.name }}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
 
-            <ion-item v-if="dateSelection">
-                <ion-select v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Mensa aussuchen">
-                    <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.id">
-                        {{ mensa.name }}
+            <ion-item v-if="dateSelection && dateSelection.length > 0">
+                <ion-select v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Datum auswählen">
+                    <ion-select-option v-for="date in dateSelection" :key="date.optionValue" :value="date.optionValue">
+                        {{ date.optionText }}
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -56,7 +56,7 @@ const mensas = [
 const selectedMensa = ref(null)
 const mensaPlan = ref(null)
 const selectedDate = ref(null);
-const dateSelection = ref(null);
+const dateSelection = ref([]);
 
 // Berechne den Namen der ausgewählten Mensa
 const selectedMensaName = computed(() => {
@@ -66,14 +66,15 @@ const selectedMensaName = computed(() => {
 
 // Lade den Mensaplan basierend auf der ausgewählten Mensa
 const loadMensaPlan = async () => {
+    console.log(selectedDate);
     const mensa = mensas.find(m => m.id === selectedMensa.value)
 
     if (mensa) {
         try {
             console.log('Lade Mensaplan für', mensa.name)
             
-            //const response = await fetch(`http://localhost:3000/api/meals/${mensa.name}`);
-            const response = await fetch(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}`);
+            //const response = await fetch(`http://localhost:3000/api/meals/${mensa.name}/${selectedDate.value}`);
+            const response = await fetch(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
             /*const html = response.data
             const $ = cheerio.load(html)
             const meals = $('.meals').html()*/
@@ -94,6 +95,19 @@ const loadMensaPlan = async () => {
 }
 
 const loadSelectionOptions = async () => {
-    dateSelection.value = await fetch('http://localhost:3000/api/')
+    const mensaName = selectedMensaName.value.toLowerCase()
+
+     try {
+        const response = await fetch(`http://localhost:3000/api/mensa/options/${mensaName}`)
+        const data = await response.json()
+        
+        console.log('LOAD OPTIONS')
+        // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
+        dateSelection.value = data.options
+        console.log(dateSelection);
+    } catch (error) {
+        console.log('Fehler beim Laden der Optionen:', error)
+        dateSelection.value = []
+    }
 }
 </script>
