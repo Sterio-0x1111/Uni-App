@@ -25,15 +25,15 @@
             </ion-item>
 
             <div v-if="mensaPlan">
-                    <h2>{{ selectedMensaName }}</h2>
-                    <div v-for="meal in mensaPlan" :key="meal.title">
-                        <p>{{ meal.title }}</p>
-                        <span>{{ meal.priceStudent }} | {{ meal.priceEmployee }} | {{ meal.priceGuest }}</span>
-                    </div>
+                <h2>{{ selectedMensaName }}</h2>
+                <div v-for="meal in mensaPlan" :key="meal.title">
+                    <p>{{ meal.title }}</p>
+                    <span>{{ meal.priceStudent }} | {{ meal.priceEmployee }} | {{ meal.priceGuest }}</span>
                 </div>
-                <div v-else>
-                    <p>Mensa auswählen oder kein Plan gefunden.</p>
-                </div>
+            </div>
+            <div v-else>
+                <p>Mensa auswählen oder kein Plan gefunden.</p>
+            </div>
         </ion-content>
     </ion-page>
 </template>
@@ -80,7 +80,7 @@ const loadMensaPlan = async () => {
             const meals = $('.meals').html()*/
             
             const meals = await response.json();
-            console.log(meals);
+            //console.log(meals);
 
             if (meals) {
                 mensaPlan.value = meals.table;
@@ -95,19 +95,19 @@ const loadMensaPlan = async () => {
 }
 
 const loadSelectionOptions = async () => {
-    const mensaName = selectedMensaName.value.toLowerCase()
+    const mensaName = selectedMensaName.value.toLowerCase();
 
-     try {
-        const response = await fetch(`http://localhost:3000/api/mensa/options/${mensaName}`)
-        const data = await response.json()
+    try {
+        const response = await fetch(`http://localhost:3000/api/mensa/options/${mensaName}`);
+        const data = await response.json();
         
-        console.log('LOAD OPTIONS')
         // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
-        dateSelection.value = data.options
-        console.log(dateSelection);
+        dateSelection.value = data.options;
+        selectedDate.value = data.options[0].optionValue;
+        loadMensaPlan();
     } catch (error) {
-        console.log('Fehler beim Laden der Optionen:', error)
-        dateSelection.value = []
+        console.log('Fehler beim Laden der Optionen:', error);
+        dateSelection.value = [];
     }
 }
 </script>
