@@ -9,7 +9,15 @@
         <ion-content>
             <p>Hier finden Sie die täglichen Speisepläne.</p>
             <ion-item>
-                <ion-select v-model="selectedMensa" @ionChange="loadMensaPlan" placeholder="Mensa aussuchen">
+                <ion-select v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa aussuchen">
+                    <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.id">
+                        {{ mensa.name }}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
+
+            <ion-item v-if="dateSelection">
+                <ion-select v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Mensa aussuchen">
                     <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.id">
                         {{ mensa.name }}
                     </ion-select-option>
@@ -47,6 +55,8 @@ const mensas = [
 // Reaktive Variablen
 const selectedMensa = ref(null)
 const mensaPlan = ref(null)
+const selectedDate = ref(null);
+const dateSelection = ref(null);
 
 // Berechne den Namen der ausgewählten Mensa
 const selectedMensaName = computed(() => {
@@ -81,5 +91,9 @@ const loadMensaPlan = async () => {
             mensaPlan.value = 'Fehler beim Laden des Mensaplan';
         }
     }
+}
+
+const loadSelectionOptions = async () => {
+    dateSelection.value = await fetch('http://localhost:3000/api/')
 }
 </script>
