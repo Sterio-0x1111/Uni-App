@@ -35,7 +35,7 @@ app.get('/api/meals/:mensa', async (req, res) => {
     } catch(err){
         console.log('Fehler beim Laden der Daten.', err);
     }
-})
+});
 
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
@@ -86,6 +86,10 @@ app.post("/api/login", async (req, res) => {
     console.error("Fehler beim Login oder Scraping:", error);
     res.status(500).json({ error: "Fehler beim Abrufen der Daten." });
   }
+});
+
+app.post("/api/vpisLogin", async (req, res) => {
+  
 });
 
 // weitere end points

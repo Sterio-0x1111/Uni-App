@@ -17,20 +17,18 @@
             </ion-item>
 
             <div v-if="mensaPlan">
-                    <h2>{{ selectedMensaName }}</h2>
-                    <div v-html="mensaPlan"></div>
-                </div>
-                <div v-else>
-                    <p>Mensa auswählen oder kein Plan gefunden.</p>
-                </div>
+                <h2>{{ selectedMensaName }}</h2>
+                <div v-html="mensaPlan"></div>
+            </div>
+            <div v-else>
+                <p>Mensa auswählen oder kein Plan gefunden.</p>
+            </div>
         </ion-content>
     </ion-page>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import axios from 'axios'
-import * as cheerio from 'cheerio'
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption } from '@ionic/vue';
 
 // Liste der Mensas mit ihren jeweiligen URLs
