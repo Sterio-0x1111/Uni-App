@@ -48,6 +48,8 @@ app.post("/api/login", async (req, res) => {
       "https://hochschulportal.fh-swf.de/qisserver/pages/cs/sys/portal/hisinoneStartPage.faces"
     );
     const cookies = loginPageResponse.headers["set-cookie"];
+    console.log(loginPageResponse);
+    console.log(cookies);
 
     const $ = cheerio.load(loginPageResponse.data);
     const viewState = $('input[name="javax.faces.ViewState"]').val();
