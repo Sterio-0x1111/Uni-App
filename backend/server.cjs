@@ -149,6 +149,42 @@ app.post("/api/vpisLogin", async (req, res) => {
   }
 });
 
+// verfügbare Semester abrufen (vpisLogin)
+app.get("/api/semesters", async (req, res) => {
+  try {
+    const response = await axios.get(
+      "https://vpis.fh-swf.de/index.php/de/vpis/"
+    );
+    const $ = cheerio.load(response.data);
+
+    const semesters = [];
+
+    // Informationen für jedes Semester
+    $(".news-teaser__item").each((i, element) => {
+      const title = $(element).find(".headline--5").text().trim();
+      const startDate = $(element)
+        .find('span[itemprop="startDate"]')
+        .first()
+        .text()
+        .trim();
+      const endDate = $(element).find("span").last().text().trim();
+      const link = $(element).find("a").attr("href");
+
+      semesters.push({
+        title: title,
+        startDate: startDate,
+        endDate: endDate,
+        link: link,
+      });
+    });
+
+    res.json(semesters); // Rückgabe der Semesterinformationen
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Semester:", error);
+    res.status(500).json({ error: "Fehler beim Abrufen der Semester." });
+  }
+});
+
 // weitere end points
 
 app.listen(PORT, () => {

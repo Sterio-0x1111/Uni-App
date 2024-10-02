@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar>
-                <ion-title>VPIS Login (Enwickler Test)</ion-title>
+                <ion-title>VPIS Login (Entwickler Test)</ion-title>
             </ion-toolbar>
         </ion-header>
 
@@ -18,8 +18,8 @@
             <ion-item>
                 <ion-label>Semester</ion-label>
                 <ion-select v-model="selectedSemester" placeholder="Semester auswählen">
-                    <ion-select-option v-for="semester in semesters" :key="semester" :value="semester">
-                        {{ semester }}
+                    <ion-select-option v-for="semester in semesters" :key="semester.link" :value="semester.link">
+                        {{ semester.title }} ({{ semester.startDate }} - {{ semester.endDate }})
                     </ion-select-option>
                 </ion-select>
             </ion-item>
@@ -39,16 +39,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonSpinner, IonList } from '@ionic/vue';
 
 const username = ref('');
 const password = ref('');
 const selectedSemester = ref(null);
-const semesters = ref(['WS2024', 'SS2024']); // Dynamisch später im Backend auslesen
+const semesters = ref([]);
 const personalData = ref([]);
 const loading = ref(false);
 const errorMessage = ref('');
+
+// Funktion zum Abrufen der verfügbaren Semester
+const fetchSemesters = async () => {
+    loading.value = true;
+    try {
+        const response = await fetch('http://localhost:3000/api/semesters');
+        if (response.ok) {
+            semesters.value = await response.json();
+        } else {
+            errorMessage.value = 'Fehler beim Abrufen der Semester.';
+        }
+    } catch (error) {
+        console.error('Fehler beim Abrufen der Semester:', error);
+        errorMessage.value = 'Ein Fehler ist aufgetreten.';
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Lade die Semester beim Start
+onMounted(fetchSemesters);
 
 const login = async () => {
     loading.value = true;
