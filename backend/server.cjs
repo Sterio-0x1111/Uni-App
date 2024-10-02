@@ -37,6 +37,7 @@ app.get('/api/meals/:mensa', async (req, res) => {
     }
 });
 
+// Hochschulportal
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   console.log("Received username:", username);
@@ -88,8 +89,64 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Login für VPIS
 app.post("/api/vpisLogin", async (req, res) => {
-  
+  const { username, password, semester } = req.body;
+
+  try {
+    // 1. Lade die Login-Seite, um Cookies und versteckte Felder zu holen
+    const loginPageResponse = await axios.get(
+      "https://vpis.fh-swf.de/index.php/de/vpis/"
+    );
+    const cookies = loginPageResponse.headers["set-cookie"];
+
+    // Lade die Seite in Cheerio, um versteckte Felder zu extrahieren
+    const $ = cheerio.load(loginPageResponse.data);
+
+    // 2. Login-Request
+    const loginResponse = await axios.post(
+      `https://vpis.fh-swf.de/${semester}/student.php3`, // Dynamischer Semesterlink (in Arbeit)
+      qs.stringify({
+        benutzerkennung: username, // Benutzerkennung-Feld
+        passwd: password, // Passwort-Feld
+        // Weitere versteckte Felder (wenn geg.)
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Cookie: cookies, // Weitergabe für Cookies
+        },
+      }
+    );
+
+    // 3. Überprüfen, ob der Login erfolgreich war
+    if (loginResponse.data.includes("Erfolgreich angemeldet")) {
+      // Erfolgreicher Login
+      const dataPageResponse = await axios.get(
+        `https://vpis.fh-swf.de/${semester}/student.php3?Template=2021`,
+        {
+          headers: {
+            Cookie: loginResponse.headers["set-cookie"],
+          },
+        }
+      );
+
+      const $ = cheerio.load(dataPageResponse.data);
+      const personalData = [];
+
+      // Scraping
+      $(".info-element").each((i, element) => {
+        personalData.push($(element).text().trim());
+      });
+
+      res.json(personalData); // Gescrapete Daten zurückgeben
+    } else {
+      res.status(401).json({ error: "Login fehlgeschlagen." });
+    }
+  } catch (error) {
+    console.error("Fehler beim Login oder Scraping:", error.message, error.response?.data);
+    res.status(500).json({ error: "Fehler beim Abrufen der Daten." });
+  }
 });
 
 // weitere end points
