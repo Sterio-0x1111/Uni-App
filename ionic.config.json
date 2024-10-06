@@ -1,7 +1,0 @@
-{
-  "name": "HochschulApp",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "vue-vite"
-}
