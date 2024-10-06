@@ -56,6 +56,7 @@ app.post("/api/login", async (req, res) => {
     const viewState = $('input[name="javax.faces.ViewState"]').val();
     const authenticityToken = $('input[name="authenticity_token"]').val();
     const ajaxToken = $('input[name="ajax-token"]').val();
+    console.log(ajaxToken);
 
     // 2. Login Request senden mit Benutzername, Passwort und versteckten Feldern
     const loginResponse = await axios.post(
@@ -65,7 +66,7 @@ app.post("/api/login", async (req, res) => {
         fdsa: password,
         "javax.faces.ViewState": viewState,
         authenticity_token: authenticityToken,
-        "ajax-token": ajaxToken,
+        "ajaxToken": ajaxToken, // ajax-token
       }),
       {
         headers: {
@@ -74,6 +75,10 @@ app.post("/api/login", async (req, res) => {
         },
       }
     );
+    const d = cheerio.load(loginResponse.data);
+    const test = d('input[name="ajax-token"]').val();
+    console.log(test);
+    
 
     // 3. Überprüfung des Erfolgs
     if (loginResponse.data.includes("Erfolgreich angemeldet")) {

@@ -3,7 +3,7 @@ import { RouteRecordRaw } from 'vue-router';
 import HomePage from '../views/HomePage.vue';
 import Meals from '../views/Meals.vue';
 import Data from '../views/Data.vue';
-import VpisLogin from '../views/vpisLogin.vue';
+import VpisLogin from '../views/VpisLogin.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/vpisLogin',
-    name: 'vpisLogin',
+    name: 'VpisLogin',
     component: VpisLogin
   }
 ]
