@@ -54,7 +54,7 @@ const errorMessage = ref('');
 const fetchSemesters = async () => {
     loading.value = true;
     try {
-        const response = await fetch('http://localhost:3000/api/semesters');
+        const response = await fetch('http://localhost:3000/api/vpis/semesters');
         if (response.ok) {
             semesters.value = await response.json();
         } else {
