@@ -509,6 +509,15 @@ app.get('/api/hsp/tokens', async (req, res) => {
 
 // VSC APIs
 
+const session = require('express-session');
+
+app.use(session({
+    secret: 'geheimesSchlüsselwort',   // Ein geheimer Schlüssel, um die Session zu signieren
+    resave: false,                     // Verhindert das Speichern von Session-Daten, wenn nichts geändert wurde
+    saveUninitialized: false,          // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
+    cookie: { secure: false }          // Setze `secure: true`, wenn du HTTPS verwendest
+}));
+
 /**
  * Middleware zum Session Handling.
  * 
@@ -536,14 +545,7 @@ app.get('/api/vsc/login', async (req, res) => {
     loginPayload.append('fdsa', 'k9tX3ssP');
     loginPayload.append('submit', 'Anmelden');
 
-    // Erstelle ein CookieJar, um Cookies zu speichern
-    const cookieJar = new CookieJar();
-
-    // Wrapper für Axios zur Nutzung von Cookies
-    const client = wrapper(axios.create({
-        jar: cookieJar,  // Verwende das CookieJar
-        withCredentials: true  // Sende Cookies bei allen Anfragen mit
-    }));
+    const client = req.client;
 
     try {
 
