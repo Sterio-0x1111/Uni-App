@@ -61,11 +61,10 @@ const loginToVPIS = async (req, res) => {
   }
 };
 
-// verfügbare Semester abrufen (vpisLogin)
+// Funktion zum Abrufen der aktuellen Semester (vpisLogin)
 const getSemesters = async (req, res) => {
   try {
     const $ = await fetchHTML(VPIS_LOGIN_URL);
-
     const semesters = [];
 
     // Informationen für jedes Semester

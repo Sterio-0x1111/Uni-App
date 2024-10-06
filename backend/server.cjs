@@ -3,13 +3,12 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
-
 const mealsRoutes = require("./routes/meals.cjs");
 const hochschulportalRoutes = require("./routes/hochschulportal.cjs");
 const vpisRoutes = require("./routes/vpis.cjs");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(bodyParser.json()); // JSON-Body-Parsing aktivieren
@@ -23,7 +22,7 @@ app.use("/api/vpis", vpisRoutes);
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Interner Serverfehler.' });
+  res.status(500).json({ error: "Interner Serverfehler." });
 });
 
 app.listen(PORT, () => {

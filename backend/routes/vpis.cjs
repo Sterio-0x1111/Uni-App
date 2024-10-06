@@ -3,7 +3,7 @@ const express = require("express");
 const {
   loginToVPIS,
   getSemesters,
-} = require("../controllers/vpisController.cjs"); // Importiere beide Funktionen
+} = require("../controllers/vpisController.cjs");
 const router = express.Router();
 
 router.post("/login", loginToVPIS);
