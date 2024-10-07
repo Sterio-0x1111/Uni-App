@@ -63,6 +63,9 @@ app.use(cors());
 app.use(bodyParser.json()); // JSON-Body-Parsing aktivieren
 app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten unterstützen
 
+app.use("/api/meals", require("./routes/meals.cjs"));
+app.use("/api/mensa/options", require("./routes/meals.cjs"));
+
 /**
  * Endpujnkt zum Laden der Mensapläne.
  * 
@@ -71,7 +74,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten u
  * Der entsprechende Plan wird geladen, geparst und aufbereitet 
  * und danach als JSON Format an das Frontend gesendet.
  */
-app.get('/api/meals/:mensa/:date', async (req, res) => {
+/*app.get('/api/meals/:mensa/:date', async (req, res) => {
     try{
         const location = req.params.mensa.toLowerCase(); // Holt den Mensanamen aus der URL
         const date = req.params.date;
@@ -110,7 +113,7 @@ app.get('/api/meals/:mensa/:date', async (req, res) => {
     } catch(err){
         console.log('Fehler beim Laden der Daten.', err);
     }
-});
+});*/
 
 // verfügbare Semester abrufen (vpisLogin)
 app.get("/api/semesters", async (req, res) => {
@@ -148,7 +151,7 @@ app.get("/api/semesters", async (req, res) => {
   }
 });
 
-app.get('/api/mensa/options/:loc', async (req, res) => {
+/*app.get('/api/mensa/options/:loc', async (req, res) => {
     try {
         console.log('OPTIONS CALLED');
         const location = req.params.loc.toLowerCase();
@@ -178,7 +181,7 @@ app.get('/api/mensa/options/:loc', async (req, res) => {
     } catch(error){
         console.error('Error while providing selection options.', error);
     }
-})
+})*/
 
 /**
  * Endpunkt zum Laden der Semestertermine.
