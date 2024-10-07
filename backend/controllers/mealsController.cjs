@@ -1,4 +1,6 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 /**
  * Laden der Daten, für die ein Mensaplan verfügbar ist.
