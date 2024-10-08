@@ -45,6 +45,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten u
 app.use("/api/meals", require("./routes/meals.cjs"));
 app.use("/api/mensa/options", require("./routes/meals.cjs"));
 app.use('/api/hsp', require('./routes/HSP.cjs'));
+app.use('/api/semester', require('./routes/semester.cjs'));
 
 // verfügbare Semester abrufen (vpisLogin)
 app.get("/api/semesters", async (req, res) => {
@@ -86,38 +87,7 @@ app.get("/api/semesters", async (req, res) => {
  * Endpunkt zum Laden der Semestertermine.
 */ 
 app.get('/api/semester', async (req, res) => {
-    try{
-        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
-        const response = await axios.get(url);
-        const html = response.data;
-        const $ = cheerio.load(html);
-
-        const semesterTable = $('.table').first();
-        semesterTable.find('thead').remove();
-        
-        const semesterList = [];
-
-        semesterTable.find('tr').each((index, row) => {
-            const columns = $(row).find('td');
-            const semester = $(columns[0]).text(); // betreffendes Semester
-            const period = $(columns[1]).text();  // Zeiträume
-
-            semesterList.push({
-                semester, 
-                period
-            })
-        })
-        
-        if(semesterList.length > 0){
-            res.json({ table: semesterList });
-            console.log('Successfully sent semester periods.');
-        } else {
-            res.status(500).json({ err: 'Error. Data was not sent.' });
-            console.log('Failed to send semester periods.');
-        }
-    } catch(err){
-        console.log('Fehler beim Laden der Daten.', err);
-    }
+    
 })
 
 
