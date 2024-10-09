@@ -41,6 +41,9 @@ app.use("/api/mensa/options", require("./routes/meals.cjs"));
 app.use('/api/semester', require('./routes/semester.cjs'));
 app.use('/api/hsp', require('./routes/HSP.cjs'));
 app.use('/api/vsc', require('./routes/VSC.cjs'));
+app.use('/api', require('./routes/states.cjs'));
+
+app.get('/api/vsc/pruefungen')
 
 // weitere end points
 
