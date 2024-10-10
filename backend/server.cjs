@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require("body-parser");
 
+const { wrapper } = require('axios-cookiejar-support');
+const { CookieJar } = require('tough-cookie');
+const axios = require('axios');
+
 const { createAxiosClient } = require('./utils/helpers.cjs')
 
 const session = require('express-session');
@@ -29,9 +33,9 @@ app.use(session({
  * sodass der Benutzer anfrageübergreifend eingeloggt bleibt.
 */
 app.use((req, res, next) => {
-    req.clientVSC = createAxiosClient(req, 'VSC'); // Virtuelles Service Center
-    req.clientHSP = createAxiosClient(req, 'HSP'); // Hochschulportal
-    req.clientVPIS = createAxiosClient(req, 'VPIS') // Vorlesungsplan Informationssystem
+     if(!req.session.c){
+        req.session.c = new CookieJar();
+    }
 
     next();
 })

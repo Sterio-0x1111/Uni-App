@@ -26,19 +26,11 @@ const handleError = (res, message) => {
  * um die unterschiedlichen Clients 
  * für die verschiedenen Login Seiten zu erstellen.
  * */
-const createAxiosClient = (req, page) => {
-  if (!req.session.client) {
-    req.session.clients = {};
-  }
-
-  if (!req.session.clients[page]) {
-    req.session.clients[page] = wrapper(axios.create({
-      jar: new CookieJar(),   // Erstelle einen neuen CookieJar für die Seite
+const createAxiosClient = (cookieJar) => {
+  return wrapper(axios.create({
+      jar: cookieJar,   // Übergib den CookieJar aus der Session
       withCredentials: true
-    }));
-  }
-
-  return req.session.clients[page];
-}
+  }));
+};
 
 module.exports = { fetchHTML, handleError, createAxiosClient };

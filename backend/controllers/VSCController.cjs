@@ -1,10 +1,11 @@
-const { fetchHTML, handleError } = require("../utils/helpers.cjs");
+const { fetchHTML, handleError, createAxiosClient } = require("../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { wrapper } = require('axios-cookiejar-support');
+const { CookieJar } = require('tough-cookie');
 
 // axios clients in session speichern, homepage nicht notwendig
-let homepage = '';
-let client = undefined;
+//let client = undefined;
 
 const loginToVSC = async (req, res) => {
     if (!req.session.loggedInVSC) {
@@ -18,7 +19,10 @@ const loginToVSC = async (req, res) => {
 
         try {
             // Sende den POST-Request zum Login mit Cookies
-            client = req.clientVSC;
+            const client = createAxiosClient(req.session.c);
+            console.log(req.session.c);
+
+
             const response = await client.post(loginPageURL, loginPayload.toString(), {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
@@ -39,10 +43,12 @@ const loginToVSC = async (req, res) => {
 
             if (data.includes('Meine Prüfungen')) {
                 req.session.loggedInVSC = true;
-                homepage = data;
             }
 
-            res.json({ data });
+            res.json({ 
+                data,
+                state: req.session.loggedInVSC
+             });
 
         } catch (error) {
             console.log('Failed to login to VSC.', error);
@@ -54,16 +60,26 @@ const loginToVSC = async (req, res) => {
 
 const logoutFromVSC = async (req, res) => {
     if (req.session.loggedInVSC) {
-        //const url = 'https://vsc.fh-swf.de/';
+        
+        let cookieJar = req.session.c;
+        if (typeof req.session.c === 'object' && !(req.session.c instanceof CookieJar)) {
+            cookieJar = CookieJar.deserializeSync(req.session.c);
+        }
 
-        const $ = cheerio.load(homepage);
+        const client = createAxiosClient(cookieJar);
+        //console.log('SECOND');
+        //console.log(req.session.c);
+
+        const url = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const response = await client.get(url);
+        const $ = cheerio.load(response.data);
+        //res.json({ data: response.data });
 
         const filteredLinks = $('a').filter(function () {
             return $(this).text().includes('bmelden');
         });
 
         const logoutURL = filteredLinks.first().attr('href');
-
 
         try {
             const response = await client.get(logoutURL);
@@ -77,7 +93,10 @@ const logoutFromVSC = async (req, res) => {
                 console.log('Logout fehlgeschlagen.');
             }
 
-            res.json({ data });
+            res.json({ 
+                data,
+                state: req.session.loggedInVSC
+             });
 
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
@@ -86,13 +105,17 @@ const logoutFromVSC = async (req, res) => {
 }
 
 const testNav = async (req, res) => {
+    console.log('Req session username');
+    console.log(req.session.username);
+    /*
+
     try {
         const response = await client.get('https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0');
         const data = response.data;
         res.json({data});
     } catch(error){
         
-    }
+    }*/
 }
 
 module.exports = { loginToVSC, logoutFromVSC, testNav };
