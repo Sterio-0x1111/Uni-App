@@ -33,8 +33,8 @@ app.use(session({
  * sodass der Benutzer anfrageübergreifend eingeloggt bleibt.
 */
 app.use((req, res, next) => {
-     if(!req.session.c){
-        req.session.c = new CookieJar();
+     if(!req.session.vscCookies){
+        req.session.vscCookies = new CookieJar();
     }
 
     next();

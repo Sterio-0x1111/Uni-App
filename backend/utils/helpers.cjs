@@ -28,9 +28,13 @@ const handleError = (res, message) => {
  * */
 const createAxiosClient = (cookieJar) => {
   return wrapper(axios.create({
-      jar: cookieJar,   // Übergib den CookieJar aus der Session
+      jar: cookieJar || new CookieJar(),   // Übergib den CookieJar aus der Session
       withCredentials: true
   }));
 };
 
-module.exports = { fetchHTML, handleError, createAxiosClient };
+const deserializeCookieJar = cookieJar => {
+  return (typeof cookieJar === 'object' && !(cookieJar instanceof CookieJar )) ? CookieJar.deserializeSync(cookieJar) : cookieJar;
+}
+
+module.exports = { fetchHTML, handleError, createAxiosClient, deserializeCookieJar };

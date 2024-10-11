@@ -1,4 +1,4 @@
-const { fetchHTML, handleError, createAxiosClient } = require("../utils/helpers.cjs");
+const { fetchHTML, handleError, createAxiosClient, deserializeCookieJar } = require("../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { wrapper } = require('axios-cookiejar-support');
@@ -19,8 +19,9 @@ const loginToVSC = async (req, res) => {
 
         try {
             // Sende den POST-Request zum Login mit Cookies
-            const client = createAxiosClient(req.session.c);
-            console.log(req.session.c);
+            const cookies = deserializeCookieJar(req.session.vscCookies);
+            const client = createAxiosClient(cookies);
+            //console.log(req.session.vscCookies);
 
 
             const response = await client.post(loginPageURL, loginPayload.toString(), {
@@ -61,19 +62,16 @@ const loginToVSC = async (req, res) => {
 const logoutFromVSC = async (req, res) => {
     if (req.session.loggedInVSC) {
         
-        let cookieJar = req.session.c;
-        if (typeof req.session.c === 'object' && !(req.session.c instanceof CookieJar)) {
-            cookieJar = CookieJar.deserializeSync(req.session.c);
-        }
+        const cookieJar = deserializeCookieJar(req.session.vscCookies);
 
         const client = createAxiosClient(cookieJar);
         //console.log('SECOND');
-        //console.log(req.session.c);
+        //console.log(req.session.vscCookies);
 
         const url = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
         const response = await client.get(url);
+        const initialData = response.data;
         const $ = cheerio.load(response.data);
-        //res.json({ data: response.data });
 
         const filteredLinks = $('a').filter(function () {
             return $(this).text().includes('bmelden');
@@ -89,6 +87,7 @@ const logoutFromVSC = async (req, res) => {
             if (data.includes('Sicherheitshinweis')) {
                 console.log('VSC: Erfolgreich ausgeloggt.');
                 req.session.loggedInVSC = false;
+                req.session.vscCookies = undefined;
             } else {
                 console.log('Logout fehlgeschlagen.');
             }
@@ -96,12 +95,13 @@ const logoutFromVSC = async (req, res) => {
             res.json({ 
                 data,
                 state: req.session.loggedInVSC
-             });
+            });
 
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
+            res.json({ data: initialData });
         }
-    }
+    } 
 }
 
 const testNav = async (req, res) => {
