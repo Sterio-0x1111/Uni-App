@@ -27,7 +27,7 @@
 
           <ion-grid>
             <ion-row> <!-- Table Headers -->
-                <ion-col v-for="header in tableHeaders" :key="header.id">{{header.text}}</ion-col>
+                <ion-col class="table-col" v-for="header in limitedHeaders" :key="header.id"><h4>{{header.text}}</h4></ion-col>
             </ion-row>
           </ion-grid>
         </ion-content>
@@ -54,6 +54,8 @@ const tableHeaders = [
     {id: 10, text: 'Prüfungsdatum'}
 ]
 
+const limitedHeaders = [tableHeaders[0], tableHeaders[2], tableHeaders[4]];
+
 const selectOptions = [
     {id: 0, text: 'Alle Einträge'}, 
     {id: 1, text: 'Modulprüfungen'}, 
@@ -63,3 +65,10 @@ const selectOptions = [
 const selectedOption = ref(selectOptions[1].text);
 
 </script>
+
+<style scoped>
+.table-col {
+  justify-content: center;
+  margin-left: 5px;
+}
+</style>
