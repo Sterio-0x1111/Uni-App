@@ -44,6 +44,7 @@ const loginToVSC = async (req, res) => {
 
             if (data.includes('Meine Prüfungen')) {
                 req.session.loggedInVSC = true;
+                req.session.save();
             }
 
             res.json({

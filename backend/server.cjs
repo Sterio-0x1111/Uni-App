@@ -14,7 +14,10 @@ const PORT = 3000; // auslagern in env
 const app = express();
 
 // Middlewars
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:8100',  // Frontend-URL
+    credentials: true                 // Cookies und andere Anmeldeinformationen zulassen
+  }));
 app.use(bodyParser.json()); // JSON-Body-Parsing aktivieren
 app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten unterstützen
 
