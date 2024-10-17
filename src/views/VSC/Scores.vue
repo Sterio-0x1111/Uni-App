@@ -25,9 +25,33 @@
             </ion-select-option>
           </ion-select>
 
-          <ion-grid>
+          <ion-grid v-if="scores">
             <ion-row> <!-- Table Headers -->
                 <ion-col class="table-col" v-for="header in limitedHeaders" :key="header.id"><h4>{{header.text}}</h4></ion-col>
+            </ion-row>
+
+            <ion-row v-for="row in scores" :key="row">
+              <ion-col>
+                <h5>{{ row[0] }}</h5>
+              </ion-col>
+
+              <ion-col>
+                <h5>{{ row[2] }}</h5>
+              </ion-col>
+
+              <ion-col v-if="row[0] !== 'PK'">
+                <h5>{{ row[4] }}</h5>
+              </ion-col>
+
+              <ion-col v-else>
+                <h5>{{ row[3] }}</h5>
+              </ion-col>
+
+              <!--
+              <ion-col v-for="cell in row" :key="cell">
+                {{ console.log('ZELLEN: ', cell) }}
+              </ion-col>
+              -->
             </ion-row>
           </ion-grid>
         </ion-content>
@@ -38,7 +62,28 @@
 
 <script setup lang="ts">
 import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption } from '@ionic/vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const scores = ref(null);
+
+onMounted(async () => {
+  try{
+    // login nur provisorisch, später auslagern eigenes formular, code nur eingeloggt ausführbar
+    await axios.get('http://localhost:3000/api/vsc/logout', { withCredentials: true });
+    const login = await axios.post('http://localhost:3000/api/vsc/login', { username: '', password: '' }, { withCredentials: true });
+    console.log(login);
+    const response = await axios.get('http://localhost:3000/api/vsc/exams/results', { withCredentials: true });
+    if(response.status !== 200){
+      throw new Error(`${response.status}`);
+    }
+    console.log('DATA:', response.data);
+    scores.value = response.data;
+    console.log(scores);
+  } catch(error){
+    console.log(error);
+  }
+})
 
 const tableHeaders = [
     {id: 0, text: 'PrfArt' }, 
@@ -71,4 +116,6 @@ const selectedOption = ref(selectOptions[1].text);
   justify-content: center;
   margin-left: 5px;
 }
+
+
 </style>
