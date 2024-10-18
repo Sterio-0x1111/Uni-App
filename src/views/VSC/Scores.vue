@@ -30,7 +30,7 @@
                 <ion-col class="table-col" v-for="header in limitedHeaders" :key="header.id"><h4>{{header.text}}</h4></ion-col>
             </ion-row>
 
-            <ion-row v-for="row in scores" :key="row">
+            <ion-row v-for="row in scores" :key="row" @click="showModal(row)">
               <ion-col>
                 <h5>{{ row[0] }}</h5>
               </ion-col>
@@ -46,14 +46,11 @@
               <ion-col v-else>
                 <h5>{{ row[3] }}</h5>
               </ion-col>
-
-              <!--
-              <ion-col v-for="cell in row" :key="cell">
-                {{ console.log('ZELLEN: ', cell) }}
-              </ion-col>
-              -->
             </ion-row>
           </ion-grid>
+
+          <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" @close="isModalOpen = false" />
+
         </ion-content>
       </ion-page>
     </body>
@@ -64,22 +61,45 @@
 import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import ScoreDetails from './ScoreDetails.vue';
+//import ScoreDetails from '@/views/VSC/ScoreDetails.vue';
 
 const scores = ref(null);
+const isModalOpen = ref(false);
+const selectedRowData = ref({});
+
+const showModal = (row) => {
+  console.log('SHOW');
+  selectedRowData.value = {
+    Art: row[0],
+    Nr: row[1],
+    Modul: row[2],
+    Semester: row[3],
+    Note: row[4],
+    Status: row[5],
+    Anerkannt: row[6],
+    ECTS: row[7],
+    Freivermerk: row[8],
+    Versuch: row[9],
+    Datum: row[10]
+  }
+
+  isModalOpen.value = true;
+}
 
 onMounted(async () => {
   try{
     // login nur provisorisch, später auslagern eigenes formular, code nur eingeloggt ausführbar
-    await axios.get('http://localhost:3000/api/vsc/logout', { withCredentials: true });
-    const login = await axios.post('http://localhost:3000/api/vsc/login', { username: '', password: '' }, { withCredentials: true });
-    console.log(login);
+    //await axios.get('http://localhost:3000/api/vsc/logout', { withCredentials: true });
+    /*await axios.post('http://localhost:3000/api/vsc/login', { username: '', password: '' }, { withCredentials: true });
+
     const response = await axios.get('http://localhost:3000/api/vsc/exams/results', { withCredentials: true });
     if(response.status !== 200){
       throw new Error(`${response.status}`);
     }
-    console.log('DATA:', response.data);
+
     scores.value = response.data;
-    console.log(scores);
+    */
   } catch(error){
     console.log(error);
   }

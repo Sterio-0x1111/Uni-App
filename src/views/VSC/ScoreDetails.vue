@@ -10,21 +10,49 @@
         </ion-header>
         
         <ion-content>
-
+            <ion-list>
+                <ion-item v-for="(v, k) in data" :key="k">
+                    <span class="left">{{ k }}</span>
+                    <br>
+                    <p class="right">{{ v }}</p>
+                </ion-item>
+            </ion-list>
         </ion-content>
     </ion-modal>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { IonHeader, IonToolbar, IonTitle, IonModal, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
+
+console.log('MODAL');
 
 const props = defineProps({
     isOpen: Boolean, 
     data: Object
 })
 
+const emit = defineEmits(['close']);
+
 const closeModal = () => {
-    props.isOpen = false;
+    emit('close');
+}
+</script>
+
+<style scoped>
+ion-item {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
-</script>
+.right {
+    flex: 1;
+    text-align: right;
+}
+
+.left {
+    flex: 1;
+    text-align: left;
+}
+</style>
