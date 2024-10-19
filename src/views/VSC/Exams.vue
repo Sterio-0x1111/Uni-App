@@ -21,6 +21,14 @@
                 <ion-item><a>Notenspiegel</a></ion-item>
                 <ion-item><a>Angemeldete Prüfungen</a></ion-item>
                 <ion-item><a>Abgemeldete Prüfungen</a></ion-item>
+                
+                <ion-item button href="/assets/Ruecktritt-Info-2023.pdf" download="RegelungenRuecktritt.pdf">
+                  <a>Regelungen Prüfungsrücktritt (Download PDF)</a>
+                </ion-item>
+
+                <ion-item><a href="https://www.fh-swf.de/cms/faq/">Hilfe und Hinweise (Weiterleitung auf FH Seite)</a></ion-item>
+
+
             </ion-list>
         </ion-content>
     </ion-page>
@@ -29,7 +37,7 @@
 </template>
 
 <script setup>
-import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem } from '@ionic/vue';
+import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton } from '@ionic/vue';
 //import { ref, computed } from 'vue';
 //import axios from 'axios';
 //import * as cheerio from 'cheerio';
@@ -39,5 +47,7 @@ import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem }
 </script>
 
 <style scoped>
-
+ion-item {
+  margin-top: 10px;
+}
 </style>
