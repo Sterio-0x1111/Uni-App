@@ -18,7 +18,7 @@
             <h2>Meine Prüfungen</h2>
 
             <ion-list>
-                <ion-item><a>Notenspiegel</a></ion-item>
+                <ion-item><a href="http://localhost:8100/exams/results">Notenspiegel</a></ion-item>
                 <ion-item><a>Angemeldete Prüfungen</a></ion-item>
                 <ion-item><a>Abgemeldete Prüfungen</a></ion-item>
                 
