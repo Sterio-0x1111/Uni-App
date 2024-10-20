@@ -40,4 +40,29 @@ const getSemesterDates = async (req, res) => {
     }
 }
 
-module.exports = { getSemesterDates }
+const getFeedbackDates = async (req, res) => {
+    try{
+
+        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
+        const $ = await fetchHTML(url);
+
+        const targetArticle = $('article.wysiwyg').first().html();
+        const headline = $(targetArticle).next('h2').text();
+        const nextSemester = $(targetArticle).next('h3').text();
+        const nextDate = $(targetArticle).next('h4').text();
+        const infoText = $(targetArticle).next('p').text();
+
+        res.status(200).json({ 
+            targetArticle, 
+            headline,
+            nextSemester, 
+            nextDate,
+            infoText
+         });
+
+    } catch(error){
+        console.log('Fehler beim Laden der Rückmeldeinformationen.', error);
+    }
+}
+
+module.exports = { getSemesterDates, getFeedbackDates }
