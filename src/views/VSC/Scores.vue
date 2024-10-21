@@ -91,7 +91,7 @@ onMounted(async () => {
   try{
     // login nur provisorisch, später auslagern eigenes formular, code nur eingeloggt ausführbar
     //await axios.get('http://localhost:3000/api/vsc/logout', { withCredentials: true });
-    /*await axios.post('http://localhost:3000/api/vsc/login', { username: '', password: '' }, { withCredentials: true });
+    await axios.post('http://localhost:3000/api/vsc/login', { username: '', password: '' }, { withCredentials: true });
 
     const response = await axios.get('http://localhost:3000/api/vsc/exams/results', { withCredentials: true });
     if(response.status !== 200){
@@ -99,7 +99,8 @@ onMounted(async () => {
     }
 
     scores.value = response.data;
-    */
+    console.log('SCORES: ', scores);
+    
   } catch(error){
     console.log(error);
   }
