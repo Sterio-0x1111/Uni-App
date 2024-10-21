@@ -4,9 +4,6 @@ const cheerio = require('cheerio');
 const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
 
-// axios clients in session speichern, homepage nicht notwendig
-//let client = undefined;
-
 const loginToVSC = async (req, res) => {
     if (!req.session.loggedInVSC) {
         const { username, password } = req.body;
@@ -121,8 +118,6 @@ const getExamResults = async (req, res) => {
             const links = $(ul).find('li a[href]').attr('href');
             const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
 
-            //const url = $(link).attr('href');
-            
             const response = await client.get(links);
             const html = response.data;
 
@@ -137,13 +132,59 @@ const getExamResults = async (req, res) => {
                 tableData.push(cells);
             })
 
-            //const clearedTable = tableData.map(item => item.replace(/\t/g, '').replace(/\n/g, '').trim());
             const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
             
             res.send(clearedTable);
         } catch(error){
             console.log('Fehler beim Laden der Prüfungsergebnisse.', error);
         }
+    }
+}
+
+const getRegisteredExams = async (req, res) => {
+    if(req.session.loggedInVSC){
+        const cookieJar = deserializeCookieJar(req.session.vscCookies);
+        const client = createAxiosClient(cookieJar);
+        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+
+        try {
+            const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
+            const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
+            const selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor'); 
+            // TODO: Filterstring ersetzen durch dynamischen Parameter für Abschluss (BA/MA -> Auswahl im Frontend)
+            //const registeredExamsPageResponse = await getAndParseHTML(client, selectedDegreePageResponse.filteredURL, 'Informatik PO-Version 19');
+
+            let $ = await fetchHTML(selectedDegreePageResponse.filteredURL, client);
+            
+            const link = $('a').filter(function () {
+                return $(this).attr('title') === 'angemeldete Prüfungen anzeigen für Informatik  (PO-Version 19)';
+            });
+
+            const ul = $('ul.treelist').eq(1);
+            const links = $(ul).find('li a[href]').attr('href');
+            const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
+            
+            const response = await client.get(links);
+            const html = response.data;
+
+            $ = cheerio.load(html);
+            
+            const table = $('table').eq(1);
+            const rows = $(table).find('tr');
+
+            const tableData = [];
+            $(rows).each((index, row) => {
+                const cells = $(row).find('td').map((i, cell) => $(cell).text().replace(/[\n\t]/g, '').trim()).get();
+                tableData.push(cells);
+            })
+
+            res.status(200).json(tableData);
+
+        } catch(error){
+            console.log('Fehler beim Laden der angemeldeten Prüfugnen.', error);
+        }
+    } else {
+        console.log('Nicht autorisiert. Nicht eingeloggt.');
     }
 }
 
@@ -243,4 +284,4 @@ const testNav = async (req, res) => {
     }
 }
 
-module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults };
+module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams };
