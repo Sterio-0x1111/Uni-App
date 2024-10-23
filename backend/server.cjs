@@ -52,6 +52,8 @@ app.use((req, res, next) => {
   next();
 })
 
+app.use('/api/vsc', require('./routes/VSC.cjs'));
+
 // weitere end points
 
 app.listen(PORT, () => {
