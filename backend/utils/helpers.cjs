@@ -17,4 +17,22 @@ const handleError = (res, message) => {
   res.status(500).json({ error: message });
 };
 
+/**
+ * Funktion zur Erstellung von Axios Clients.
+ * 
+ * Die Funktion wird aufgerufen, 
+ * um die unterschiedlichen Clients 
+ * für die verschiedenen Login Seiten zu erstellen.
+ * */
+const createAxiosClient = (cookieJar) => {
+  return wrapper(axios.create({
+    jar: cookieJar || new CookieJar(),   // Übergib den CookieJar aus der Session
+    withCredentials: true
+  }));
+};
+
+const deserializeCookieJar = cookieJar => {
+  return (typeof cookieJar === 'object' && !(cookieJar instanceof CookieJar)) ? CookieJar.deserializeSync(cookieJar) : cookieJar;
+}
+
 module.exports = { fetchHTML, handleError };
