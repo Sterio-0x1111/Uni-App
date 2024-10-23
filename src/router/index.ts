@@ -16,26 +16,6 @@ const routes: Array<RouteRecordRaw> = [
     name: "Home",
     component: HomePage,
   },
-  {
-    path: "/meals",
-    name: "Meals",
-    component: Meals,
-  },
-  {
-    path: "/data",
-    name: "Data",
-    component: Data,
-  },
-  {
-    path: "/vpisLogin",
-    name: "VpisLogin",
-    component: VpisLogin,
-  },
-  {
-    path: "/vpisPlaner",
-    name: "VpisPlaner",
-    component: VpisPlaner,
-  },
 ];
 
 const router = createRouter({
