@@ -52,6 +52,8 @@ app.use((req, res, next) => {
   next();
 })
 
+app.use('/api/semester', require('./routes/semester.cjs'));
+
 // weitere end points
 
 app.listen(PORT, () => {
