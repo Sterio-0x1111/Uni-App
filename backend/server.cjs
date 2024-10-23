@@ -52,6 +52,9 @@ app.use((req, res, next) => {
   next();
 })
 
+app.use("/api/meals", require("./routes/meals.cjs"));
+app.use("/api/mensa/options", require("./routes/meals.cjs"));
+
 // weitere end points
 
 app.listen(PORT, () => {
