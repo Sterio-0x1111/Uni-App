@@ -5,24 +5,24 @@ import Semester from '../views/Semester.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home'
+    path: "/",
+    redirect: "/home",
   },
   {
-    path: '/home',
-    name: 'Home',
-    component: HomePage
+    path: "/home",
+    name: "Home",
+    component: HomePage,
   },
   {
     path: '/semester',
     name: 'Semester',
     component: Semester
   }
-]
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
 export default router
