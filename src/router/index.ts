@@ -8,13 +8,13 @@ import RegisteredExams from '../views/VSC/RegisteredExams.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home'
+    path: "/",
+    redirect: "/home",
   },
   {
-    path: '/home',
-    name: 'Home',
-    component: HomePage
+    path: "/home",
+    name: "Home",
+    component: HomePage,
   },
   {
     path: '/exams',
@@ -31,11 +31,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Registered exams',
     component: RegisteredExams
   }
-]
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
 export default router
