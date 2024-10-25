@@ -26,7 +26,12 @@ app.use(session({
   secret: 'geheimesSchlüsselwort',   // Ein geheimer Schlüssel, um die Session zu signieren
   resave: false,                     // Verhindert das Speichern von Session-Daten, wenn nichts geändert wurde
   saveUninitialized: false,          // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
-  cookie: { secure: false }          // Setze `secure: true`, wenn du HTTPS verwendest
+  cookie: { 
+    secure: false,
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24
+   },
+   store: new session.MemoryStore()
 }));
 
 /**
@@ -37,9 +42,9 @@ app.use(session({
  * sodass der Benutzer anfrageübergreifend eingeloggt bleibt.
 */
 app.use((req, res, next) => {
-  if (!req.session.vscCookies) {
+  /*if (!req.session.vscCookies) {
     req.session.vscCookies = new CookieJar();
-  }
+  }*/
 
   if(!req.session.hspCookies){
     req.session.hspCookies = new CookieJar();

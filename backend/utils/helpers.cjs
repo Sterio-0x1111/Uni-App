@@ -1,10 +1,12 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const { CookieJar } = require('tough-cookie');
+const { wrapper } = require('axios-cookiejar-support');
 
 // Utility function to fetch HTML from a URL
-const fetchHTML = async (url) => {
+const fetchHTML = async (url, client = axios) => {
   try {
-    const response = await axios.get(url);
+    const response = await client.get(url);
     return cheerio.load(response.data);
   } catch (error) {
     throw new Error(`Fehler beim Laden der Daten von ${url}: ${error.message}`);
@@ -35,4 +37,26 @@ const deserializeCookieJar = cookieJar => {
   return (typeof cookieJar === 'object' && !(cookieJar instanceof CookieJar)) ? CookieJar.deserializeSync(cookieJar) : cookieJar;
 }
 
-module.exports = { fetchHTML, handleError };
+const getAndParseHTML = async (client, url, keyword, tag = 'a', attribute = 'href') => {
+  const response = await client.get(url, { withCredentials: true });
+  /*const response = await axios.get(url, {
+    headers: {
+      Cookie: cookie
+    }
+  });*/
+  const html = response.data;
+  const $ = cheerio.load(html);
+
+  const filteredLinks = $(tag).filter(function () {
+    return $(this).text().includes(keyword);
+  });
+  //console.log(filteredLinks);
+
+  const filteredURL = filteredLinks.first().attr('href');
+  return {
+    filteredURL,
+    html
+  };
+}
+
+module.exports = { fetchHTML, handleError, createAxiosClient, deserializeCookieJar, getAndParseHTML };

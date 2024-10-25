@@ -9,6 +9,9 @@ const loginToVSC = async (req, res) => {
         const { username, password } = req.body;
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
 
+        const cookieJar = new CookieJar();
+        const client = wrapper(axios.create({ jar: cookieJar, withCredentials: true }));
+
         const loginPayload = new URLSearchParams();
         loginPayload.append('asdf', username);
         loginPayload.append('fdsa', password);
@@ -16,44 +19,53 @@ const loginToVSC = async (req, res) => {
 
         try {
             // Sende den POST-Request zum Login mit Cookies
-            const cookies = deserializeCookieJar(req.session.vscCookies);
-            const client = createAxiosClient(cookies);
-
-            const response = await client.post(loginPageURL, loginPayload.toString(), {
+            //const cookies = deserializeCookieJar(req.session.vscCookies);
+            //const client = createAxiosClient(cookies);
+            
+            await client.get(loginPageURL, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
-                    'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Sec-GPC': '1',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Sec-Fetch-Dest': 'document',
-                    'Sec-Fetch-Mode': 'navigate',
-                    'Sec-Fetch-Site': 'cross-site',
-                    'Sec-Fetch-User': '?1',
-                    'Priority': 'u=0, i'
+                    'User-Agent': 'Mozilla/5.0',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
                 }
             });
-
+        
+            // Schritt 2: POST-Login-Request senden
+            const response = await client.post(loginPageURL, loginPayload.toString(), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Mozilla/5.0',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                }
+            });
+            
             const data = response.data;
 
             if (data.includes('Meine Prüfungen')) {
-                req.session.loggedInVSC = true;
-                req.session.save();
+                req.session.loggedInVSC = false; // provisorisch deaktiviert
+                req.session.user = { username };
+                req.session.vscCookies = cookieJar;
+                console.log(req.session.vscCookies);
+                console.log(response.headers);
+                //req.session.save();
                 console.log('ERFOLGREICH EINGELOGGT');
-            }
 
-            res.status(200).json({
-                state: req.session.loggedInVSC,
-                data
-            });
+                res.status(200).json({
+                    data,
+                    message: 'VSC Login erfolgreich.'
+                });
+            } else {
+                res.status(401).json({
+                    data,
+                    message: 'VSC Login fehlgeschlagen.'
+                });
+            }
 
         } catch (error) {
             console.log('Failed to login to VSC.', error);
             res.status(500).send('Fehler beim Login.');
         }
     } else {
-        res.json({ message: 'VSC: Bereits eingeloggt.' });
+        res.status(200).json({ message: 'VSC: Bereits eingeloggt.' });
     }
 }
 
@@ -82,8 +94,14 @@ const logoutFromVSC = async (req, res) => {
                 console.log('VSC: Erfolgreich ausgeloggt.');
                 req.session.loggedInVSC = false;
                 req.session.vscCookies = undefined;
+
+                res.status(200).json({
+                    data
+                })
+
             } else {
                 console.log('Logout fehlgeschlagen.');
+                res.status(500).json({ message: 'VSC Logout fehlgeschlagen.' })
             }
 
             res.json({
@@ -93,13 +111,74 @@ const logoutFromVSC = async (req, res) => {
 
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
-            res.json({ data: initialData });
+            res.status(500).json({ data: initialData });
         }
+    } else {
+        res.status(200).json({ message: 'VSC bereits ausgeloggt.' })
     }
 }
 
+const getExamResults2 = async (req, res) => {
+    if(!req.session.vscCookies){
+        res.status(401).json({ message: 'VSC: Nicht authentifiziert.' });
+    }
+
+    const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+    const cookie = req.session.vscCookies;
+
+    try {
+        const homepageResponse = await getAndParseHTML(cookie, homepageUrl, 'Meine Prüfungen');
+        const generalExamsPageResponse = await getAndParseHTML(cookie, homepageResponse.filteredURL, 'Notenspiegel');
+        const scoreOptionsPageResponse = await getAndParseHTML(cookie, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+
+        //let $ = await fetchHTML(scoreOptionsPageResponse.filteredURL, client);
+        const scoreResponse = await axios.get(scoreOptionsPageResponse.filteredURL, {
+            headers: {
+                Cookie: cookie
+            }
+        });
+
+        let $ = cheerio.load(scoreResponse.data);
+        
+        const link = $('a').filter(function () {
+            return $(this).attr('title') === 'Leistungen für Informatik  (PO-Version 19)  anzeigen';
+        });
+
+        const ul = $('ul.treelist').eq(1);
+        const links = $(ul).find('li a[href]').attr('href');//.attr('href');
+        //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
+        console.log(links);
+        const response = await axios.get(links, {
+            headers: {
+                Cookie: cookie
+            }
+        });
+        const html = response.data;
+
+        $ = cheerio.load(html);
+        
+        const table = $('table').eq(1);
+        const rows = $(table).find('tr');
+
+        const tableData = [];
+        $(rows).each((index, row) => {
+            const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
+            tableData.push(cells);
+        })
+
+        const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
+        
+        res.send(clearedTable);
+    } catch(error){
+        res.status(500).json({ message: 'Fehler beim Laden der Prüfungsergebnisse vom VSC.' });
+    }
+
+
+}
+
+// DEBUG
 const getExamResults = async (req, res) => {
-    if (req.session.loggedInVSC) {
+    if (req.session.vscCookies) {
         const cookieJar = deserializeCookieJar(req.session.vscCookies);
         const client = createAxiosClient(cookieJar);
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
@@ -117,9 +196,9 @@ const getExamResults = async (req, res) => {
             });
 
             const ul = $('ul.treelist').eq(1);
-            const links = $(ul).find('li a[href]').attr('href');
-            const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
-
+            const links = $(ul).find('li a[href]').attr('href');//.attr('href');
+            //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
+            console.log(links);
             const response = await client.get(links);
             const html = response.data;
 
@@ -140,6 +219,8 @@ const getExamResults = async (req, res) => {
         } catch(error){
             console.log('Fehler beim Laden der Prüfungsergebnisse.', error);
         }
+    } else {
+        res.status(401).json({ message: 'Nicht eingeloggt.' });
     }
 }
 
