@@ -25,10 +25,7 @@ const scrapeElektrischeEnergietechnik = async (req, res) => {
 
     // Scrape die Accordion-Elemente für verfügbare Prüfungspläne
     $(".accordion__wrapper .accordion__item").each((i, element) => {
-      const semester = $(element)
-        .find(".accordion__head h3.headline--3")
-        .text()
-        .trim();
+      const semester = $(element).find(".accordion__head h3.headline--3").text().trim();
       const plansList = [];
 
       $(element)
