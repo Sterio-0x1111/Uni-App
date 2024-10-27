@@ -4,7 +4,8 @@ import HomePage from '../views/HomePage.vue';
 import Meals from '../views/Meals.vue';
 import Data from '../views/Data.vue';
 import VpisLogin from '../views/vpisLogin.vue';
-import VpisPlaner from '../views/Planer.vue'
+import VpisPlaner from '../views/Planer.vue';
+import PruefungsForm from '../views/PruefungsForm.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -35,6 +36,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/vpisPlaner",
     name: "VpisPlaner",
     component: VpisPlaner,
+  },
+  {
+    path: "/pruefungsForm",
+    name: "PruefungsForm",
+    component: PruefungsForm,
   },
 ];
 

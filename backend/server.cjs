@@ -16,6 +16,14 @@ app.use("/api/hochschulportal", require("./routes/hochschulportal.cjs"));
 app.use("/api/vpis", require("./routes/vpis.cjs"));
 app.use("/api/vpisPlaner", require("./routes/vpisPlaner.cjs"));
 
+app.use("/api/pruefungsplaene/meschede", require("./routes/pruefungsplaene/meschede/ingenieurWirtschaftsRoutes.cjs"));
+app.use("/api/pruefungsplaene/hagen", require("./routes/pruefungsplaene/hagen/elektrotechnikInformationstechnikRoutes.cjs"));
+app.use("/api/pruefungsplaene/hagen", require("./routes/pruefungsplaene/hagen/technischeBetriebswirtschaftRoutes.cjs"));
+app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/agrarwirtschaftRoutes.cjs"));
+app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/maschinenbauAutomatisierungRoutes.cjs"));
+app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/elektrischeEnergietechnikRoutes.cjs"));
+app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/bildungsGesellschaftsRoutes.cjs"));
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
