@@ -4,9 +4,6 @@ const {
 } = require("../../../controllers/pruefungsplaene/hagen/elektrotechnikInformationstechnikController.cjs");
 const router = express.Router();
 
-router.get(
-  "/elektrotechnikInformationstechnik",
-  scrapeElektrotechnikInformationstechnik
-);
+router.get("/elektrotechnik-informationstechnik", scrapeElektrotechnikInformationstechnik);
 
 module.exports = router;

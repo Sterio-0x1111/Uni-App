@@ -4,6 +4,6 @@ const {
 } = require("../../../controllers/pruefungsplaene/hagen/technischeBetriebswirtschaftController.cjs");
 const router = express.Router();
 
-router.get("/technischeBetriebswirtschaft", scrapeTechnischeBetriebswirtschaft);
+router.get("/technische-betriebswirtschaft", scrapeTechnischeBetriebswirtschaft);
 
 module.exports = router;

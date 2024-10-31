@@ -16,13 +16,20 @@ app.use("/api/hochschulportal", require("./routes/hochschulportal.cjs"));
 app.use("/api/vpis", require("./routes/vpis.cjs"));
 app.use("/api/vpisPlaner", require("./routes/vpisPlaner.cjs"));
 
-app.use("/api/pruefungsplaene/meschede", require("./routes/pruefungsplaene/meschede/ingenieurWirtschaftsRoutes.cjs"));
-app.use("/api/pruefungsplaene/hagen", require("./routes/pruefungsplaene/hagen/elektrotechnikInformationstechnikRoutes.cjs"));
-app.use("/api/pruefungsplaene/hagen", require("./routes/pruefungsplaene/hagen/technischeBetriebswirtschaftRoutes.cjs"));
-app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/agrarwirtschaftRoutes.cjs"));
-app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/maschinenbauAutomatisierungRoutes.cjs"));
-app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/elektrischeEnergietechnikRoutes.cjs"));
-app.use("/api/pruefungsplaene/soest", require("./routes/pruefungsplaene/soest/bildungsGesellschaftsRoutes.cjs"));
+// Routenpfade und zugehörige Route-Module definieren
+const routes = {
+  meschede: ["ingenieurWirtschaftsRoutes.cjs"],
+  hagen: ["elektrotechnikInformationstechnikRoutes.cjs", "technischeBetriebswirtschaftRoutes.cjs"],
+  soest: ["agrarwirtschaftRoutes.cjs", "maschinenbauAutomatisierungRoutes.cjs", "elektrischeEnergietechnikRoutes.cjs", "bildungsGesellschaftsRoutes.cjs"],
+  iserlohn: ["informatikNaturwissenschaftRoutes.cjs", "maschinenbauRoutes.cjs"]
+};
+
+// Schleife, um alle Routen zu registrieren
+for (const [location, routeFiles] of Object.entries(routes)) {
+  routeFiles.forEach(route => {
+    app.use(`/api/pruefungsplaene/${location}`, require(`./routes/pruefungsplaene/${location}/${route}`));
+  });
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
