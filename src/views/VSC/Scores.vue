@@ -51,11 +51,13 @@ import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonGrid, IonRow, I
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import ScoreDetails from './ScoreDetails.vue';
-//import ScoreDetails from '@/views/VSC/ScoreDetails.vue';
+import { wrapper } from 'axios-cookiejar-support';
+import { CookieJar } from 'tough-cookie';
 
 const scores = ref(null);
 const isModalOpen = ref(false);
 const selectedRowData = ref({});
+const url = 'http://localhost:3000/api/vsc/exams/results';
 
 const showModal = (row) => {
   console.log('SHOW');
@@ -78,17 +80,13 @@ const showModal = (row) => {
 
 onMounted(async () => {
   try{
-    // login nur provisorisch, später auslagern eigenes formular, code nur eingeloggt ausführbar
-    //await axios.get('http://localhost:3000/api/vsc/logout', { withCredentials: true });
-    //await axios.post('http://localhost:3000/api/vsc/login', { username: '', password: '' }, { withCredentials: true });
-
-    const response = await axios.get('http://localhost:3000/api/vsc/exams/results', { withCredentials: true });
+   
+    const response = await axios.get(url, { withCredentials: true });
     if(response.status !== 200){
       throw new Error(`${response.status}`);
     }
 
     scores.value = response.data;
-    console.log('SCORES: ', scores);
     
   } catch(error){
     console.log(error);

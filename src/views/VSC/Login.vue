@@ -35,17 +35,19 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardH
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-
+import { wrapper } from 'axios-cookiejar-support';
+import { CookieJar } from 'tough-cookie';
+console.log('Login entered');
 const router = useRouter();
 const username = ref(null);
 const password = ref(null);
+const url = 'http://localhost:3000/api/vsc/login';
 
 const handleLogin = async () => {
     try {
 
-        const vscLogin = await axios.post('http://localhost:3000/api/vsc/login', { username: username.value, password: password.value }, { withCredentials: true });
-        //const vscLogin = await axios.post('http://localhost:3000/api/vsc/login', { username: 'emkoc003', password: 'k9tX3ssP' }, { withCredentials: true });
-    
+        const vscLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
+        
         if(vscLogin.status === 200){
             router.push('/exams');
         }

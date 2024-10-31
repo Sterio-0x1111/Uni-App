@@ -5,7 +5,8 @@ const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
 
 const loginToVSC = async (req, res) => {
-    if (!req.session.loggedInVSC) {
+    if (!req.session.vscCookies) {
+        console.log('ENTERED LOGIN');
         const { username, password } = req.body;
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
 
@@ -21,14 +22,7 @@ const loginToVSC = async (req, res) => {
             // Sende den POST-Request zum Login mit Cookies
             //const cookies = deserializeCookieJar(req.session.vscCookies);
             //const client = createAxiosClient(cookies);
-            
-            await client.get(loginPageURL, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                }
-            });
-        
+
             // Schritt 2: POST-Login-Request senden
             const response = await client.post(loginPageURL, loginPayload.toString(), {
                 headers: {
@@ -37,16 +31,16 @@ const loginToVSC = async (req, res) => {
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
                 }
             });
-            
+
             const data = response.data;
 
             if (data.includes('Meine Prüfungen')) {
                 req.session.loggedInVSC = false; // provisorisch deaktiviert
                 req.session.user = { username };
                 req.session.vscCookies = cookieJar;
-                console.log(req.session.vscCookies);
-                console.log(response.headers);
-                //req.session.save();
+                //console.log(req.session.vscCookies);
+                //console.log(response);
+                req.session.save();
                 console.log('ERFOLGREICH EINGELOGGT');
 
                 res.status(200).json({
@@ -118,265 +112,131 @@ const logoutFromVSC = async (req, res) => {
     }
 }
 
-const getExamResults2 = async (req, res) => {
-    if(!req.session.vscCookies){
-        res.status(401).json({ message: 'VSC: Nicht authentifiziert.' });
-    }
-
-    const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
-    const cookie = req.session.vscCookies;
-
-    try {
-        const homepageResponse = await getAndParseHTML(cookie, homepageUrl, 'Meine Prüfungen');
-        const generalExamsPageResponse = await getAndParseHTML(cookie, homepageResponse.filteredURL, 'Notenspiegel');
-        const scoreOptionsPageResponse = await getAndParseHTML(cookie, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
-
-        //let $ = await fetchHTML(scoreOptionsPageResponse.filteredURL, client);
-        const scoreResponse = await axios.get(scoreOptionsPageResponse.filteredURL, {
-            headers: {
-                Cookie: cookie
-            }
-        });
-
-        let $ = cheerio.load(scoreResponse.data);
-        
-        const link = $('a').filter(function () {
-            return $(this).attr('title') === 'Leistungen für Informatik  (PO-Version 19)  anzeigen';
-        });
-
-        const ul = $('ul.treelist').eq(1);
-        const links = $(ul).find('li a[href]').attr('href');//.attr('href');
-        //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
-        console.log(links);
-        const response = await axios.get(links, {
-            headers: {
-                Cookie: cookie
-            }
-        });
-        const html = response.data;
-
-        $ = cheerio.load(html);
-        
-        const table = $('table').eq(1);
-        const rows = $(table).find('tr');
-
-        const tableData = [];
-        $(rows).each((index, row) => {
-            const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
-            tableData.push(cells);
-        })
-
-        const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
-        
-        res.send(clearedTable);
-    } catch(error){
-        res.status(500).json({ message: 'Fehler beim Laden der Prüfungsergebnisse vom VSC.' });
-    }
-
-
-}
-
-// DEBUG
 const getExamResults = async (req, res) => {
     if (req.session.vscCookies) {
-        const cookieJar = deserializeCookieJar(req.session.vscCookies);
-        const client = createAxiosClient(cookieJar);
+        const client = createAxiosClient(req.session.vscCookies);
+
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
-        
         try {
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalExamsPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Notenspiegel');
-            const scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            let scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            let scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
 
-            let $ = await fetchHTML(scoreOptionsPageResponse.filteredURL, client);
-            
-            const link = $('a').filter(function () {
+            if (!scoreResponse.data.includes('Informatik')) {
+                scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+                scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
+            }
+
+            const $ = cheerio.load(scoreResponse.data);
+
+            /*const link = $('a').filter(function () {
                 return $(this).attr('title') === 'Leistungen für Informatik  (PO-Version 19)  anzeigen';
-            });
+            });*/
 
             const ul = $('ul.treelist').eq(1);
             const links = $(ul).find('li a[href]').attr('href');//.attr('href');
             //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
-            console.log(links);
-            const response = await client.get(links);
+            const response = await client.get(links, { withCredentials: true });
             const html = response.data;
 
-            $ = cheerio.load(html);
-            
-            const table = $('table').eq(1);
-            const rows = $(table).find('tr');
+            const $2 = cheerio.load(html);
+
+            const table = $2('table').eq(1);
+            const rows = $2(table).find('tr');
 
             const tableData = [];
-            $(rows).each((index, row) => {
-                const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
+            $2(rows).each((index, row) => {
+                const cells = $2(row).find('td').map((i, cell) => $2(cell).text()).get();
                 tableData.push(cells);
             })
 
             const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
-            
+            //await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+
             res.send(clearedTable);
-        } catch(error){
+        } catch (error) {
+            res.status(500).json({ message: 'Fehler beim Laden der Prüfungsergebnisse.', error })
             console.log('Fehler beim Laden der Prüfungsergebnisse.', error);
         }
     } else {
+        console.log('401: Nicht eingeloggt');
+        console.log(deserializeCookieJar(req.session.vscCookies));
         res.status(401).json({ message: 'Nicht eingeloggt.' });
     }
 }
 
 const getRegisteredExams = async (req, res) => {
-    if(req.session.loggedInVSC){
-        const cookieJar = deserializeCookieJar(req.session.vscCookies);
-        const client = createAxiosClient(cookieJar);
+    console.log('UPDATED');
+    if (req.session.vscCookies) {
+
+        const client = createAxiosClient(req.session.vscCookies);
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
         try {
+
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
-            const selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor'); 
+            let selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            let registeredExamsPage = await client.get(selectedDegreePageResponse.filteredURL, { withCredentials: true });
             // TODO: Filterstring ersetzen durch dynamischen Parameter für Abschluss (BA/MA -> Auswahl im Frontend)
-            //const registeredExamsPageResponse = await getAndParseHTML(client, selectedDegreePageResponse.filteredURL, 'Informatik PO-Version 19');
 
-            let $ = await fetchHTML(selectedDegreePageResponse.filteredURL, client);
-            
-            /*const link = $('a').filter(function () {
-                return $(this).attr('title') === 'angemeldete Prüfungen anzeigen für Informatik  (PO-Version 19)';
-            });*/
+            if (!registeredExamsPage.data.includes('Informatik')) {
+                selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor');
+                registeredExamsPage = await client.get(selectedDegreePageResponse.filteredURL, { withCredentials: true });
+            }
+
+            let $ = cheerio.load(registeredExamsPage.data);
 
             const ul = $('ul.treelist').eq(1);
-            //const links = $(ul).find('li a[href]').attr('href');
             const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
             const course = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
-
-            res.status(200).json({
-                course,
-                links
-            });
-
-            /*
-            const response = await client.get(links);
-            const html = response.data;
-
-            $ = cheerio.load(html);
-            
-            const table = $('table').eq(1);
-            const rows = $(table).find('tr');
-
-            const tableData = [];
-            $(rows).each((index, row) => {
-                const cells = $(row).find('td').map((i, cell) => $(cell).text().replace(/[\n\t]/g, '').trim()).get();
-                tableData.push(cells);
-            })
-
-            res.status(200).json({
-                course,
-                links, 
-                tableData
-            });*/
-
-        } catch(error){
-            console.log('Fehler beim Laden der angemeldeten Prüfugnen.', error);
-        }
-    } else {
-        console.log('Nicht autorisiert.');
-        res.status(401).send('Nicht eingeloggt.');
-    }
-}
-
-const testNav = async (req, res) => {
-    if (req.session.loggedInVSC) {
-        const cookieJar = deserializeCookieJar(req.session.vscCookies);
-        const client = createAxiosClient(cookieJar);
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
-
         
-        try {
-            const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
-            const generalExamsPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Notenspiegel');
-            const scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            console.log(links);
+            console.log(course);
 
-            let $ = await fetchHTML(scoreOptionsPageResponse.filteredURL, client);
-
-            const ul = $('ul.treelist').eq(1);
-            const links = $(ul).find('li a[href]').attr('href');
-            const course = $(ul).find('li span').html();
-
-
-            /*res.json({
-                links,
-                course
-            })*/
-
-            //const url = $(link).attr('href');
-            
-            const response = await client.get(links);
+            const response = await client.get(links[0], { withCredentials: true });
             const html = response.data;
 
             $ = cheerio.load(html);
-            
+
             const table = $('table').eq(1);
             const rows = $(table).find('tr');
+            const headers = $(table).find('th');
 
+            const tableHeaders = $(headers).map((index, header) => $(header).text().trim()).get();
             const tableData = [];
-            $(rows).each((index, row) => {
+
+            $(rows.slice(1)).each((index, row) => {
                 const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
                 tableData.push(cells);
             })
 
-            //const clearedTable = tableData.map(item => item.replace(/\t/g, '').replace(/\n/g, '').trim());
             const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
-            
-            console.log(clearedTable);
-            res.send(clearedTable);
-            
-            //const response = await client.get(homepageUrl);
-            /*
-            const homepage = response.data;
-            const $ = cheerio.load(homepage);
-            const keyword = 'Meine Prüfungen';
-            
-            const filteredLinks = $('a').filter(function () {
-                return $(this).text().includes(keyword);
-            });
 
-            // general exams (Link 1 clicked)
-            const generalExamsURL = filteredLinks.first().attr('href');
-            const generalExamsResponse = await client.get(generalExamsURL);
-            const generalExamsPage = generalExamsResponse.data;
-            
-            const $1 = cheerio.load(generalExamsPage);
-            const generalExamsPageKeyword = 'Notenspiegel';
+            let resCode = 200;
+            let data = clearedTable;
 
-            const gradesLink = $1('a').filter(function () {
-                return $(this).text().includes(generalExamsPageKeyword);
-            });
+            if (clearedTable.length === 0) {
+                resCode = 200;
+                data = 'Keine Daten gefunden.';
+            }
 
-            const gradesURL = gradesLink.first().attr('href');
+            res.status(resCode).json({ data: data });
 
-            console.log(gradesURL);
-            
-            // notenspiegel link
-            const grades1Reponse = await client.get(gradesURL);
-            const grades1Data = grades1Reponse.data;
-            const $2 = cheerio.load(grades1Data);
-            const grades2Keyword = 'Abschluss BA Bachelor';
-
-            const grades2Link = $2('a').filter(function () {
-                return $(this).text().includes(grades2Keyword);
-            });
-
-            const grades2URL = grades2Link.first().attr('href');
-
-            // Abschluss BA Bachelor Link
-            const grades2Response = await client.get(grades2URL);
-            const grades2Data = grades2Response.data;
-            //res.json({grades2Data});
-            */
-
-        } catch(error){
-            console.log('Fehler beim Laden der Prüfungsergebnisse.', error);
+        } catch (error) {
+            console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
+            res.status(500).json({ error: 'Fehler beim Laden der angemeldeten Prüfungen.' });
         }
+    } else {
+        console.log('VSC: Nicht eingeloggt.');
+        res.status(401).send('Nicht eingeloggt!');
     }
+}
+
+const testNav = async (req, res) => {
+
 }
 
 module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams };

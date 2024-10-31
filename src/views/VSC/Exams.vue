@@ -10,12 +10,9 @@
           <h2>Meine Prüfungen</h2>
 
           <ion-list>
-            <!--
-              <ion-item><a href="http://localhost:8100/exams/results">Notenspiegel</a></ion-item>
-              -->
               <ion-button router-link="/exams/results">Notenspiegel</ion-button>
-              <ion-item><a>Angemeldete Prüfungen</a></ion-item>
-              <ion-item><a>Abgemeldete Prüfungen</a></ion-item>
+              <ion-button router-link="/exams/registered">Angemeldete Prüfungen</ion-button>
+              <ion-button router-link="/exams/registered">Abgemeldete Prüfungen</ion-button>
               
               <ion-item button href="/assets/Ruecktritt-Info-2023.pdf" download="RegelungenRuecktritt.pdf">
                 <a>Regelungen Prüfungsrücktritt (Download PDF)</a>
@@ -46,5 +43,15 @@ const navigateTo = (page) => {
 <style scoped>
 ion-item {
   margin-top: 10px;
+}
+
+ion-button {
+  display: blocK;
+  margin-left: 10px; 
+  margin-right: 10px;
+  margin-top: 10px;
+  --background: #1E3A8A;
+  
+  
 }
 </style>
