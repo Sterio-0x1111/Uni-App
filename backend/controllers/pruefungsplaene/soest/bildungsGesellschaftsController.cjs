@@ -1,4 +1,5 @@
-const { fetchHTML, handleError, extractInfoBoxText, extractPlans } = require("../../../utils/helpers.cjs");
+const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
+const { extractInfoBoxText, extractPlans } = require("../../../utils/scrapeHelper.cjs");
 
 // Scrape-Funktion für Prüfungsinformationen Bildungs- und Gesellschaftswissenschaften in Soest
 const scrapeBildungsGesellschafts = async (req, res) => {

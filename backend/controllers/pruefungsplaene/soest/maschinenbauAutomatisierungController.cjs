@@ -1,4 +1,5 @@
-const { fetchHTML, handleError, extractInfoBoxText, extractPlans } = require("../../../utils/helpers.cjs");
+const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
+const { extractInfoBoxText, extractPlans } = require("../../../utils/scrapeHelper.cjs");
 
 // Scrape-Funktion für Prüfungsinformationen Maschinenbau-Automatisierungstechnik in Soest
 const scrapeMaschinenbauAutomatisierung = async (req, res) => {
