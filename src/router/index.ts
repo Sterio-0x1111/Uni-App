@@ -5,12 +5,17 @@ import Exams from '../views/VSC/Exams.vue'
 import Scores from '../views/VSC/Scores.vue'
 import RegisteredExams from '../views/VSC/RegisteredExams.vue';
 import Login from '../views/VSC/Login.vue';
-
+import Semester from '../views/Semester.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     redirect: "/home",
+  },
+  {
+    path: '/semester',
+    name: 'Semester',
+    component: Semester
   },
   {
     path: "/home",
