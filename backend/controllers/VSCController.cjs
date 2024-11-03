@@ -3,6 +3,25 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
+const { VSCPortal } = require('../classes/VSCPortal.cjs');
+
+const loginToVSC2 = async (req, res) => {
+    if(!req.session.vsc){
+        const { username, password } = req.body;
+        const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
+
+        const loginPayload = new URLSearchParams();
+        loginPayload.append('asdf', username);
+        loginPayload.append('fdsa', password);
+        loginPayload.append('submit', 'Anmelden');
+
+        const vscPortal = new VSCPortal();
+        vscPortal.login(loginPayload);
+
+    } else {
+        res.status(200).json({ message: 'VSC: Bereits eingeloggt.' });
+    }
+}
 
 const loginToVSC = async (req, res) => {
     if (!req.session.vscCookies) {
@@ -19,11 +38,6 @@ const loginToVSC = async (req, res) => {
         loginPayload.append('submit', 'Anmelden');
 
         try {
-            // Sende den POST-Request zum Login mit Cookies
-            //const cookies = deserializeCookieJar(req.session.vscCookies);
-            //const client = createAxiosClient(cookies);
-
-            // Schritt 2: POST-Login-Request senden
             const response = await client.post(loginPageURL, loginPayload.toString(), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -38,8 +52,6 @@ const loginToVSC = async (req, res) => {
                 req.session.loggedInVSC = false; // provisorisch deaktiviert
                 req.session.user = { username };
                 req.session.vscCookies = cookieJar;
-                //console.log(req.session.vscCookies);
-                //console.log(response);
                 req.session.save();
                 console.log('ERFOLGREICH EINGELOGGT');
 

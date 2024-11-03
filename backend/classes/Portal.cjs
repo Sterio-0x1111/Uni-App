@@ -4,24 +4,41 @@ const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 
 class Portal {
-    constructor(homepageURL) {
-        this.homepageURL = homepageURL;
-        this._client = this.createAxiosInstance();
+    constructor() {
+        if (new.target === Portal) {
+            throw new Error('Die abstrakte Klasse Portal kann nicht instanziiert werden.');
+        }
+
+        this._loginState = false;
+        //this.baseURL = baseURL;
+        this.cookies = new CookieJar();
     }
 
-    get client() {
-        return this._client;
+    get loginState(){
+        return this._loginState;
     }
 
-    /*set client(axiosClient){
-        this.client = axiosClient;
-    }*/
+    get loginState(){
 
-    createAxiosInstance() {
+    }
+
+    deserializeCookieJar = () => {
+        return (typeof this.cookies === 'object' && !(this.cookies instanceof CookieJar)) ? CookieJar.deserializeSync(this.cookies) : this.cookies;
+    }
+
+    createAxiosClient() {
         return wrapper(axios.create({
-            jar: new CookieJar(),
+            jar: this.deserializeCookieJar(),
             withCredentials: true
-        }));
+        }))
+    }
+
+    async login(loginPayload){
+        throw new Error('Die abstrakte Methode loginToPortal muss in einer Subklasse implementiert werden.');
+    }
+
+    logoutFromPortal(){
+        throw new Error('Die abstrakte Methode logoutFromPortal muss in einer Subklasse implementiert werden.');
     }
 }
 
