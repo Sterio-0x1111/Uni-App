@@ -13,14 +13,19 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/home",
   },
   {
+    path: "/home",
+    name: "Home",
+    component: HomePage,
+  },
+  {
     path: '/semester',
     name: 'Semester',
     component: Semester
   },
   {
-    path: "/home",
-    name: "Home",
-    component: HomePage,
+    path: "/meals", 
+    name: "Meals",
+    component: Meals
   },
   {
     path: '/exams',

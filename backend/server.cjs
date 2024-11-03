@@ -59,6 +59,8 @@ app.use((req, res, next) => {
 
 app.use('/api/vsc', require('./routes/VSC.cjs'));
 app.use('/api/semester', require('./routes/semester.cjs'));
+app.use("/api/meals", require("./routes/meals.cjs"));
+app.use("/api/mensa/options", require("./routes/meals.cjs"));
 
 // weitere end points
 

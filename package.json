@@ -28,6 +28,7 @@
     "express": "^4.21.0",
     "express-session": "^1.18.1",
     "ionicons": "^7.0.0",
+    "qs": "^6.13.0",
     "vue": "^3.3.0",
     "vue-router": "^4.2.0"
   },
