@@ -21,7 +21,7 @@ const routes = {
   meschede: ["ingenieurWirtschaftsRoutes.cjs"],
   hagen: ["elektrotechnikInformationstechnikRoutes.cjs", "technischeBetriebswirtschaftRoutes.cjs"],
   soest: ["agrarwirtschaftRoutes.cjs", "maschinenbauAutomatisierungRoutes.cjs", "elektrischeEnergietechnikRoutes.cjs", "bildungsGesellschaftsRoutes.cjs"],
-  iserlohn: ["informatikNaturwissenschaftRoutes.cjs", "maschinenbauRoutes.cjs"]
+  iserlohn: ["informatikNaturwissenschaftRoutes.cjs", "maschinenbauRoutes.cjs", "vpisIserlohnPruefungsRoutes.cjs"]
 };
 
 // Schleife, um alle Routen zu registrieren

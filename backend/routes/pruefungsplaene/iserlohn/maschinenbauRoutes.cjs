@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  scrapeMaschinenbau,
+  scrapeMaschinenbau
 } = require("../../../controllers/pruefungsplaene/iserlohn/maschinenbauController.cjs");
 
 const router = express.Router();

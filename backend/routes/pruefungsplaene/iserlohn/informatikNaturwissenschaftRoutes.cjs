@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  scrapeInformatikNaturwissenschaft,
+  scrapeInformatikNaturwissenschaft
 } = require("../../../controllers/pruefungsplaene/iserlohn/informatikNaturwissenschaftController.cjs");
 
 const router = express.Router();

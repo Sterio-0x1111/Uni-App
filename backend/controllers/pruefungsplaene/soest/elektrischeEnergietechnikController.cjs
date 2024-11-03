@@ -1,15 +1,18 @@
 const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
-const { extractInfoBoxText, extractPlans } = require("../../../utils/scrapeHelper.cjs");
+const {
+  extractInfoBoxText,
+  extractPlans,
+} = require("../../../utils/scrapeHelper.cjs");
 
-// Scrape-Funktion für Prüfungsinformationen Elektrische Energietechnik in Soest
+// Funktion zum Scrapen der Prüfungsinformationen für Elektrische Energietechnik in Soest
 const scrapeElektrischeEnergietechnik = async (req, res) => {
   try {
     const $ = await fetchHTML(
       "https://www.fh-swf.de/de/studierende/studienorganisation/pruefungsplaene/soest/fb_elektrische_energietechnik.php"
     );
 
-    const infoboxes = extractInfoBoxText($, ".bubble-box__wrapper p"); // Infoboxen extrahieren
-    const plans = extractPlans($, ".accordion__wrapper .accordion__item"); // Prüfungspläne extrahieren
+    const infoboxes = extractInfoBoxText($, ".bubble-box__wrapper p"); // Extrahiert Infoboxen
+    const plans = extractPlans($, ".accordion__wrapper .accordion__item"); // Extrahiert Prüfungspläne
 
     res.json({
       infoboxes,
