@@ -6,6 +6,7 @@ import Data from '../views/Data.vue';
 import VpisLogin from '../views/vpisLogin.vue';
 import VpisPlaner from '../views/Planer.vue';
 import PruefungsForm from '../views/PruefungsForm.vue';
+import VpisIserlohnPruefungsEinsicht from '../views/pruefungsplaene/iserlohn/vpisIserlohnPruefungsEinsicht.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -42,6 +43,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "PruefungsForm",
     component: PruefungsForm,
   },
+  {
+    path: "/vpisIserlohnPruefungsEinsicht",
+    name: "VpisIserlohnPruefungsEinsicht",
+    component: VpisIserlohnPruefungsEinsicht,
+  }
 ];
 
 const router = createRouter({
