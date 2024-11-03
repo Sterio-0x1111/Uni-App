@@ -33,12 +33,15 @@ const scrapeCourses = async (url) => {
   const verbundStudiengaenge = [];
   const courseNamesSet = new Set();
 
-  // Präsenz- und Verbundstudiengänge in einer Liste
+  // Präsenz- und Verbundstudiengänge in der Standardliste
   $(".bubble-box__wrapper .list-wrapper__item").each((i, element) => {
     const name = $(element).find(".link__text").first().text().trim();
     const link = $(element).find("a").attr("href");
 
-    // Erkennen, ob der Kurs "Life Science Engineering" ist und spezielle Prüfungspläne hat
+    // Erkennen, ob der Kurs ein Verbundstudiengang ist
+    const isVerbund =
+      name.toLowerCase().includes("berufsbegleitendes verbundstudium") ||
+      name.toLowerCase().includes("verbund");
     const isLSE =
       name.toLowerCase().includes("life science engineering") ||
       name.toLowerCase().includes("lse");
@@ -68,15 +71,11 @@ const scrapeCourses = async (url) => {
       verbundStudiengaenge.push(course);
       courseNamesSet.add("Life Science Engineering M.Sc.");
     } else if (!isLSE && !courseNamesSet.has(name)) {
-      // Falls kein LSE-Kurs, normalen Kurs einfügen
+      // Standardkurs für Präsenz oder Verbund einfügen
       const course = {
         name,
         link: link.startsWith("http") ? link : `https://www.fh-swf.de${link}`,
       };
-
-      const isVerbund =
-        name.toLowerCase().includes("berufsbegleitendes verbundstudium") ||
-        name.toLowerCase().includes("verbund");
 
       if (isVerbund) {
         verbundStudiengaenge.push(course);
@@ -84,6 +83,28 @@ const scrapeCourses = async (url) => {
         praesenzStudiengaenge.push(course);
       }
 
+      courseNamesSet.add(name);
+    }
+  });
+
+  // Verbundstudiengänge in der Accordion-Komponente (Maschinenbau)
+  $(".accordion__item").each((i, element) => {
+    const name = $(element).find(".headline--3").first().text().trim();
+    const link = $(element).find(".wysiwyg a").attr("href");
+
+    if (!courseNamesSet.has(name)) {
+      const course = {
+        name,
+        link: link
+          ? link.startsWith("http")
+            ? link
+            : `https://www.fh-swf.de${link}`
+          : "N/A",
+        additionalInfo: "Anmeldung auf Moodle erforderlich",
+        additionalLinks: [],
+      };
+
+      verbundStudiengaenge.push(course);
       courseNamesSet.add(name);
     }
   });

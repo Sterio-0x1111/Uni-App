@@ -17,4 +17,14 @@ const handleError = (res, message) => {
   res.status(500).json({ error: message });
 };
 
-module.exports = { fetchHTML, handleError };
+// Hilfsfunktion zur Überprüfung der Erreichbarkeit eines Links
+const checkLink = async (url) => {
+  try {
+    const response = await axios.get(url);
+    return response.status === 200;
+  } catch (error) {
+    return false;
+  }
+};
+
+module.exports = { fetchHTML, handleError, checkLink };
