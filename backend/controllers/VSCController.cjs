@@ -318,7 +318,6 @@ const getRegisteredExams = async (req, res) => {
 }
 
 const testNav = async (req, res) => {
-
 }
 
 module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams };
