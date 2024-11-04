@@ -74,7 +74,7 @@ const loadMensaPlan = async () => {
             console.log('Lade Mensaplan für', mensa.name)
             
             //const response = await fetch(`http://localhost:3000/api/meals/${mensa.name}/${selectedDate.value}`);
-            const response = await fetch(`http://192.168.2.148:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
+            const response = await fetch(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
             /*const html = response.data
             const $ = cheerio.load(html)
             const meals = $('.meals').html()*/

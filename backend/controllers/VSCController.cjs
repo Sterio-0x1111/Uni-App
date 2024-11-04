@@ -5,7 +5,7 @@ const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
 const { VSCPortal } = require('../classes/VSCPortal.cjs');
 
-const loginToVSC = async (req, res) => {
+const loginToVSC2 = async (req, res) => {
     if(!req.session.vsc){
         const { username, password } = req.body;
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
@@ -34,7 +34,7 @@ const loginToVSC = async (req, res) => {
     }
 }
 
-const loginToVSC_ORIGINAL = async (req, res) => {
+const loginToVSC = async (req, res) => {
     if (!req.session.vscCookies) {
         console.log('ENTERED LOGIN');
         const { username, password } = req.body;
@@ -135,7 +135,7 @@ const logoutFromVSC = async (req, res) => {
     }
 }
 
-const getExamResults = async (req, res) => {
+const getExamResults2 = async (req, res) => {
     if (req.session.vsc) {
         const client = createAxiosClient(req.session.vscCookies);
 
@@ -191,7 +191,7 @@ const getExamResults = async (req, res) => {
     }
 }
 
-const getExamResults_ORIGINAL = async (req, res) => {
+const getExamResults = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
 
