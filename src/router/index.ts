@@ -63,7 +63,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: Login
-  }
+  },
   {
     path: "/vpisLogin",
     name: "VpisLogin",
