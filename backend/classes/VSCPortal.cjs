@@ -25,7 +25,8 @@ class VSCPortal extends Portal {
 
         } catch (error) {
             console.log('Failed to login to VSC.', error);
-            res.status(500).send('Fehler beim Login.');
+            //res.status(500).send('Fehler beim Login.');
+            return false;
         }
     }
 }

@@ -5,7 +5,7 @@ const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
 const { VSCPortal } = require('../classes/VSCPortal.cjs');
 
-const loginToVSC2 = async (req, res) => {
+const loginToVSC = async (req, res) => {
     if(!req.session.vsc){
         const { username, password } = req.body;
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
@@ -16,14 +16,25 @@ const loginToVSC2 = async (req, res) => {
         loginPayload.append('submit', 'Anmelden');
 
         const vscPortal = new VSCPortal();
-        vscPortal.login(loginPayload);
+        let resCode = 401;
+        let message = 'Nicht eingeloggt.';
+
+        const state = await vscPortal.login(loginPayload);
+        console.log(state);
+        if(state){
+            req.session.vsc = vscPortal;
+            resCode = 200;
+            message = 'Erfolgreich eingeloggt.';
+        }
+
+        res.status(resCode).json({ message: message })
 
     } else {
         res.status(200).json({ message: 'VSC: Bereits eingeloggt.' });
     }
 }
 
-const loginToVSC = async (req, res) => {
+const loginToVSC_ORIGINAL = async (req, res) => {
     if (!req.session.vscCookies) {
         console.log('ENTERED LOGIN');
         const { username, password } = req.body;
@@ -125,6 +136,62 @@ const logoutFromVSC = async (req, res) => {
 }
 
 const getExamResults = async (req, res) => {
+    if (req.session.vsc) {
+        const client = createAxiosClient(req.session.vscCookies);
+
+        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+
+        try {
+            const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
+            const generalExamsPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Notenspiegel');
+            let scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            let scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
+
+            if (!scoreResponse.data.includes('Informatik')) {
+                scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+                scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
+            }
+
+            const $ = cheerio.load(scoreResponse.data);
+
+            /*const link = $('a').filter(function () {
+                return $(this).attr('title') === 'Leistungen für Informatik  (PO-Version 19)  anzeigen';
+            });*/
+
+            const ul = $('ul.treelist').eq(1);
+            const links = $(ul).find('li a[href]').attr('href');//.attr('href');
+            //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
+            const response = await client.get(links, { withCredentials: true });
+            const html = response.data;
+
+            const $2 = cheerio.load(html);
+
+            const table = $2('table').eq(1);
+            const rows = $2(table).find('tr');
+
+            const tableData = [];
+            $2(rows).each((index, row) => {
+                const cells = $2(row).find('td').map((i, cell) => $2(cell).text()).get();
+                tableData.push(cells);
+            })
+
+            const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
+            console.log(clearedTable);
+            //await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
+
+            res.send(clearedTable);
+        } catch (error) {
+            res.status(500).json({ message: 'Fehler beim Laden der Prüfungsergebnisse.', error })
+            console.log('Fehler beim Laden der Prüfungsergebnisse.', error);
+        }
+    } else {
+        console.log('401: Nicht eingeloggt');
+        console.log(deserializeCookieJar(req.session.vscCookies));
+        res.status(401).json({ message: 'Nicht eingeloggt.' });
+    }
+}
+
+const getExamResults_ORIGINAL = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
 
@@ -165,6 +232,7 @@ const getExamResults = async (req, res) => {
             })
 
             const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
+            console.log(clearedTable);
             //await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
 
             res.send(clearedTable);
@@ -229,13 +297,15 @@ const getRegisteredExams = async (req, res) => {
 
             let resCode = 200;
             let data = clearedTable;
+            let found = true;
 
             if (clearedTable.length === 0) {
                 resCode = 200;
                 data = 'Keine Daten gefunden.';
+                found = false;
             }
 
-            res.status(resCode).json({ data: data });
+            res.status(resCode).json({ data: data, found: found });
 
         } catch (error) {
             console.log('Fehler beim Laden der angemeldeten Prüfungen', error);

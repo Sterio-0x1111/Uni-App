@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import HomePage from '../views/HomePage.vue'
+import Navigation from '../views/Navigation.vue';
 import Exams from '../views/VSC/Exams.vue'
 import Scores from '../views/VSC/Scores.vue'
 import RegisteredExams from '../views/VSC/RegisteredExams.vue';
 import Login from '../views/VSC/Login.vue';
 import Semester from '../views/Semester.vue';
+import Meals from '../views/Meals.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -16,6 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/home",
     name: "Home",
     component: HomePage,
+  },
+  {
+    path: '/navigation',
+    name: 'Navigation',
+    component: Navigation
   },
   {
     path: '/semester',

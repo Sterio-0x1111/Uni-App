@@ -7,19 +7,22 @@
         </ion-header>
 
         <ion-content>
-            <ion-grid>
+            <ion-grid v-if="found">
                 <ion-row> <!-- table headers, aktuell noch hardkodiert, später parsen und mitschicken -->
                     <ion-col v-for="header in limitedHeaders" :key="header.id">
                         {{ header.text }}
                     </ion-col>
                 </ion-row>
 
-                <ion-row v-for="exam in exams" :key="exam">
+                <ion-row v-for="exam in exams.data" :key="exam">
                     <ion-col>{{ exam[1] }}</ion-col>
                     <ion-col>{{ exam[2] }}</ion-col>
                     <ion-col>{{ exam[5] }}</ion-col>
+                    
                 </ion-row>
             </ion-grid>
+
+            <p v-else>Keine Daten gefunden.</p>
         </ion-content>
     </ion-page>
 </template>
@@ -43,8 +46,10 @@ const headers = [
 
 const limitedHeaders = [headers[1], headers[2], headers[5]];
 
-const exams = ref(null);
 const url = 'http://localhost:3000/api/vsc/exams/registered';
+const exams = ref(null);
+const found = ref(false);
+
 
 onMounted(async () => {
     try {
@@ -55,6 +60,8 @@ onMounted(async () => {
         }
 
         exams.value = response.data;
+        found.value = exams.value.found;
+        console.log(exams.value);
 
     } catch(error){
         console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);

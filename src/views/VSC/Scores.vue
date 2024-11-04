@@ -87,6 +87,7 @@ onMounted(async () => {
     }
 
     scores.value = response.data;
+    console.log(scores);
     
   } catch(error){
     console.log(error);
