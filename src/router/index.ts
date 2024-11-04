@@ -45,11 +45,6 @@ const routes: Array<RouteRecordRaw> = [
     component: Data,
   },
   {
-    path: "/vpisLogin",
-    name: "VpisLogin",
-    component: VpisLogin,
-  },
-  {
     path: "/exams",
     name: "Exams",
     component: Exams,
