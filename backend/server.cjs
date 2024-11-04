@@ -51,7 +51,6 @@ app.use((req, res, next) => {
 });
 
 // Routes
-
 app.use("/api/hochschulportal", require("./routes/hochschulportal.cjs"));
 app.use("/api/vpis", require("./routes/vpis.cjs"));
 app.use("/api/vpisPlaner", require("./routes/vpisPlaner.cjs"));
