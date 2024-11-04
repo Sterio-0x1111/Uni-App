@@ -98,7 +98,7 @@ const loadSelectionOptions = async () => {
     const mensaName = selectedMensaName.value.toLowerCase();
 
     try {
-        const response = await fetch(`http://192.168.2.148:3000/api/mensa/options/${mensaName}`);
+        const response = await fetch(`http://localhost:3000/api/mensa/options/${mensaName}`);
         const data = await response.json();
         
         // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
