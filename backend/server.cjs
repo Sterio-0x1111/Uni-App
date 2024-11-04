@@ -15,10 +15,6 @@ app.use(cors({
   }));
 app.use(bodyParser.json()); // JSON-Body-Parsing aktivieren
 app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten unterstützen
-app.use(cors({
-  origin: 'http://localhost:8100',  // Frontend-URL
-  credentials: true                 // Cookies und andere Anmeldeinformationen zulassen
-}));
 
 app.use(session({
   secret: 'geheimesSchlüsselwort',   // Ein geheimer Schlüssel, um die Session zu signieren
