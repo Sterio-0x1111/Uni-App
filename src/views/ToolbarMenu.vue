@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts">
-import {IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
+import { defineProps } = from 'vue';
 const props = defineProps({
   menuTitle: {
     type: String, 
