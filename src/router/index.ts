@@ -55,6 +55,16 @@ const routes: Array<RouteRecordRaw> = [
     component: Scores,
   },
   {
+    path: "/exams/registered",
+    name: "Registered exams",
+    component: RegisteredExams,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  }
+  {
     path: "/vpisLogin",
     name: "VpisLogin",
     component: VpisLogin,
