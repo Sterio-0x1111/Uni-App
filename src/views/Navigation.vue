@@ -3,7 +3,6 @@
     <ion-header>
       <ToolbarMenu menuTitle="ASDF" />
     </ion-header>
-
     <ion-content>
         <ion-list>
             <ion-button class="routes" v-for="route in routes" :key="route.id" :router-link="route.path">{{ route.title }}</ion-button>
