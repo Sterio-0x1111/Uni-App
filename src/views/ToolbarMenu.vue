@@ -9,9 +9,10 @@
   </ion-toolbar>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
-import { defineProps } from 'vue';
+import { defineProps, onMounted } from 'vue';
+
 const props = defineProps({
   menuTitle: {
     type: String, 

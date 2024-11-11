@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ToolbarMenu menuTitle="ASDF" />
+      <toolbar-menu :menuTitle="toolbarTitle" />
     </ion-header>
 
     <ion-content>
@@ -16,6 +16,9 @@
 import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import ToolbarMenu from './ToolbarMenu.vue';
+import { ref } from 'vue';
+
+const toolbarTitle = ref('SEM');
 
 interface Route {
     id: number;
