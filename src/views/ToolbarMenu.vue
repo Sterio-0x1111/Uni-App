@@ -3,7 +3,7 @@
     <ion-title>{{ menuTitle }}</ion-title>
     <ion-buttons slot="end">
       <ion-button router-link="/navigation">
-        <ion-icon name="menu"></ion-icon>
+        x<ion-icon name="home"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

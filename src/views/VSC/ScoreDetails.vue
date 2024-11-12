@@ -1,5 +1,5 @@
 <template>
-    <ion-modal :is-open="isOpen">
+    <ion-modal :is-open="isOpen" :backdrop-dismiss="backdropDismiss">
         <ion-header>
             <ion-toolbar>
                 <ion-title>Details</ion-title>
@@ -25,11 +25,10 @@
 import { ref } from 'vue';
 import { IonHeader, IonToolbar, IonTitle, IonModal, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
 
-console.log('MODAL');
-
 const props = defineProps({
     isOpen: Boolean, 
-    data: Object
+    data: Object,
+    backdropDismiss: Boolean // Dynamisch übergeben
 })
 
 const emit = defineEmits(['close']);

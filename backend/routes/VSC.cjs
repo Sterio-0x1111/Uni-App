@@ -7,5 +7,6 @@ router.get('/logout', logoutFromVSC);
 router.get('/test', testNav);
 router.get('/exams/results', getExamResults);
 router.get('/exams/registered', getRegisteredExams);
+//router.get('/exams/reg', getReg);
 
 module.exports = router;

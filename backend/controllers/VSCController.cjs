@@ -137,7 +137,8 @@ const logoutFromVSC = async (req, res) => {
 
 const getExamResults2 = async (req, res) => {
     if (req.session.vsc) {
-        const client = createAxiosClient(req.session.vscCookies);
+        //const client = createAxiosClient(req.session.vscCookies);
+        const vscPortal = new VSCPortal();
 
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
@@ -232,7 +233,7 @@ const getExamResults = async (req, res) => {
             })
 
             const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
-            console.log(clearedTable);
+            //console.log(clearedTable);
             //await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
 
             res.send(clearedTable);
@@ -248,14 +249,11 @@ const getExamResults = async (req, res) => {
 }
 
 const getRegisteredExams = async (req, res) => {
-    console.log('UPDATED');
     if (req.session.vscCookies) {
-
         const client = createAxiosClient(req.session.vscCookies);
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
         try {
-
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
             let selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor');
@@ -317,7 +315,31 @@ const getRegisteredExams = async (req, res) => {
     }
 }
 
+/*const getRegisteredSelectionOptions = async (req, res) => {
+    if (req.session.vscCookies) {
+        const client = createAxiosClient(req.session.vscCookies);
+        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const avaibleDegrees = ['Abschluss BA Bachelor', 'Abschluss MA Master'];
+
+        try {
+            const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
+            const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
+            res.json({ page: generalInformationPageResponse.html });
+
+            //res.status(resCode).json({ data: data, found: found });
+
+        } catch (error) {
+            console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
+            res.status(500).json({ error: 'Fehler beim Laden der angemeldeten Prüfungen.' });
+        }
+    } else {
+        console.log('VSC: Nicht eingeloggt.');
+        res.status(401).send('Nicht eingeloggt!');
+    }
+}*/
+
 const testNav = async (req, res) => {
+
 }
 
 module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams };
