@@ -7,6 +7,7 @@
         </ion-header>
 
         <ion-content>
+            <course-selection />
             <ion-grid v-if="found">
                 <ion-row> <!-- table headers, aktuell noch hardkodiert, später parsen und mitschicken -->
                     <ion-col v-for="header in limitedHeaders" :key="header.id">
@@ -31,6 +32,7 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import CourseSelection from './CourseSelection.vue';
 
 const headers = [
     { id: 0, text: 'Prüfungsnr.' },

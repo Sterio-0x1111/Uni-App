@@ -6,7 +6,7 @@ const { CookieJar } = require('tough-cookie');
 const { VSCPortal } = require('../classes/VSCPortal.cjs');
 
 const loginToVSC2 = async (req, res) => {
-    if(!req.session.vsc){
+    if (!req.session.vsc) {
         const { username, password } = req.body;
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
 
@@ -21,7 +21,7 @@ const loginToVSC2 = async (req, res) => {
 
         const state = await vscPortal.login(loginPayload);
         console.log(state);
-        if(state){
+        if (state) {
             req.session.vsc = vscPortal;
             resCode = 200;
             message = 'Erfolgreich eingeloggt.';
@@ -270,9 +270,6 @@ const getRegisteredExams = async (req, res) => {
             const ul = $('ul.treelist').eq(1);
             const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
             const course = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
-        
-            console.log(links);
-            console.log(course);
 
             const response = await client.get(links[0], { withCredentials: true });
             const html = response.data;
@@ -315,7 +312,91 @@ const getRegisteredExams = async (req, res) => {
     }
 }
 
-/*const getRegisteredSelectionOptions = async (req, res) => {
+const getReg = async (req, res) => {
+    if (req.session.vscCookies) {
+        const client = createAxiosClient(req.session.vscCookies);
+        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const avaibleDegrees = ['Abschluss BA Bachelor'];
+
+        try {
+            const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
+            const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
+            const degreeSelectionPage = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, avaibleDegrees[0]);
+
+            let examsPage = await client.get(degreeSelectionPage.filteredURL, { withCredentials: true });
+            const resultsBachelor = getCoursesAndDegrees(examsPage.data);
+            console.log('BACHELOR');
+            console.log(resultsBachelor);
+
+            //let $ = cheerio.load(examsPage.data);
+
+            // Bachelor Studiengänge parsen
+            /*const ul = $('ul.treelist').eq(1);
+            const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+            const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();*/
+
+            // Bachelor Studiengänge zusammenführen (kursnamen und links)
+            /*const mappedResults = links.map((link, index) => ({
+                name: courses[index],
+                link: link
+            }));*/
+
+            // TODO: Umbauen auf Master Studiengänge parsen (ul treelist holen und kurse und links parsen, wie unten bei bachelor)
+            const masterAvailable = degreeSelectionPage.html.includes('Master')
+
+            if (masterAvailable) {
+                avaibleDegrees.push('Abschluss MA Master');
+
+                const resultsMaster = getCoursesAndDegrees(examspage.data, true);
+
+                /*onst ul = $('ul.treelist').eq(1);
+                const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+                const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+
+                // Bachelor Studiengänge zusammenführen (kursnamen und links)
+                const mappedResults = links.map((link, index) => ({
+                    name: courses[index],
+                    link: link
+                }));*/
+            }
+
+            // aktuell werden nur Bachelor Daten gesendet, umstellen für Master
+            res.status(200).json({
+                degrees: avaibleDegrees,
+                bachelor: resultsBachelor,
+                ...(masterAvailable && { master: resultsMaster })
+            });
+
+        } catch (error) {
+            console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
+            res.status(500).json({ error: 'Fehler beim Laden der angemeldeten Prüfungen.' });
+        }
+    } else {
+        console.log('VSC: Nicht eingeloggt.');
+        res.status(401).send('Nicht eingeloggt!');
+    }
+}
+
+const getCoursesAndDegrees = (data, master = false) => {
+    try {
+        const $ = cheerio.load(data);
+        const ul = $('ul.treelist').eq( (master) ? 2 : 1 );
+        const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+        const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+
+        // Mapping von Studiengängen und deren Links
+        const mappedResults = links.map((link, index) => ({
+            name: courses[index],
+            link: link
+        }));
+
+        return mappedResults;
+    } catch (error) {
+        console.log('Fehler beim Laden der Studiengänge und Abschlüsse.', error);
+    }
+}
+
+const testNav = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
@@ -336,10 +417,6 @@ const getRegisteredExams = async (req, res) => {
         console.log('VSC: Nicht eingeloggt.');
         res.status(401).send('Nicht eingeloggt!');
     }
-}*/
-
-const testNav = async (req, res) => {
-
 }
 
-module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams };
+module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams, getReg };
