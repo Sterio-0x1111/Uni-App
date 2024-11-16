@@ -32,6 +32,7 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useCourseStore } from '@/stores/courseStore';
 import CourseSelection from './CourseSelection.vue';
 
 const headers = [
@@ -52,9 +53,17 @@ const url = 'http://localhost:3000/api/vsc/exams/registered';
 const exams = ref(null);
 const found = ref(false);
 
+const degrees = ref([]);
+const courses = ref([]);
+const masterCourses = ref([]);
+const selectedDegree = ref(null);
+const seelctedCourse = ref(null);
+
 
 onMounted(async () => {
     try {
+        
+        
         const response = await axios.get(url, { withCredentials: true });
         
         if(response.status !== 200){
