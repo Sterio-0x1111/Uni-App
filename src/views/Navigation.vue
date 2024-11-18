@@ -17,6 +17,7 @@ import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, 
 import { useRouter } from 'vue-router';
 import ToolbarMenu from './ToolbarMenu.vue';
 import { ref } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 
 const toolbarTitle = ref('SEM');
 
@@ -31,6 +32,9 @@ const routes: Route[] = [
     { id: 1, title: 'Semestertermine', path: '/semester' },
     { id: 2, title: 'Login', path: '/login' }
 ]
+
+const authStore = useAuthStore();
+console.log(authStore.isLoggedIn);
 
 </script>
 

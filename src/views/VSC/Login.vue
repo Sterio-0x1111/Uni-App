@@ -9,7 +9,7 @@
         <ion-content>
             <ion-card>
                 <ion-card-header>
-                    <ion-card-title>Login</ion-card-title>
+                    <ion-card-title>Navigation</ion-card-title>
                 </ion-card-header>
 
                 <ion-card-content>
@@ -37,11 +37,13 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
-console.log('Login entered');
+import { useAuthStore } from '@/stores/authStore';
+
 const router = useRouter();
 const username = ref(null);
 const password = ref(null);
 const url = 'http://localhost:3000/api/vsc/login';
+const authStore = useAuthStore();
 
 const handleLogin = async () => {
     try {
@@ -49,6 +51,8 @@ const handleLogin = async () => {
         const vscLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
         
         if(vscLogin.status === 200){
+            authStore.login();
+            console.log('Login: ', authStore.isLoggedIn);
             router.push('/exams');
         }
 

@@ -62,7 +62,9 @@ const seelctedCourse = ref(null);
 
 onMounted(async () => {
     try {
-        
+        const courseStore = useCourseStore();
+        await courseStore.fetchCourses();
+        console.log('Abschluss: ' , courseStore.bachelorCourses);
         
         const response = await axios.get(url, { withCredentials: true });
         

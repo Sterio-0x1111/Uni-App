@@ -1,11 +1,11 @@
 <template>
-    <ion-select v-modal="selectedDegree" v-if="degrees">
+    <ion-select v-model="selectedDegree" v-if="degrees">
         <ion-select-option v-for="degree in degrees" :key="degree" :value="degree">
             {{ degree }}
         </ion-select-option>
     </ion-select>
     
-    <ion-select v-modal="seelctedCourse">
+    <ion-select v-model="seelctedCourse">
         <ion-select-option v-for="course in courses" :key="course" :value="course">
             {{ course.name }}
         </ion-select-option>

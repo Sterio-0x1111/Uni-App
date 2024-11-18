@@ -4,6 +4,7 @@ const cheerio = require('cheerio');
 const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
 const { VSCPortal } = require('../classes/VSCPortal.cjs');
+//const { useCourseStore } = require('../../src/stores/courseStore.ts');
 
 const loginToVSC2 = async (req, res) => {
     if (!req.session.vsc) {
@@ -321,25 +322,22 @@ const getReg = async (req, res) => {
         try {
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
-            const degreeSelectionPage = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, avaibleDegrees[0]);
-
+            let degreeSelectionPage = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, avaibleDegrees[0]);
             let examsPage = await client.get(degreeSelectionPage.filteredURL, { withCredentials: true });
-            const resultsBachelor = getCoursesAndDegrees(examsPage.data);
+
+            if (!examsPage.data.includes('Diesen Zweig zuklappen')) {
+                degreeSelectionPage = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, avaibleDegrees[0]);
+                examsPage = await client.get(degreeSelectionPage.filteredURL, { withCredentials: true });
+            }
+
+            const data = examsPage.data;
+            // TODO: Für Master Studiengänge erweitern
+            res.status(200).json({ degrees: avaibleDegrees, bachelorPage: data });
+
+            /*const resultsBachelor = getCoursesAndDegrees(examsPage.data);
+
             console.log('BACHELOR');
             console.log(resultsBachelor);
-
-            //let $ = cheerio.load(examsPage.data);
-
-            // Bachelor Studiengänge parsen
-            /*const ul = $('ul.treelist').eq(1);
-            const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
-            const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();*/
-
-            // Bachelor Studiengänge zusammenführen (kursnamen und links)
-            /*const mappedResults = links.map((link, index) => ({
-                name: courses[index],
-                link: link
-            }));*/
 
             // TODO: Umbauen auf Master Studiengänge parsen (ul treelist holen und kurse und links parsen, wie unten bei bachelor)
             const masterAvailable = degreeSelectionPage.html.includes('Master')
@@ -348,16 +346,6 @@ const getReg = async (req, res) => {
                 avaibleDegrees.push('Abschluss MA Master');
 
                 const resultsMaster = getCoursesAndDegrees(examspage.data, true);
-
-                /*onst ul = $('ul.treelist').eq(1);
-                const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
-                const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
-
-                // Bachelor Studiengänge zusammenführen (kursnamen und links)
-                const mappedResults = links.map((link, index) => ({
-                    name: courses[index],
-                    link: link
-                }));*/
             }
 
             // aktuell werden nur Bachelor Daten gesendet, umstellen für Master
@@ -365,7 +353,7 @@ const getReg = async (req, res) => {
                 degrees: avaibleDegrees,
                 bachelor: resultsBachelor,
                 ...(masterAvailable && { master: resultsMaster })
-            });
+            });*/
 
         } catch (error) {
             console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
@@ -380,7 +368,7 @@ const getReg = async (req, res) => {
 const getCoursesAndDegrees = (data, master = false) => {
     try {
         const $ = cheerio.load(data);
-        const ul = $('ul.treelist').eq( (master) ? 2 : 1 );
+        const ul = $('ul.treelist').eq((master) ? 2 : 1);
         const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
         const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
 
