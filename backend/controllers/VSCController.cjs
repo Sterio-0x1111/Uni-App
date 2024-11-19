@@ -251,18 +251,21 @@ const getExamResults = async (req, res) => {
 
 const getRegisteredExams = async (req, res) => {
     if (req.session.vscCookies) {
+        const degree = req.params.degree;
+        const course = req.params.course;
+
         const client = createAxiosClient(req.session.vscCookies);
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
         try {
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
-            let selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            let selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, degree);
             let registeredExamsPage = await client.get(selectedDegreePageResponse.filteredURL, { withCredentials: true });
             // TODO: Filterstring ersetzen durch dynamischen Parameter für Abschluss (BA/MA -> Auswahl im Frontend)
 
-            if (!registeredExamsPage.data.includes('Informatik')) {
-                selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor');
+            if (!registeredExamsPage.data.includes('Diesen Zweig zuklappen')) {
+                selectedDegreePageResponse = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, degree);
                 registeredExamsPage = await client.get(selectedDegreePageResponse.filteredURL, { withCredentials: true });
             }
 
@@ -270,14 +273,15 @@ const getRegisteredExams = async (req, res) => {
 
             const ul = $('ul.treelist').eq(1);
             const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
-            const course = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+            const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+            
 
-            const response = await client.get(links[0], { withCredentials: true });
+            const response = await client.get(links[courses.indexOf(course)], { withCredentials: true });
             const html = response.data;
 
             $ = cheerio.load(html);
-
-            const table = $('table').eq(1);
+            console.log(degree.includes('Bachelor'));
+            const table = $('table').eq((degree.includes('Master') ? 2 : 1));
             const rows = $(table).find('tr');
             const headers = $(table).find('th');
 

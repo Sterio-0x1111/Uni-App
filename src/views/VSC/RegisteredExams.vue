@@ -1,13 +1,22 @@
 <template>
     <ion-page>
         <ion-header>
-            <ion-toolbar>
-                <ion-title>Angemeldete Prüfungen</ion-title>
-            </ion-toolbar>
+            <toolbar-menu :menuTitle="toolbarTitle" />
         </ion-header>
 
         <ion-content>
-            <course-selection />
+            <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
+                <ion-select-option v-for="degree in degrees" :key="degree">
+                    {{ degree }}
+                </ion-select-option>
+            </ion-select>
+
+            <ion-select v-if="currentCourses" v-model="selectedCourse" :disabled="currentCourses.length <= 1">
+                <ion-select-option v-for="course in courses" :key="course">
+                    {{ course }}
+                </ion-select-option>
+            </ion-select>
+            <!-- <course-selection /> -->
             <ion-grid v-if="found">
                 <ion-row> <!-- table headers, aktuell noch hardkodiert, später parsen und mitschicken -->
                     <ion-col v-for="header in limitedHeaders" :key="header.id">
@@ -29,11 +38,14 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol } from '@ionic/vue';
-import { ref, onMounted } from 'vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption } from '@ionic/vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
-import CourseSelection from './CourseSelection.vue';
+import ToolbarMenu from '../ToolbarMenu.vue';
+//import CourseSelection from './CourseSelection.vue';
+
+const toolbarTitle = 'Angemeldete Prüfungen'
 
 const headers = [
     { id: 0, text: 'Prüfungsnr.' },
@@ -49,7 +61,6 @@ const headers = [
 
 const limitedHeaders = [headers[1], headers[2], headers[5]];
 
-const url = 'http://localhost:3000/api/vsc/exams/registered';
 const exams = ref(null);
 const found = ref(false);
 
@@ -57,16 +68,34 @@ const degrees = ref([]);
 const courses = ref([]);
 const masterCourses = ref([]);
 const selectedDegree = ref(null);
-const seelctedCourse = ref(null);
+const selectedCourse = ref(null);
 
+const currentCourses = computed(() => {
+    switch(selectedDegree.value){
+        case 'Abschluss BA Bachelor':
+            return courses;
+        case 'Abschluss MA Master':
+            return masterCourses;
+        default:
+            return null;
+    }
+})
 
+console.log(currentCourses);
 onMounted(async () => {
     try {
         const courseStore = useCourseStore();
         await courseStore.fetchCourses();
-        console.log('Abschluss: ' , courseStore.bachelorCourses);
+
+        degrees.value = courseStore.degrees;
+        selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
+
+        courses.value = courseStore.bachelorCourses;
+        selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
         
+        const url = `http://localhost:3000/api/vsc/exams/registered/${selectedDegree.value}/${selectedCourse.value}`;
         const response = await axios.get(url, { withCredentials: true });
+        //const response = await axios.post(url, { degree: selectedDegree, course: selectedCourse }, { withCredentials: true });
         
         if(response.status !== 200){
             throw new Error(`${response.status}`);
@@ -74,7 +103,6 @@ onMounted(async () => {
 
         exams.value = response.data;
         found.value = exams.value.found;
-        console.log(exams.value);
 
     } catch(error){
         console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
