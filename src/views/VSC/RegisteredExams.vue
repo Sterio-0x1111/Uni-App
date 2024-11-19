@@ -11,7 +11,7 @@
                 </ion-select-option>
             </ion-select>
 
-            <ion-select v-if="currentCourses" v-model="selectedCourse" :disabled="currentCourses.length <= 1">
+            <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
                 <ion-select-option v-for="course in courses" :key="course">
                     {{ course }}
                 </ion-select-option>
@@ -93,10 +93,18 @@ onMounted(async () => {
         courses.value = courseStore.bachelorCourses;
         selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
         
+        await loadData();
+
+    } catch(error){
+        console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
+    }
+})
+
+const loadData = async () => {
+    try {
         const url = `http://localhost:3000/api/vsc/exams/registered/${selectedDegree.value}/${selectedCourse.value}`;
         const response = await axios.get(url, { withCredentials: true });
-        //const response = await axios.post(url, { degree: selectedDegree, course: selectedCourse }, { withCredentials: true });
-        
+
         if(response.status !== 200){
             throw new Error(`${response.status}`);
         }
@@ -105,9 +113,9 @@ onMounted(async () => {
         found.value = exams.value.found;
 
     } catch(error){
-        console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
+        console.log('Fehler beim Laden der angemeldeten Prüfungen.', error);
     }
-})
+}
 
 </script>
 
