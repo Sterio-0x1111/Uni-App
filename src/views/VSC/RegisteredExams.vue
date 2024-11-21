@@ -43,7 +43,7 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
 import ToolbarMenu from '../ToolbarMenu.vue';
-//import CourseSelection from './CourseSelection.vue';
+import { checkAuthentication } from '@/helpers/authGuard';
 
 const toolbarTitle = 'Angemeldete Prüfungen'
 
@@ -83,20 +83,22 @@ const currentCourses = computed(() => {
 
 console.log(currentCourses);
 onMounted(async () => {
-    try {
-        const courseStore = useCourseStore();
-        await courseStore.fetchCourses();
-
-        degrees.value = courseStore.degrees;
-        selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
-
-        courses.value = courseStore.bachelorCourses;
-        selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
-        
-        await loadData();
-
-    } catch(error){
-        console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
+    if (checkAuthentication()) {
+        try {
+            const courseStore = useCourseStore();
+            await courseStore.fetchCourses();
+    
+            degrees.value = courseStore.degrees;
+            selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
+    
+            courses.value = courseStore.bachelorCourses;
+            selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
+            
+            await loadData();
+    
+        } catch(error){
+            console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
+        }
     }
 })
 
