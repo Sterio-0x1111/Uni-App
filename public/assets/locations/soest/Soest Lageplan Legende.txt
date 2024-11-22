@@ -1,0 +1,24 @@
+    1 FB Agrarwirtschaft (AW)
+    2 FB Maschinenbau-Automatisierungstechnik (M-A)
+    3 Verwaltungsgebäude: Studierenden-Servicebüro, International Office, Poststelle
+    4 FB Elektrische Energietechnik (EET)
+    5 Labore M-A
+    6 Labore M-A und EET
+    7 Labore M-A
+    8 Mensa
+    9 Technischer Betriebsdienst
+    10 Seminargebäude 
+
+	
+
+    11 Audimax, Seminargebäude
+    12 Bibliothek
+    13 Labore EET
+    14 Labore AW
+    15 Gewächshaus
+    16 Lager
+    17 Seminargebäude, Fraunhofer-Anwendungszentrum
+    18 Labore AW
+    19 Labore M-A
+    20 FB Bildungs- und Gesellschaftswissenschaften (BG)
+    21 Franz West: Kvadratur

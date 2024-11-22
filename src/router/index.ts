@@ -13,6 +13,7 @@ import VpisLogin from '../views/vpisLogin.vue';
 import VpisPlaner from '../views/Planer.vue';
 import PruefungsForm from '../views/PruefungsForm.vue';
 import VpisIserlohnPruefungsEinsicht from '../views/pruefungsplaene/iserlohn/vpisIserlohnPruefungsEinsicht.vue';
+import LocationPlans from '../views/LocationPlans.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -84,6 +85,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "VpisIserlohnPruefungsEinsicht",
     component: VpisIserlohnPruefungsEinsicht,
   },
+  {
+    path: "/locations",
+    name: "Locations",
+    component: LocationPlans
+  }
 ];
 
 const router = createRouter({
