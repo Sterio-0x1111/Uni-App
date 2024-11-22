@@ -72,7 +72,3 @@ export const useCourseStore = defineStore('courseStore', {
         storage: sessionStorage,
     }
 });
-
-/*function fetchCourses() {
-    throw new Error('Function not implemented.');
-}*/

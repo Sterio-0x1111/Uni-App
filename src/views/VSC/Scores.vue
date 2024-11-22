@@ -1,47 +1,65 @@
 <template>
-    <ion-page>
-        <ion-header>
-            <toolbar-menu :menuTitle="toolbarTitle" />
-        </ion-header>
+  <ion-page>
+    <ion-header>
+      <toolbar-menu :menuTitle="toolbarTitle" />
+    </ion-header>
 
-        <ion-content>
-            <h2>Notenspiegel</h2>
-            <h3>Studiengang Informatik</h3>
+    <ion-content>
+      <h2>Notenspiegel</h2>
+      <h3>Studiengang Informatik</h3>
 
-            <ion-select v-model="selectedOption">
-                <ion-select-option v-for="option in selectOptions" :key="option.id" aria-placeholder="Filter auswählen">
-                    {{ option.text }}
-                </ion-select-option>
-            </ion-select>
+      <ion-select v-model="selectedOption">
+        <ion-select-option
+          v-for="option in selectOptions"
+          :key="option.id"
+          aria-placeholder="Filter auswählen"
+        >
+          {{ option.text }}
+        </ion-select-option>
+      </ion-select>
 
-            <ion-grid v-if="scores">
-                <ion-row> <!-- Table Headers -->
-                    <ion-col class="score-row" v-for="header in limitedHeaders" :key="header.id"><h4>{{header.text}}</h4></ion-col>
-                </ion-row>
+      <ion-grid v-if="scores">
+        <ion-row>
+          <!-- Table Headers -->
+          <ion-col
+            class="score-row"
+            v-for="header in limitedHeaders"
+            :key="header.id"
+            ><h4>{{ header.text }}</h4></ion-col
+          >
+        </ion-row>
 
-                <ion-row v-for="row in filteredScores" :key="row" @click="showModal(row)">
-                    <ion-col class="score-row">
-                        <h5>{{ row[0] }}</h5>
-                    </ion-col>
+        <ion-row
+          v-for="row in filteredScores"
+          :key="row"
+          @click="showModal(row)"
+        >
+          <ion-col class="score-row">
+            <h5>{{ row[0] }}</h5>
+          </ion-col>
 
-                    <ion-col class="score-row">
-                        <h5>{{ row[2] }}</h5>
-                    </ion-col>
+          <ion-col class="score-row">
+            <h5>{{ row[2] }}</h5>
+          </ion-col>
 
-                    <ion-col class="score-row" v-if="row[0] !== 'PK'">
-                        <h5>{{ row[4] }}</h5>
-                    </ion-col>
+          <ion-col class="score-row" v-if="row[0] !== 'PK'">
+            <h5>{{ row[4] }}</h5>
+          </ion-col>
 
-                    <ion-col class="score-row" v-else>
-                        <h5>{{ row[3] }}</h5>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
+          <ion-col class="score-row" v-else>
+            <h5>{{ row[3] }}</h5>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
 
-            <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" :backdropDismiss="backdropDismiss" @close="isModalOpen = false" />
-
-        </ion-content>
-    </ion-page>
+      <ScoreDetails
+        :isOpen="isModalOpen"
+        :data="selectedRowData"
+        :backdropDismiss="backdropDismiss"
+        @close="isModalOpen = false"
+      />
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -50,8 +68,11 @@ import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, 
 import axios from 'axios';
 import ScoreDetails from './ScoreDetails.vue';
 import ToolbarMenu from '../ToolbarMenu.vue';
+import { checkAuthentication } from '@/helpers/authGuard';
 
-const toolbarTitle = 'Notenspiegel';
+// TODO: Kurs Selektion aus RegisteredExams einbauen und Backend entsprechend anpassen
+
+const toolbarTitle = "Notenspiegel";
 const scores = ref(null);
 const mpScores = ref([]);
 const slScores = ref([]);
@@ -59,7 +80,7 @@ const pkScores = ref([]);
 const isModalOpen = ref(false);
 const selectedRowData = ref({});
 const backdropDismiss = ref(true); // Dynamisch steuern, ob das Modal durch Klicken auf den Hintergrund geschlossen werden kann
-const url = 'http://localhost:3000/api/vsc/exams/results';
+const url = "http://localhost:3000/api/vsc/exams/results";
 
 const showModal = (row) => {
   selectedRowData.value = {
@@ -73,65 +94,66 @@ const showModal = (row) => {
     ECTS: row[7],
     Freivermerk: row[8],
     Versuch: row[9],
-    Datum: row[10]
-  }
+    Datum: row[10],
+  };
 
   // Optional: Modus für das Schließen durch den Hintergrund anpassen
   backdropDismiss.value = true; // Falls du das Modal beim Klicken auf den Hintergrund schließen willst
   isModalOpen.value = true;
-}
+};
 
 onMounted(async () => {
-  try {
-    const response = await axios.get(url, { withCredentials: true });
-    if (response.status !== 200) {
-      throw new Error(`${response.status}`);
+  if (checkAuthentication()) {
+    try {
+      const response = await axios.get(url, { withCredentials: true });
+      if (response.status !== 200) {
+        throw new Error(`${response.status}`);
+      }
+
+      scores.value = response.data;
+
+      mpScores.value = scores.value.filter((target) => target[0] === "MP");
+      slScores.value = scores.value.filter((target) => target[0] === "SL");
+      pkScores.value = scores.value.filter((target) => target[0] === "PK");
+    } catch (error) {
+      console.log(error);
     }
-
-    scores.value = response.data;
-    
-    mpScores.value = scores.value.filter(target => target[0] === 'MP');
-    slScores.value = scores.value.filter(target => target[0] === 'SL');
-    pkScores.value = scores.value.filter(target => target[0] === 'PK');
-
-  } catch (error) {
-    console.log(error);
   }
-})
+});
 
 const tableHeaders = [
-  {id: 0, text: 'PrfArt'}, 
-  {id: 1, text: 'Prüfungsnr.'}, 
-  {id: 2, text: 'Prüfungstext'}, 
-  {id: 3, text: 'Semester'}, 
-  {id: 4, text: 'Note'}, 
-  {id: 5, text: 'Status'}, 
-  {id: 6, text: 'Anerkannt'}, 
-  {id: 7, text: 'ECTS'}, 
-  {id: 8, text: 'Freivermerk'}, 
-  {id: 9, text: 'Versuch'}, 
-  {id: 10, text: 'Prüfungsdatum'}
-]
+  { id: 0, text: "PrfArt" },
+  { id: 1, text: "Prüfungsnr." },
+  { id: 2, text: "Prüfungstext" },
+  { id: 3, text: "Semester" },
+  { id: 4, text: "Note" },
+  { id: 5, text: "Status" },
+  { id: 6, text: "Anerkannt" },
+  { id: 7, text: "ECTS" },
+  { id: 8, text: "Freivermerk" },
+  { id: 9, text: "Versuch" },
+  { id: 10, text: "Prüfungsdatum" },
+];
 
 const limitedHeaders = [tableHeaders[0], tableHeaders[2], tableHeaders[4]];
 
 const selectOptions = [
-  {id: 0, text: 'Alle Einträge'}, 
-  {id: 1, text: 'Modulprüfungen'}, 
-  {id: 2, text: 'Studienleistungen'},
-  {id: 3, text: 'PK'}
-]
+  { id: 0, text: "Alle Einträge" },
+  { id: 1, text: "Modulprüfungen" },
+  { id: 2, text: "Studienleistungen" },
+  { id: 3, text: "PK" },
+];
 
 const selectedOption = ref(selectOptions[1].text);
 
 // Computed Property zur Filterung der Daten basierend auf der Auswahl
 const filteredScores = computed(() => {
   switch (selectedOption.value) {
-    case 'Modulprüfungen':
+    case "Modulprüfungen":
       return mpScores.value;
-    case 'Studienleistungen':
+    case "Studienleistungen":
       return slScores.value;
-    case 'PK':
+    case "PK":
       return pkScores.value;
     default:
       return scores.value; // Alle Einträge anzeigen
@@ -143,7 +165,8 @@ const filteredScores = computed(() => {
 ion-grid {
   margin-bottom: 20px;
 }
-.score-row h4, .score-row h5 {
+.score-row h4,
+.score-row h5 {
   font-size: 15px;
   display: inline-block;
   flex: 1;
@@ -151,10 +174,9 @@ ion-grid {
   border: 1px solid yellow;
   margin: 0;
   width: 50px;
-  
+
   white-space: normal;
   word-wrap: break-word;
- 
 }
 
 .score-row {

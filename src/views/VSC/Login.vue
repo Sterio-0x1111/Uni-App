@@ -38,6 +38,7 @@ import { useRouter } from 'vue-router';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import { useAuthStore } from '@/stores/authStore';
+import { useCourseStore } from '@/stores/courseStore';
 
 const router = useRouter();
 const username = ref(null);
@@ -52,7 +53,9 @@ const handleLogin = async () => {
         
         if(vscLogin.status === 200){
             authStore.login();
+            const courseStore = useCourseStore();
             console.log('Login: ', authStore.isLoggedIn);
+            await courseStore.fetchCourses();
             router.push('/exams');
         }
 
