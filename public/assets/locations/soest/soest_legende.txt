@@ -8,9 +8,6 @@
     8 Mensa
     9 Technischer Betriebsdienst
     10 Seminargebäude 
-
-	
-
     11 Audimax, Seminargebäude
     12 Bibliothek
     13 Labore EET
