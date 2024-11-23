@@ -1,9 +1,15 @@
 <template>
   <ion-toolbar>
-    <ion-title>{{ menuTitle }}</ion-title>
+    <ion-title class="menu-title">{{ menuTitle }}</ion-title>
+    <ion-buttons slot="start">
+      <ion-button router-link="/navigation">
+        <ion-icon name="menu" aria-label="Navigation"></ion-icon> 
+      </ion-button>
+    </ion-buttons>
+
     <ion-buttons slot="end">
       <ion-button router-link="/navigation">
-        NAV<ion-icon name="home"></ion-icon>
+        <ion-icon name="login" aria-label="Login"></ion-icon> 
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -19,7 +25,28 @@ const props = defineProps({
     required: true
   }
 });
+
+import { addIcons } from 'ionicons'; 
+import { home, menu, logIn, list, person, logOut } from 'ionicons/icons'; 
+addIcons({ 
+  'home': home,
+  'menu': menu,
+  'login': logIn,
+  'logout': logOut,
+  'list': list,
+  'person': person
+});
 </script>
 
 <style scoped>
+ion-toolbar {
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+}
+
+.menu-title {
+  text-align: center; 
+  flex-grow: 1;
+}
 </style>
