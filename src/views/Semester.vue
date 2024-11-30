@@ -1,9 +1,12 @@
 <template>
     <ion-page>
         <ion-header>
+            <!--
             <ion-toolbar>
                 <ion-title>Semesterzeiten</ion-title>
             </ion-toolbar>
+            -->
+            <ToolbarMenu />
         </ion-header>
 
         <ion-content>
@@ -39,6 +42,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { IonPage, IonHeader, IonContent, IonToolbar, IonTitle, IonGrid, IonRow, IonCol, IonText } from '@ionic/vue';
+import ToolbarMenu from './ToolbarMenu.vue';
 
 const semesterPeriods = ref(null);
 const feedbackDates = ref(null);
