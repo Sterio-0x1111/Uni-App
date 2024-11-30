@@ -28,16 +28,17 @@ const loginState = computed(() => authStore.isLoggedIn);
 const routes: Route[] = [
   { id: 0, title: "Mensaplan", path: "/meals", requiresAuth: false },
   { id: 1, title: "Semestertermine", path: "/semester", requiresAuth: false },
-  { id: 2, title: "Login", path: "/login", requiresAuth: false },
+  //{ id: 2, title: "Login", path: "/login", requiresAuth: false },
+  { id: 2, title: "Lagepläne", path: "/locations", requiresAuth: false },
   { id: 3, title: "Meine Prüfungen", path: "/exams", requiresAuth: true },
 ];
 
 const filteredRoutes = computed(() => {
   return routes.filter((route) => {
-    if (loginState.value && route.path === "/login") {
+    //if (loginState.value && route.path === "/login") {
       // Login-Route ausblenden, wenn der Benutzer eingeloggt ist
-      return false;
-    }
+      //return false;
+    //}
     if (!loginState.value && route.requiresAuth) {
       // Geschützte Routen ausblenden, wenn der Benutzer nicht eingeloggt ist
       return false;
