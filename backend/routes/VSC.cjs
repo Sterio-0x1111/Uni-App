@@ -1,11 +1,13 @@
 const express = require("express");
-const { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams, getReg } = require("../controllers/VSCController.cjs");
+const { loginToVSC, loginToVSC2, logoutFromVSC, testNav, getExamResults, getExamResults2, getRegisteredExams, getReg } = require("../controllers/VSCController.cjs");
 const router = express.Router();
 
 router.post('/login', loginToVSC);
+router.post('/login2', loginToVSC2);
 router.get('/logout', logoutFromVSC);
 router.get('/test', testNav);
 router.get('/exams/results', getExamResults);
+router.get('/exams/results2', getExamResults2);
 router.get('/exams/registered/:degree/:course', getRegisteredExams);
 router.get('/exams/reg', getReg);
 

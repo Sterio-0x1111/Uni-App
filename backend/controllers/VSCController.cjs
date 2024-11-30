@@ -23,7 +23,8 @@ const loginToVSC2 = async (req, res) => {
         const state = await vscPortal.login(loginPayload);
         console.log(state);
         if (state) {
-            req.session.vsc = vscPortal;
+            req.session.vsc = vscPortal.cookies;
+            req.session.save();
             resCode = 200;
             message = 'Erfolgreich eingeloggt.';
         }
@@ -65,13 +66,14 @@ const loginToVSC = async (req, res) => {
                 req.session.user = { username };
                 req.session.vscCookies = cookieJar;
                 req.session.save();
-                console.log('ERFOLGREICH EINGELOGGT');
+                console.log('EINGELOGGT');
 
                 res.status(200).json({
                     data,
                     message: 'VSC Login erfolgreich.'
                 });
             } else {
+                console.log('FAILURE LOGIN');
                 res.status(401).json({
                     data,
                     message: 'VSC Login fehlgeschlagen.'
@@ -138,54 +140,19 @@ const logoutFromVSC = async (req, res) => {
 
 const getExamResults2 = async (req, res) => {
     if (req.session.vsc) {
-        //const client = createAxiosClient(req.session.vscCookies);
         const vscPortal = new VSCPortal();
+        vscPortal.cookies = req.session.vsc;
+        console.log(req.session.vsc);
+        //const client = vscPortal.getClient();
 
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
-
-        try {
-            const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
-            const generalExamsPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Notenspiegel');
-            let scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
-            let scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
-
-            if (!scoreResponse.data.includes('Informatik')) {
-                scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
-                scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
-            }
-
-            const $ = cheerio.load(scoreResponse.data);
-
-            /*const link = $('a').filter(function () {
-                return $(this).attr('title') === 'Leistungen für Informatik  (PO-Version 19)  anzeigen';
-            });*/
-
-            const ul = $('ul.treelist').eq(1);
-            const links = $(ul).find('li a[href]').attr('href');//.attr('href');
-            //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
-            const response = await client.get(links, { withCredentials: true });
-            const html = response.data;
-
-            const $2 = cheerio.load(html);
-
-            const table = $2('table').eq(1);
-            const rows = $2(table).find('tr');
-
-            const tableData = [];
-            $2(rows).each((index, row) => {
-                const cells = $2(row).find('td').map((i, cell) => $2(cell).text()).get();
-                tableData.push(cells);
-            })
-
-            const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
-            console.log(clearedTable);
-            //await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
-
-            res.send(clearedTable);
-        } catch (error) {
-            res.status(500).json({ message: 'Fehler beim Laden der Prüfungsergebnisse.', error })
-            console.log('Fehler beim Laden der Prüfungsergebnisse.', error);
+        if(vscPortal instanceof VSCPortal){
+            console.log('INSTANZ');
+            const results = await vscPortal.getExamsResults();
+            console.log(results);
+        } else {
+            console.log(typeof vscPortal);
         }
+        
     } else {
         console.log('401: Nicht eingeloggt');
         console.log(deserializeCookieJar(req.session.vscCookies));
@@ -411,4 +378,4 @@ const testNav = async (req, res) => {
     }
 }
 
-module.exports = { loginToVSC, logoutFromVSC, testNav, getExamResults, getRegisteredExams, getReg };
+module.exports = { loginToVSC, logoutFromVSC, loginToVSC2, testNav, getExamResults, getExamResults2, getRegisteredExams, getReg };

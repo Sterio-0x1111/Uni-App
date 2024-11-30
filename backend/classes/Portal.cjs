@@ -18,9 +18,13 @@ class Portal {
         return this._loginState;
     }
 
-    get loginState(){
-
+    /*get cookies(){
+        return this.cookies;
     }
+
+    set cookies(cookie){
+        this.cookies = cookie;
+    }*/
 
     deserializeCookieJar = () => {
         return (typeof this.cookies === 'object' && !(this.cookies instanceof CookieJar)) ? CookieJar.deserializeSync(this.cookies) : this.cookies;
