@@ -163,6 +163,8 @@ const getExamResults2 = async (req, res) => {
 const getExamResults = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
+        //const course = req.params.course;
+        const course = 'Informatik  (PO-Version 19)';
 
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
@@ -172,22 +174,19 @@ const getExamResults = async (req, res) => {
             let scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
             let scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
 
-            if (!scoreResponse.data.includes('Informatik')) {
+            if (!scoreResponse.data.includes(course)) {
                 scoreOptionsPageResponse = await getAndParseHTML(client, generalExamsPageResponse.filteredURL, 'Abschluss BA Bachelor');
                 scoreResponse = await client.get(scoreOptionsPageResponse.filteredURL, { withCredentials: true });
             }
 
             const $ = cheerio.load(scoreResponse.data);
 
-            /*const link = $('a').filter(function () {
-                return $(this).attr('title') === 'Leistungen für Informatik  (PO-Version 19)  anzeigen';
-            });*/
-
             const ul = $('ul.treelist').eq(1);
-            const links = $(ul).find('li a[href]').attr('href');//.attr('href');
-            //const course = $(ul).find('li span').html().replace(/[\n\t]/g, '').trim();
-            const response = await client.get(links, { withCredentials: true });
+            const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+            const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+            const response = await client.get(links[courses.indexOf(course)], { withCredentials: true });
             const html = response.data;
+            
 
             const $2 = cheerio.load(html);
 
@@ -216,6 +215,81 @@ const getExamResults = async (req, res) => {
     }
 }
 
+// zentrale Logik zum Parsen von Abschluss / Studiengang Links und Tabellen
+const getExamsData = async (req, res) => {
+    if(req.session.vscCookies){
+
+        const client = createAxiosClient(req.session.vscCookies);
+        const homepageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+
+        const degree = req.params.degree;
+        const course = req.params.course;
+        const category = req.params.category; // Notenspiegel, Infos über angemeldete / abgemeldete Prüfungen
+
+        try {
+            // navigiere zur richtigen Seite
+            const homepageResponse = await getAndParseHTML(client, homepageURL, 'Meine Prüfungen');
+            const categoryResponse = await getAndParseHTML(client, homepageResponse.filteredURL, category);
+            let degreeResponse = await getAndParseHTML(client, categoryResponse.filteredURL, degree);
+            let courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
+
+            // falls Liste mit Studiengängen zugeklappt ist
+            if(!courseResponse.data.includes(course)){
+                degreeResponse = await getAndParseHTML(client, categoryResponse.filteredURL, degree);
+                courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
+            }
+
+            // Parsen der Zielseite nach Ergebnistabelle
+            let $ = cheerio.load(courseResponse.data);
+
+            const ul = $('ul.treelist').eq( (degree.includes('Master')) ? 2 : 1 );
+            const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+            const courseNames = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+
+            const response = await client.get(links[courseNames.indexOf(course)], { withCredentials: true });
+            const html = response.data;
+
+            // Parsen der Ergebnistabelle
+            $ = cheerio.load(html);
+            const table = $('table').eq((degree.includes('Master') ? 2 : 1));
+            const rows = $(table).find('tr');
+            const headers = $(table).find('th');
+
+            const tableHeaders = $(headers).map((index, header) => $(header).text().trim()).get();
+            const tableData = [];
+
+            $(rows.slice(1)).each((index, row) => {
+                const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
+                tableData.push(cells);
+            })
+
+            const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
+
+            let responseCode = 200;
+            let data = clearedTable;
+            let found = true;
+
+            if (clearedTable.length === 0) {
+                responseCode = 200;
+                data = 'Keine Daten gefunden.';
+                found = false;
+            }
+
+            //console.log(responseData);
+
+            res.status(responseCode).json({ data, found: found });
+
+        } catch(error){
+            console.log('Fehler beim Parsen der Abschluss- und Studiengangsdaten');
+            res.status(500).send('Fehler beim Laden der Studiengangsinformationen.');
+        }
+
+    } else {
+        console.log('Nicht eingeloggt im VSC.');
+        res.status(401).send('Sie sind nicht im VSC eingeloggt.');
+    }
+}
+
 const getRegisteredExams = async (req, res) => {
     if (req.session.vscCookies) {
         const degree = req.params.degree;
@@ -241,13 +315,10 @@ const getRegisteredExams = async (req, res) => {
             const ul = $('ul.treelist').eq(1);
             const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
             const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
-            
-
             const response = await client.get(links[courses.indexOf(course)], { withCredentials: true });
             const html = response.data;
 
             $ = cheerio.load(html);
-            console.log(degree.includes('Bachelor'));
             const table = $('table').eq((degree.includes('Master') ? 2 : 1));
             const rows = $(table).find('tr');
             const headers = $(table).find('th');
@@ -378,4 +449,4 @@ const testNav = async (req, res) => {
     }
 }
 
-module.exports = { loginToVSC, logoutFromVSC, loginToVSC2, testNav, getExamResults, getExamResults2, getRegisteredExams, getReg };
+module.exports = { loginToVSC, logoutFromVSC, loginToVSC2, testNav, getExamResults, getExamResults2, getRegisteredExams, getReg, getExamsData };

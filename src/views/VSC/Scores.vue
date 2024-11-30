@@ -73,14 +73,18 @@ import { checkAuthentication } from '@/helpers/authGuard';
 // TODO: Kurs Selektion aus RegisteredExams einbauen und Backend entsprechend anpassen
 
 const toolbarTitle = "Notenspiegel";
-const scores = ref(null);
+const scores = ref([]);
 const mpScores = ref([]);
 const slScores = ref([]);
 const pkScores = ref([]);
 const isModalOpen = ref(false);
 const selectedRowData = ref({});
 const backdropDismiss = ref(true); // Dynamisch steuern, ob das Modal durch Klicken auf den Hintergrund geschlossen werden kann
-const url = "http://localhost:3000/api/vsc/exams/results";
+
+const category = 'Notenspiegel';
+const degree = 'Abschluss BA Bachelor';
+const course = 'Informatik  (PO-Version 19)';
+const url = `http://localhost:3000/api/vsc/exams/${category}/${degree}/${course}`;
 
 const showModal = (row) => {
   selectedRowData.value = {
@@ -109,8 +113,8 @@ onMounted(async () => {
       if (response.status !== 200) {
         throw new Error(`${response.status}`);
       }
-
-      scores.value = response.data;
+      
+      scores.value = response.data.data;
 
       mpScores.value = scores.value.filter((target) => target[0] === "MP");
       slScores.value = scores.value.filter((target) => target[0] === "SL");
