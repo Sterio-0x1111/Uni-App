@@ -9,7 +9,7 @@
         <ion-content>
             <ion-card>
                 <ion-card-header>
-                    <ion-card-title>Navigation</ion-card-title>
+                    <ion-card-title>Anmeldung</ion-card-title>
                 </ion-card-header>
 
                 <ion-card-content>
@@ -32,31 +32,45 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import { useAuthStore } from '@/stores/authStore';
+import { checkAuthentication } from '@/helpers/authGuard';
 import { useCourseStore } from '@/stores/courseStore';
+
+const authStore = useAuthStore();
+
+onMounted(() => {
+    
+});
 
 const router = useRouter();
 const username = ref(null);
 const password = ref(null);
 const url = 'http://localhost:3000/api/vsc/login';
-const authStore = useAuthStore();
 
 const handleLogin = async () => {
     try {
 
-        const vscLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
+        const centralLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
+        console.log(centralLogin.headers['set-cookie']);
         
-        if(vscLogin.status === 200){
+        if(centralLogin.status === 200){
+            // TODO: ggf. login States für jede Plattform (vsc, vpis, hsp)
             authStore.login();
+
+            //const cookies = centralLogin.headers['set-cookie'];
+            /*cookies.forEach(cookie => {
+                document.cookie = cookie;
+            })*/
+            
             const courseStore = useCourseStore();
             console.log('Login: ', authStore.isLoggedIn);
             await courseStore.fetchCourses();
-            router.push('/exams');
+            router.push('/navigation');
         }
 
     } catch(error){
