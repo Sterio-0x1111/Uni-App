@@ -8,8 +8,12 @@
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button router-link="/navigation">
+      <ion-button v-if="!loginState" router-link="/login">
         <ion-icon name="login" aria-label="Login"></ion-icon> 
+      </ion-button>
+
+      <ion-button v-else @click="logout"> <!-- Logout Routine implementieren -->
+        <ion-icon name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -17,7 +21,14 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
-import { defineProps, onMounted } from 'vue';
+import { ref, defineProps, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+
+const authStore = useAuthStore();
+const loginState = ref(authStore.isLoggedIn);
+const router = useRouter();
 
 const props = defineProps({
   menuTitle: {
@@ -36,6 +47,23 @@ addIcons({
   'list': list,
   'person': person
 });
+
+const logout = async () => {
+  try {
+    const url = 'http://localhost:3000/api/vsc/logout';
+    const response = await axios.get(url, { withCredentials: true });
+
+    if(response.status === 200){
+      authStore.logout();
+      loginState.value = authStore.isLoggedIn;
+      router.push('/navigation');
+    }
+
+  } catch(error){
+    console.log('Fehler beim Abmelden.', error);
+  }
+  // echten auch serverseitig durchführen
+}
 </script>
 
 <style scoped>
