@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { IonHeader, IonToolbar, IonTitle, IonModal, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
 
 const props = defineProps({
@@ -36,6 +36,22 @@ const emit = defineEmits(['close']);
 const closeModal = () => {
     emit('close');
 }
+
+const handleKeyDown = (event) => {
+    if (event.key === 'Escape' || event.key === 'Backspace') {
+        closeModal(); // Schließt das Modal
+    }
+};
+
+// Globale Event-Listener hinzufügen, wenn das Modal geöffnet wird
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown);
+});
+
+// Event-Listener entfernen, wenn das Modal geschlossen wird
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+});
 </script>
 
 <style scoped>
