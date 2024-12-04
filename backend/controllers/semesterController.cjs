@@ -65,4 +65,41 @@ const getFeedbackDates = async (req, res) => {
     }
 }
 
-module.exports = { getSemesterDates, getFeedbackDates }
+/**
+ * Funktion zum Laden von auswählbaren Fachbereichen.
+ */
+const getDepartments = async (req, res) => {
+    try {
+        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
+        const response = await axios.get(url);
+        const departments = [];
+        
+        const $ = cheerio.load(response.data);
+        $('select option').each((index, department) => {
+            departments.push($(department).val());
+        });
+        departments.shift(); // erstes Element ist 'Fachbereich auswählen!', wird nicht benötigt
+
+        res.status(200).json({ departments });
+    } catch(error){
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
+/**
+ * Funktion zum Laden von fachbereichsspezifischen Terminen.
+ */
+const getSpecificDates = async (req, res) => {
+    try {
+
+        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
+
+
+    } catch(error){
+        console.log(error);
+        res.status(500).send(error);
+    }
+}
+
+module.exports = { getSemesterDates, getFeedbackDates, getSemesterDates, getDepartments }
