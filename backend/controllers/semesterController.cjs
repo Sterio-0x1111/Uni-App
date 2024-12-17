@@ -73,10 +73,22 @@ const getDepartments = async (req, res) => {
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const response = await axios.get(url);
         const departments = [];
+        const linkCases = ['FB Informatik und Naturwissenschaften', 'FB Maschinenbau: Präsenzstudium'];
+        const textCases = ['FB Agrarwirtschaft', 'FB Bildungs- und Gesellschaftswissenschaften', 'FB Elektrische Energietechnik'];
         
         const $ = cheerio.load(response.data);
         $('select option').each((index, department) => {
-            departments.push($(department).val());
+            const departmentValue = $(department).val();
+            console.log(departmentValue);
+            let type = 'simple'; // regulärer Fall, einfache Tabelle
+            if(linkCases.includes(departmentValue)){
+                type = 'link'; // Sonderfall 1: für Tabellen, die auf andere Tabellen verlinken
+            }
+
+            if(textCases.includes(departmentValue)){
+                type = 'text';
+            }
+            departments.push({ department: departmentValue, type });
         });
         departments.shift(); // erstes Element ist 'Fachbereich auswählen!', wird nicht benötigt
 
@@ -106,9 +118,9 @@ const getDepartmentDates = async (req, res) => {
  * Diese Funktion lädt die als Tabelle bereitgestellten fachbereichspezifischen Semestertermine.
  */
 const getDepartmentDatesAsTable = async (req, res) => {
-    const department = 'FB Informatik und Naturwissenschaften';
+    const { department } = req.body;
+    console.log('POST: ', department + 'X');
     try {
-        // department soll später als dynamischer parameter übergeben werden (aus frontend)
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const response = await axios.get(url);
         const $ = cheerio.load(response.data);
@@ -134,6 +146,82 @@ const getDepartmentDatesAsTable = async (req, res) => {
     }
 }
 
+const getDepartmentDatesAsText = async (req, res) => {
+    const department = 'FB Bildungs- und Gesellschaftswissenschaften';
+    try {
+        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
+        const response = await axios.get(url);
+        let $ = cheerio.load(response.data);
+
+        /*const departments = {
+            'FB Agrarwirtschaft': 
+        }*/
+
+        //------------
+
+        // Filtern der Überschriften (Semester)
+        const headings = []
+        const section = $(`section[data-filter="${department}"]`).html();
+        $(`section[data-filter="${department}"]`).find('h4 strong').each((index, heading) => {
+            headings.push($(heading).html());
+        });
+
+        /*const content = [];
+        let capture = false;
+        $(`section[data-filter="${department}"] article[class="wysiwyg"]`).children().each((index, element) => {
+            const tagName = $(element).prop('tagName');
+            
+            if(tagName === 'H4' && $(element).text().trim() === headings[0]){
+                console.log('Start');
+                capture = true;
+                return;
+            }
+
+            if(capture && tagName === 'H4' && $(element).text().trim() === headings[headings.length-1]){
+                console.log('End');
+                capture = false;
+                return;
+            }
+
+            if(capture){
+                content.push($.html(element));
+            }
+        });*/
+
+        //-----------
+
+       
+
+        const titles = [];
+        $(`section[data-filter="${department}"]`).find('strong').each((index, title) => {
+            titles.push($(title).html());
+        });
+
+        const lists = [];
+        $(`section[data-filter="${department}"]`).find('ul[class="list-wrapper list-wrapper--section-nav mb--24 "]').each((index, list) => {
+            const items = [];
+            const subitems = [];
+            $(list).find('> li').each((index, item) => {
+                $(item).find('li').each((index, subitem) => {
+                    subitems.push($(subitem).html());
+                });
+                $(item).find('ul').remove();
+                items.push($(item).html());
+            });
+            lists.push({
+                items,
+                subitems
+            });
+        });
+        
+        res.status(200).json({ headings, titles, lists, section });
+
+    } catch(error){
+        console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
+        res.status(500).json({ error: error });
+    }
+}
+
 /**
  * Funktion zum Filtern der fachbereichsspezifischen Tabellen.
  */
@@ -142,7 +230,11 @@ const filterDepartmentTables = ($, dates) => {
         const tableData = [];
         $(dates).find('tbody tr').each((index, row) => {
             const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
-            tableData.push(cells);
+            console.log(cells);
+            tableData.push({
+                event: cells[1],
+                date: cells[0]
+            });
         })
         return tableData;
 
@@ -161,15 +253,22 @@ const filterDepartmentTablesWithLinks = ($, dates) => {
         const tableData = [];
 
         $(dates).find('tr').each((index, row) => {
-            const name = $(row).text().trim();
+            let name = $(row).text().trim();
+            const sliceIndex = name.indexOf('\n'); // entferne den Standard "Terminplan finden sie hier"
+            
+            if(sliceIndex !== -1){
+                name = name.slice(0, sliceIndex);
+            }
+
             const link = $(row).find('a').map((index, a) => {
                 return {
-                    name: $(row).text().trim(),
+                    name,
                     url: baseURL + $(a).attr('href')
                 }
             }).get(0);
             tableData.push(link);
         })
+        console.log(tableData);
         return tableData;
 
     } catch(error){
@@ -177,10 +276,60 @@ const filterDepartmentTablesWithLinks = ($, dates) => {
     }
 }
 
+const filterDepartmentTablesByLink = async (req, res) => {
+    try {
+        const { url } = req.body;
+        const response = await axios.get(url);
+        const $ = cheerio.load(response.data);
+
+        const tables = [];
+        const dates = [];
+
+        const parseTableData = (table = 'table') => {
+            const cols1 = [];
+            const cols2 = [];
+
+            $(table).find('td').each((index, element) => {
+                if(index % 2 === 0){
+                    cols1.push($(element).text().trim());
+                } else {
+                    cols2.push($(element).text().trim());
+                }
+            });
+
+            const rows = cols1.map((col1, index) => {
+                return {
+                    date: col1,
+                    event: cols2[index]
+                }
+            });
+            return rows;
+        }
+
+        if($('article').html()){
+            $('article').each((index, article) => {
+                const heading = $(article).text().trim();
+                const table = $(article).nextAll('.mb--64').find('table.table').first();
+
+                tables.push({
+                    heading, 
+                    table: parseTableData(table)
+                });
+            });
+        } else {
+            dates.value = parseTableData();
+        }
+        res.status(200).json({ tables, dates: dates.value });
+        
+    } catch(error){
+        console.log(error);
+    }
+}
+
 /**
  * Funktion zum Filtern von Verweistabellen.
  * 
- * Die Funktion parst parst Tabellen,
+ * Die Funktion parst Tabellen,
  * die selbst keine Auskunft über Termine geben,
  * sondern mit Links auf Moodle verweisen (FB 6).
  * 
@@ -215,4 +364,4 @@ const filterExternalDepartmentTables = ($, dates) => {
     }
 }
 
-module.exports = { getSemesterDates, getFeedbackDates, getSemesterDates, getDepartments, getDepartmentDatesAsTable }
+module.exports = { getSemesterDates, getFeedbackDates, getSemesterDates, getDepartments, getDepartmentDatesAsTable, getDepartmentDatesAsText, filterDepartmentTablesByLink }
