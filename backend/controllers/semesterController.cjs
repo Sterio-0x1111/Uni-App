@@ -79,7 +79,6 @@ const getDepartments = async (req, res) => {
         const $ = cheerio.load(response.data);
         $('select option').each((index, department) => {
             const departmentValue = $(department).val();
-            console.log(departmentValue);
             let type = 'simple'; // regulärer Fall, einfache Tabelle
             if(linkCases.includes(departmentValue)){
                 type = 'link'; // Sonderfall 1: für Tabellen, die auf andere Tabellen verlinken
@@ -119,27 +118,44 @@ const getDepartmentDates = async (req, res) => {
  */
 const getDepartmentDatesAsTable = async (req, res) => {
     const { department } = req.body;
-    console.log('POST: ', department + 'X');
     try {
+        const courseURL = 'http://localhost:3000/api/semester/departments';
+        const courseResponse = await axios.get(courseURL);
+        const courses = courseResponse.data;
+
+        // für dynamische Bestimmung der Filterfunktion
+        const methodByType = {
+            simple:     filterDepartmentTables,
+            link:       filterDepartmentTablesWithLinks,
+            text:       filterDepartmentDatesAsText
+        }
+
+        const departments = {};
+        courses.departments.forEach(dep => {
+            departments[dep.department] = {
+                type: dep.type,
+                method: methodByType[dep.type]
+            }
+        });
+
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const response = await axios.get(url);
         const $ = cheerio.load(response.data);
 
         // JSON für dynamische Bestimmung der Filter Methode
-        const departments = {
+        /*const departments = {
             'FB Elektrotechnik und Informationstechnik':    filterDepartmentTables,
             'FB Technische Betriebswirtschaft':             filterDepartmentTables,
             'FB Informatik und Naturwissenschaften':        filterDepartmentTablesWithLinks,
             'FB Maschinenbau: Präsenzstudium':              filterDepartmentTablesWithLinks,
             'FB Maschinenbau: Verbundstudium ':             filterExternalDepartmentTables,
             'FB Ingenieur- und Wirtschaftswissenschaften':  filterDepartmentTables
-        }
+        }*/
 
-        const filterMethod = departments[department];
-        const dates = $('table').has(`tr[data-filter="${department}"]`).html();
-        const tableData = filterMethod($, dates);
+        const filterMethod = departments[department].method;
+        const tableData = await filterMethod($, department);
         
-        res.status(200).json({ tableData });
+        res.status(200).json( { tableData } );
 
     } catch(error){
         console.log(`Fehler beim Laden der Termine für den Fachbereich ${department}.`, error);
@@ -153,6 +169,50 @@ const getDepartmentDatesAsText = async (req, res) => {
         const response = await axios.get(url);
         let $ = cheerio.load(response.data);
 
+        const content = {};
+        const section = $(`section[data-filter="${department}"]`).html();
+        $(section).find('h4').each((index, heading) => {
+            const headingText = $(heading).text().trim();
+            const part = $(heading).nextUntil('h4').toArray().map(el => $.html(el)).join('');
+            const $2 = cheerio.load(part);
+            
+            const strongs = [];
+
+            $2('strong').each((index, strong) => {
+                const subpart = $2(strong).nextUntil('strong').toArray().map(el => $.html(el)).join('');
+                const $3 = cheerio.load(subpart);
+
+                const list = new Set(); // Use Set to avoid duplicates
+
+                // Find top-level list items
+                $3('li.list-wrapper__item').each((_, element) => {
+                    const course = $3(element).clone().children('ul').remove().end().text().trim(); // Extract program name
+                    const date = $3(element).find('ul.list-wrapper--dots > li.list-wrapper__item').text().trim(); // Extract date
+
+                    if (course && date) {
+                        list.add(JSON.stringify({ program: course, date })); // Store as stringified JSON to prevent object duplicates
+                    }
+                });
+
+                strongs.push({
+                    title: $2(strong).text().trim(),
+                    list: Array.from(list).map(item => JSON.parse(item)) //$3('ul').html()
+                });
+            });
+
+            content[headingText] = strongs;
+        });
+        res.status(200).json({ content });
+
+        /*const content = $(section).find('h4').eq(0).nextUntil('h4').toArray()
+            .map(el => $.html(el))
+            .join('');*/
+        //const prev = $(section).find('h4').eq(1);
+        //const content = $(prev).prevAll().toArray().map(el => $.html(el)).join('');
+        /*$(`section[data-filter="${department}"]`).find('h4 strong').each((index, heading) => {
+            
+        });*/
+
         /*const departments = {
             'FB Agrarwirtschaft': 
         }*/
@@ -160,11 +220,11 @@ const getDepartmentDatesAsText = async (req, res) => {
         //------------
 
         // Filtern der Überschriften (Semester)
-        const headings = []
+        /*const headings = []
         const section = $(`section[data-filter="${department}"]`).html();
         $(`section[data-filter="${department}"]`).find('h4 strong').each((index, heading) => {
             headings.push($(heading).html());
-        });
+        });*/
 
         /*const content = [];
         let capture = false;
@@ -192,12 +252,12 @@ const getDepartmentDatesAsText = async (req, res) => {
 
        
 
-        const titles = [];
+        /*const titles = [];
         $(`section[data-filter="${department}"]`).find('strong').each((index, title) => {
             titles.push($(title).html());
-        });
+        });*/
 
-        const lists = [];
+        /*const lists = [];
         $(`section[data-filter="${department}"]`).find('ul[class="list-wrapper list-wrapper--section-nav mb--24 "]').each((index, list) => {
             const items = [];
             const subitems = [];
@@ -212,9 +272,9 @@ const getDepartmentDatesAsText = async (req, res) => {
                 items,
                 subitems
             });
-        });
+        });*/
         
-        res.status(200).json({ headings, titles, lists, section });
+        //res.status(200).json({ headings, titles, lists, section });
 
     } catch(error){
         console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
@@ -225,9 +285,10 @@ const getDepartmentDatesAsText = async (req, res) => {
 /**
  * Funktion zum Filtern der fachbereichsspezifischen Tabellen.
  */
-const filterDepartmentTables = ($, dates) => {
+const filterDepartmentTables = ($, department) => {
     try {
         const tableData = [];
+        const dates = $('table').has(`tr[data-filter="${department}"]`).html();
         $(dates).find('tbody tr').each((index, row) => {
             const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
             console.log(cells);
@@ -247,8 +308,9 @@ const filterDepartmentTables = ($, dates) => {
 /**
  * Funktion zum Filtern von fachbereichsspezifischen Tabellen mit Links auf weitere Seiten.
  */
-const filterDepartmentTablesWithLinks = ($, dates) => {
+const filterDepartmentTablesWithLinks = ($, department) => {
     try {
+        const dates = $('table').has(`tr[data-filter="${department}"]`).html();
         const baseURL = 'https://www.fh-swf.de';
         const tableData = [];
 
@@ -361,6 +423,53 @@ const filterExternalDepartmentTables = ($, dates) => {
 
     } catch(error){
         console.log('Fehler beim Laden der externen Tabellen.', error);
+    }
+}
+
+const filterDepartmentDatesAsText = async ($, department) => {
+    try {
+        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
+        const response = await axios.get(url);
+        let $ = cheerio.load(response.data);
+
+        const content = {};
+        const section = $(`section[data-filter="${department}"]`).html();
+        $(section).find('h4').each((index, heading) => {
+            const headingText = $(heading).text().trim();
+            const part = $(heading).nextUntil('h4').toArray().map(el => $.html(el)).join('');
+            const $2 = cheerio.load(part);
+            
+            const strongs = [];
+
+            $2('strong').each((index, strong) => {
+                const subpart = $2(strong).nextUntil('strong').toArray().map(el => $.html(el)).join('');
+                const $3 = cheerio.load(subpart);
+
+                const list = new Set(); // Use Set to avoid duplicates
+
+                // Find top-level list items
+                $3('li.list-wrapper__item').each((_, element) => {
+                    const course = $3(element).clone().children('ul').remove().end().text().trim(); // Extract program name
+                    const date = $3(element).find('ul.list-wrapper--dots > li.list-wrapper__item').text().trim(); // Extract date
+
+                    if (course && date) {
+                        list.add(JSON.stringify({ program: course, date })); // Store as stringified JSON to prevent object duplicates
+                    }
+                });
+
+                strongs.push({
+                    title: $2(strong).text().trim(),
+                    list: Array.from(list).map(item => JSON.parse(item)) //$3('ul').html()
+                });
+            });
+
+            content[headingText] = strongs;
+        });
+        return content;
+
+    } catch(error){
+        console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
+        res.status(500).json({ error: error });
     }
 }
 
