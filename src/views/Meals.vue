@@ -1,9 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <ion-toolbar>
-                <ion-title>Mensaplan</ion-title>
-            </ion-toolbar>
+            <toolbar-menu :menuTitle="menuTitle" />
         </ion-header>
 
         <ion-content>
@@ -43,6 +41,9 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption } from '@ionic/vue';
+import ToolbarMenu from "./ToolbarMenu.vue";
+
+const menuTitle = ref('Mensaplan');
 
 // Liste der Mensas mit ihren jeweiligen URLs
 const mensas = [
