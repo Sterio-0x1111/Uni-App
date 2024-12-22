@@ -1,6 +1,11 @@
 <template>
-  <ion-toolbar>
+  <ion-toolbar class="custom-toolbar">
     <ion-title class="menu-title">{{ menuTitle }}</ion-title>
+    <!--
+    <div class="logo-container">
+      <img class="logo" src="/assets/logos/logo_with_text.png" />
+    </div>
+    -->
     <ion-buttons slot="start">
       <ion-button router-link="/navigation">
         <ion-icon name="menu" aria-label="Navigation"></ion-icon> 
@@ -66,12 +71,6 @@ const logout = async () => {
 }
 </script>
 
-<script lang="ts">
-/*export default {
-  name: 'ToolbarMenu'
-}*/
-</script>
-
 <style scoped>
 ion-toolbar {
   display: flex;
@@ -82,5 +81,21 @@ ion-toolbar {
 .menu-title {
   text-align: center; 
   flex-grow: 1;
+}
+
+
+.logo-container {
+  display: flex;
+  justify-content: center; /* Zentriert das Logo horizontal */
+  align-items: center; /* Zentriert das Logo vertikal */
+  position: fixed;
+  top: 50%; /* Abstand von oben */
+  left: 50%; /* Abstand von links */
+  z-index: 1000; /* Sicherstellen, dass das Logo immer über anderem Inhalt bleibt */
+}
+
+.logo {
+  width: 100px; /* Angepasste Größe des Logos */
+  height: auto;
 }
 </style>
