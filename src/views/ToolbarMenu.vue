@@ -12,7 +12,7 @@
         <ion-icon name="login" aria-label="Login"></ion-icon> 
       </ion-button>
 
-      <ion-button v-else @click="logout"> <!-- Logout Routine implementieren -->
+      <ion-button v-if="loginState" @click="logout"> <!-- Logout Routine implementieren -->
         <ion-icon name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
@@ -21,13 +21,13 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
-import { ref, defineProps, onMounted } from 'vue';
+import { ref, computed, defineProps, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const authStore = useAuthStore();
-const loginState = ref(authStore.isLoggedIn);
+const loginState = computed(() => authStore.isLoggedIn);
 const router = useRouter();
 
 const props = defineProps({
@@ -64,6 +64,12 @@ const logout = async () => {
   }
   // echten auch serverseitig durchführen
 }
+</script>
+
+<script lang="ts">
+/*export default {
+  name: 'ToolbarMenu'
+}*/
 </script>
 
 <style scoped>
