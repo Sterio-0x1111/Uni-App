@@ -1,38 +1,50 @@
 <template>
   <ion-page>
     <ion-header :translucent="true">
-      <ion-toolbar>
-        <ion-title>Blank</ion-title>
-      </ion-toolbar>
+      <toolbar-menu :menuTitle="menuTitle" />
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Blank</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
-      <div id="container">
-        <strong>Ready to create an app?</strong>
-        <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+      
+      <div class="container">
+        <h2>Willkommen!</h2>
+        <p>Dies ist das neue Informationssystem für Studierende der FH SWF!</p>
+        <p>Hier können Sie auf verschiedene Seiten zugreifen, wie zum Beispiel Speisepläne, Prüfungsergebnisse oder Terminübersichten.</p>
+        <ion-button router-link="/navigation">
+            Zur Seitenübersicht!
+        </ion-button>
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { ref } from 'vue';
+import { IonContent, IonHeader, IonPage, IonTitle, IonButton, IonImg } from '@ionic/vue';
+import ToolbarMenu from './ToolbarMenu.vue';
+
+const menuTitle = ref('Startseite');
 </script>
 
 <style scoped>
+.container {
+  text-align: left;
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  right: 10%;
+}
+
+.container p {
+  font-size: 20px;
+}
 #container {
   text-align: center;
   
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
+  left: 10%;
+  right: 10%;
+  top: 20%;
   transform: translateY(-50%);
 }
 
@@ -42,7 +54,7 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue
 }
 
 #container p {
-  font-size: 16px;
+  font-size: 24px;
   line-height: 22px;
   
   color: #8c8c8c;
