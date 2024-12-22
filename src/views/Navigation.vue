@@ -28,9 +28,10 @@ const loginState = computed(() => authStore.isLoggedIn);
 const routes: Route[] = [
   { id: 0, title: "Mensaplan", path: "/meals", requiresAuth: false },
   { id: 1, title: "Semestertermine", path: "/semester", requiresAuth: false },
+  { id: 2, title: "Fachbereichstermine", path: "/departments", requiresAuth: false },
   //{ id: 2, title: "Login", path: "/login", requiresAuth: false },
-  { id: 2, title: "Lagepläne", path: "/locations", requiresAuth: false },
-  { id: 3, title: "Meine Prüfungen", path: "/exams", requiresAuth: true },
+  { id: 3, title: "Lagepläne", path: "/locations", requiresAuth: false },
+  { id: 4, title: "Meine Prüfungen", path: "/exams", requiresAuth: true },
 ];
 
 const filteredRoutes = computed(() => {
@@ -58,11 +59,11 @@ interface Route {
 </script>
 
 <style scoped>
-ion-button {
+ion-button{
   display: blocK;
   margin-left: 10px;
   margin-right: 10px;
   margin-top: 10px;
-  --background: #1e3a8a;
+  
 }
 </style>
