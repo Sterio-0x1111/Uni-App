@@ -6,7 +6,7 @@
 
     <ion-content>
       <ion-list>
-        <ion-button v-for="route in filteredRoutes" :key="route.id" class="routes" :router-link="route.path">
+        <ion-button class="custom-button" v-for="route in filteredRoutes" :key="route.id"  :router-link="route.path">
           {{ route.title }}
         </ion-button>
       </ion-list>
@@ -65,5 +65,33 @@ ion-button{
   margin-right: 10px;
   margin-top: 10px;
   
+}
+
+.custom-button {
+  --background: transparent;
+  --color: #ffffff;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --height: 50px;
+  --border-width: 3px;
+  --border-style: solid;
+  --border-color: blue;
+  --border-radius: 50px;
+  position: relative;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.custom-button:before {
+  content: '';
+  position: absolute;
+  inset: 0; /* Füllt den gesamten Button aus */
+  border-radius: inherit;
+  padding: 2px; /* Abstand für den Farbverlauf */
+  --background: linear-gradient(90deg, #d32f7e, #a2275e); /* Farbverlauf */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
 }
 </style>
