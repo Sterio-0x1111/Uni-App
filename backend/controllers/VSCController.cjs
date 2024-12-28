@@ -163,8 +163,9 @@ const getExamResults2 = async (req, res) => {
 const getExamResults = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
-        //const course = req.params.course;
-        const course = 'Informatik  (PO-Version 19)';
+        const course = req.params.course;
+        const degree = req.params.degree;
+        //const course = 'Informatik  (PO-Version 19)';
 
         const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
 
