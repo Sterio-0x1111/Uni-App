@@ -14,6 +14,7 @@ import VpisPlaner from '../views/Planer.vue';
 import PruefungsForm from '../views/PruefungsForm.vue';
 import VpisIserlohnPruefungsEinsicht from '../views/pruefungsplaene/iserlohn/vpisIserlohnPruefungsEinsicht.vue';
 import LocationPlans from '../views/LocationPlans.vue';
+import Departments from '../views/Departments.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -89,6 +90,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/locations",
     name: "Locations",
     component: LocationPlans
+  },
+  {
+    path: "/departments",
+    name: "Departments",
+    component: Departments
   }
 ];
 
