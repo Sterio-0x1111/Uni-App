@@ -144,7 +144,7 @@ onMounted(async () => {
 
 const loadData = async () => {
     try {
-        const url = 'http://localhost:3000/api/semester/departments/dates';
+        const url = 'http://localhost:3000/api/departments/dates';
         const response = await axios.post(url, { department: selectedDepartment.value.department });
         const data = response.data;
         const type = selectedDepartment.value.type;
