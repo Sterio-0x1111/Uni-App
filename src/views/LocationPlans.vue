@@ -10,6 +10,12 @@
                     {{ location }}
                 </ion-select-option>
             </ion-select>
+            
+        <div v-if="nextDistance">
+            <p>Nächster Studienstandort: {{ nextLocation }}</p>
+            <p>Entfernung: {{ nextDistance }} km</p>
+        </div>
+
             <div v-for="image in filteredImages" :key="image">
                 <img :src="image.path" />
             </div>
@@ -19,19 +25,34 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonContent, IonSelect, IonSelectOption } from '@ionic/vue';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onBeforeMount } from 'vue';
 import ToolbarMenu from './ToolbarMenu.vue';
+import { useLocationStore } from '@/stores/locationStore';
 
 const toolbarTitle = 'Lagepläne';
 const images = ref([]);
 const locations = [ 'Hagen', 'Iserlohn', 'Meschede', 'Soest', 'Lüdenscheid' ];
 const selectedLocation = ref(locations[0]);
+const nextLocation = ref(null);
+const locationStore = useLocationStore();
+const nextDistance = ref(null);
 
 const filteredImages = computed(() => {
     return images.value.filter((image) => image.location === selectedLocation.value);
 })
 
-onMounted(() => {
+onMounted(async () => {
+    const success = await locationStore.locateClient();
+    console.log(success);
+    //nextDistance.value = locationStore.nextLocationDistance;
+    //console.log(nextDistance.value, locationStore.nextLocationDistance);
+    if(success){
+        console.log('Entered -1', nextDistance.value);
+        selectedLocation.value = locationStore.nextLocation;
+        nextLocation.value = locationStore.nextLocation;
+        nextDistance.value = Math.round( (locationStore.nextLocationDistance / 1000) * 100 ) / 100; // Umrechnung in km
+    }
+
     images.value = [
         { location: 'Hagen',        path: '/assets/locations/hagen/hagen_1.png' },
         { location: 'Hagen',        path: '/assets/locations/hagen/hagen_2.png' },
