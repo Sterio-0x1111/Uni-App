@@ -26,7 +26,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 
@@ -38,6 +38,12 @@ const navigateTo = (page) => {
 
 
 
+</script>
+
+<script lang="ts">
+export default {
+  
+}
 </script>
 
 <style scoped>

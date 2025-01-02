@@ -24,7 +24,7 @@
                     </ion-col>
                 </ion-row>
 
-                <ion-row v-for="exam in exams.data" :key="exam">
+                <ion-row v-for="exam in exams.data" :key="exam" @click="showModal(exam)">
                     <ion-col>{{ exam[1] }}</ion-col>
                     <ion-col>{{ exam[2] }}</ion-col>
                     <ion-col>{{ exam[5] }}</ion-col>
@@ -33,6 +33,9 @@
             </ion-grid>
 
             <p v-else>Keine Daten gefunden.</p>
+
+            <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" @close="isModalOpen = false"/>
+
         </ion-content>
     </ion-page>
 </template>
@@ -44,6 +47,7 @@ import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
 import ToolbarMenu from '../ToolbarMenu.vue';
 import { checkAuthentication } from '@/helpers/authGuard';
+import ScoreDetails from "./ScoreDetails.vue";
 
 const toolbarTitle = 'Angemeldete Prüfungen'
 
@@ -116,6 +120,24 @@ const loadData = async () => {
     } catch(error){
         console.log('Fehler beim Laden der angemeldeten Prüfungen.', error);
     }
+}
+
+const isModalOpen = ref(false);
+const selectedRowData = ref(null);
+const showModal = (row : any[]) => {
+    selectedRowData.value = {
+        'Prüfungsnr.':      row[0],
+        'Prüfungstext':     row[1],
+        zugelassen:         row[2],
+        Vorbehalt:          row[3],
+        Freivermerk:        row[4],
+        Versuch:            row[5],
+        'Prüfer/in':        row[6], 
+        Semester:           row[7],
+        'Prüfungsdatum':    row[8]
+    }
+
+    isModalOpen.value = true;
 }
 
 </script>

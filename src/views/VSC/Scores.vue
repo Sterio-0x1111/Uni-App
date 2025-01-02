@@ -5,32 +5,50 @@
     </ion-header>
 
     <ion-content>
+      <!-- teste ohne überschrift, da titel in toolbar leiste steht
       <h2>Notenspiegel</h2>
+      -->
 
-      <ion-select v-model="selectedOption">
-        <ion-select-option
-          v-for="option in selectOptions"
-          :key="option.id"
-          aria-placeholder="Filter auswählen"
-        >
-          {{ option.text }}
-        </ion-select-option>
-      </ion-select>
+      <div class="select-container">
+        <h6>Abschluss</h6>
+        <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
+          <ion-select-option v-for="degree in degrees" :key="degree">
+            {{ degree }}
+          </ion-select-option>
+        </ion-select>
 
-      <ion-grid v-if="scores">
-        <ion-row>
-          <!-- Table Headers -->
-          <ion-col class="score-row" v-for="header in limitedHeaders" :key="header.id">
-            <h4>{{ header.text }}</h4>
-          </ion-col>
-        </ion-row>
+        <h6>Studiengang</h6>
+        <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
+          <ion-select-option v-for="course in courses" :key="course">
+            {{ course }}
+          </ion-select-option>
+        </ion-select>
 
-        <ion-row v-for="row in filteredScores" :key="row" @click="showModal(row)" >
-          <ion-col v-for="index in headerIndices" :key="index" class="score-row">
-            <h5>{{ row[index] }}</h5>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+        <h6>Filter</h6>
+        <ion-select v-if="scores" v-model="selectedOption">
+          <ion-select-option v-for="option in selectOptions" :key="option.id" aria-placeholder="Filter auswählen">
+            {{ option.text }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+
+      <div v-if="scores">
+        <p>Klicken Sie auf eine Prüfung, um mehr Details zu erhalten.</p>
+        <ion-grid >
+          <ion-row>
+            <!-- Table Headers -->
+            <ion-col class="score-row" v-for="header in limitedHeaders" :key="header.id" :size="4" :size-md="6" size-lg="4">
+              <h4>{{ header.text }}</h4>
+            </ion-col>
+          </ion-row>
+
+          <ion-row v-for="row in filteredScores" :key="row" @click="showModal(row)" >
+            <ion-col v-for="index in headerIndices" :key="index" class="score-row" :size="4" :size-md="6" size-lg="4">
+              <h5>{{ row[index] }}</h5>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
 
       <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" :backdropDismiss="backdropDismiss" @close="isModalOpen = false"/>
     </ion-content>
@@ -39,26 +57,29 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import {
-  IonPage,
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-  IonList,
-  IonItem,
-  IonButton,
-  IonSelect,
-  IonSelectOption,
-  IonGrid,
-  IonCol,
-  IonRow,
-} from "@ionic/vue";
+import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, } from "@ionic/vue";
 import axios from "axios";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
 import { checkAuthentication } from "@/helpers/authGuard";
+import { useCourseStore } from '@/stores/courseStore';
 
+const degrees = ref([]);
+const courses = ref([]);
+const masterCourses = ref([]);
+const selectedDegree = ref(null);
+const selectedCourse = ref(null);
+
+const currentCourses = computed(() => {
+    switch(selectedDegree.value){
+        case 'Abschluss BA Bachelor':
+            return courses;
+        case 'Abschluss MA Master':
+            return masterCourses;
+        default:
+            return null;
+    }
+})
 // TODO: Kurs Selektion aus RegisteredExams einbauen und Backend entsprechend anpassen
 
 const toolbarTitle = "Notenspiegel";
@@ -72,11 +93,10 @@ const backdropDismiss = ref(true); // Dynamisch steuern, ob das Modal durch Klic
 
 const category = "Notenspiegel";
 // TODO: Kurs Selektion
-const degree = "Abschluss BA Bachelor";
-const course = "Informatik  (PO-Version 19)";
-const url = `http://localhost:3000/api/vsc/exams/${category}/${degree}/${course}`;
+const degree = ref('Abschluss BA Bachelor');
+const course = ref('');
 
-const showModal = (row) => {
+const showModal = (row : any[]) => {
   if (row[0] === "PK" && (row[3].includes(",") || row[3] === "")) {
     selectedRowData.value = {
       Art: row[0],
@@ -110,21 +130,40 @@ const showModal = (row) => {
 onMounted(async () => {
   if (checkAuthentication()) {
     try {
-      const response = await axios.get(url, { withCredentials: true });
-      if (response.status !== 200) {
-        throw new Error(`${response.status}`);
-      }
-
-      scores.value = response.data.data;
-
-      mpScores.value = scores.value.filter((target) => target[0] === "MP");
-      slScores.value = scores.value.filter((target) => target[0] === "SL");
-      pkScores.value = scores.value.filter((target) => target[0] === "PK");
+      const courseStore = useCourseStore();
+    
+      degrees.value = courseStore.degrees;
+      selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
+    
+      courses.value = courseStore.bachelorCourses;
+      selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
+            
+      await loadData();
+      
     } catch (error) {
       console.log(error);
     }
   }
 });
+
+const loadData = async () => {
+  try {
+    const url = `http://localhost:3000/api/vsc/exams/${category}/${selectedDegree.value}/${selectedCourse.value}`;
+    const response = await axios.get(url, { withCredentials: true });
+    if (response.status !== 200) {
+      throw new Error(`${response.status}`);
+    }
+
+    scores.value = response.data.data;
+
+    mpScores.value = scores.value.filter((target : (string | number)[]) => target[0] === "MP");
+    slScores.value = scores.value.filter((target : (string | number)[]) => target[0] === "SL");
+    pkScores.value = scores.value.filter((target : (string | number)[]) => target[0] === "PK");
+
+  } catch(error){
+    console.log(error);
+  }
+}
 
 const tableHeaders = [
   { id: 0, text: "PrfArt" },
@@ -165,8 +204,8 @@ const headerIndices = computed(() => {
     headers.splice(3, 1);
   }
 
-  const indices = [];
-  limitedHeaders.value.forEach((element) => {
+  const indices : number[] = [];
+  limitedHeaders.value.forEach((element : any) => {
     indices.push(headers.indexOf(element));
   });
   return indices;
@@ -189,13 +228,10 @@ const filteredScores = computed(() => {
     case "Studienleistungen":
       return slScores.value;
     case "PK":
-      pkScores.value.forEach((element) => {
-        //element.splice(4, 1);
-        if (
-          element[0] === "PK" &&
-          (element[3].includes("S") || element[3].includes("W"))
-        ) {
-          element.splice(3, 1);
+      pkScores.value.forEach((element : (string | number)[]) => {
+        const actualElement = (Array.isArray(element) ? element : Array.from(element));
+        if (actualElement[0] === "PK" && (actualElement[3].includes("S") || actualElement[3].includes("W"))) {
+          actualElement.splice(3, 1);
         }
       });
       return pkScores.value;
@@ -205,18 +241,13 @@ const filteredScores = computed(() => {
 });
 
 const limitedScores = computed(() => {
-  if (
-    filteredScores.value[0] === "PK" &&
-    (filteredScores.value[4].includes("S") ||
-      filteredScores.value[4].includes("W"))
-  ) {
-  }
+  
   switch (selectedOption.value) {
     case selectOptions[1].text:
       return [
         filteredScores.value[2],
         filteredScores.value[4],
-        filteredScores[10],
+        filteredScores.value[10],
       ];
     default:
       return [];
@@ -225,9 +256,14 @@ const limitedScores = computed(() => {
 </script>
 
 <style scoped>
+.select-container {
+  
+}
+
 ion-grid {
   margin-bottom: 20px;
 }
+
 .score-row h4,
 .score-row h5 {
   font-size: 15px;
