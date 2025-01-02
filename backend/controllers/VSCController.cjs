@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { fetchHTML, handleError, createAxiosClient, deserializeCookieJar, getAndParseHTML } = require("../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -40,7 +41,7 @@ const loginToVSC = async (req, res) => {
     if (!req.session.vscCookies) {
         console.log('ENTERED LOGIN');
         const { username, password } = req.body;
-        const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
+        const loginPageURL = process.env.VSC_LOGIN_URL;
 
         const cookieJar = new CookieJar();
         const client = wrapper(axios.create({ jar: cookieJar, withCredentials: true }));

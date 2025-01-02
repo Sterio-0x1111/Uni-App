@@ -6,14 +6,19 @@ const { CookieJar } = require("tough-cookie");
 
 const session = require("express-session");
 
+const dotenv = require('dotenv');
+const path = require('path');
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+
 const PORT = process.env.PORT;
 const app = express();
+
 
 // Middlewars
 app.use(
   cors({
-    //origin: "http://localhost:8100", 
-    origin: "http://localhost:5173", // Frontend-URL
+    origin: "http://localhost:8100", 
+    //origin: "http://localhost:5173", // Frontend-URL
     credentials: true, // Cookies und andere Anmeldeinformationen zulassen
   })
 );
