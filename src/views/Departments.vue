@@ -175,7 +175,7 @@ const loadData = async () => {
 
 const loadCourseData = async () => {
     try {
-        const url = 'http://localhost:3000/api/semester/departments/course';
+        const url = 'http://localhost:3000/api/departments/course';
         const response = await axios.post(url, { url: selectedCourse.value });
         const data = response.data;
 

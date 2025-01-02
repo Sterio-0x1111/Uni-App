@@ -60,7 +60,7 @@ const getDepartments = async (req, res) => {
 const getDepartmentDatesAsTable = async (req, res) => {
     const { department } = req.body;
     try {
-        const getDepartmentsURL = 'http://localhost:3000/api/semester/departments';
+        const getDepartmentsURL = 'http://localhost:3000/api/departments';
         const getDepartmentsResponse = await axios.get(getDepartmentsURL);
         const availableDepartments = getDepartmentsResponse.data;
 
@@ -68,7 +68,7 @@ const getDepartmentDatesAsTable = async (req, res) => {
         const methodByType = {
             simple:     filterDepartmentTables,
             link:       filterDepartmentTablesWithLinks,
-            text:       filterDepartmentDatesAsText
+            text:       filterDepartmentDatesAsList
         }
 
         // Zuordnung der zu verwendenden Filterfunktion
@@ -173,6 +173,18 @@ const getDepartmentDatesAsText = async (req, res) => {
 
 /**
  * Funktion zum Filtern der fachbereichsspezifischen Tabellen.
+ * 
+ * Die Funktion verwendet das präparierte Cheerio Objekt 
+ * und den ausgewählten Fachbereich, 
+ * um die simple tabellerarische Struktur zu parsen.
+ * 
+ * @param $
+ *  Cheerio Objekt mit geladenem Seitencode
+ * @param department
+ *  ausgewählter Fachbereich, für den Daten geladen werden sollen
+ * 
+ * @returns tableData
+ *  gefilterte Termintabelle als Array
  */
 const filterDepartmentTables = ($, department) => {
     try {
@@ -195,11 +207,25 @@ const filterDepartmentTables = ($, department) => {
 
 /**
  * Funktion zum Filtern von fachbereichsspezifischen Tabellen mit Links auf weitere Seiten.
+ * 
+ * Die Funktion verwendet ein präpariertes Cherio Objekt 
+ * und den ausgewählten Fachbereich, 
+ * um die spezifischen Tabellen zu filtern, 
+ * die selbst keine Daten enthalten, 
+ * sondenr auf weitere Tabellen verlinken.
+ * 
+ * @param $
+ *  Cheerio Objekt mit geladenem Seitencode
+ * @param department
+ *  ausgewählter Fachbereich, für den Daten geladen werden sollen
+ * 
+ * @returns tableData
+ *  gefilterte Termintabelle als Array
  */
 const filterDepartmentTablesWithLinks = ($, department) => {
     try {
         const dates = $('table').has(`tr[data-filter="${department}"]`).html();
-        const baseURL = 'https://www.fh-swf.de';
+        const baseURL = 'https://www.fh-swf.de'; // zum Vervollständigen von relativen Pfaden
         const tableData = [];
 
         $(dates).find('tr').each((index, row) => {
@@ -213,7 +239,7 @@ const filterDepartmentTablesWithLinks = ($, department) => {
             const link = $(row).find('a').map((index, a) => {
                 return {
                     name,
-                    url: baseURL + $(a).attr('href')
+                    url: baseURL + $(a).attr('href') // baue URL, da Quellseite relative Pfade verwendet
                 }
             }).get(0);
             tableData.push(link);
@@ -225,8 +251,21 @@ const filterDepartmentTablesWithLinks = ($, department) => {
     }
 }
 
+/**
+ * Endpunkt zum erweiterten Filtern von verlinkten Tabellen.
+ * 
+ * Die Funktion erhält eine URL 
+ * und parst die dort zu findenden 
+ * Tabellen mit Terminen.
+ * 
+ * @param req
+ *  Anfrage 
+ * @param res
+ *  Antwort
+ */
 const filterDepartmentTablesByLink = async (req, res) => {
     try {
+        console.log('By Link');
         const { url } = req.body;
         const response = await axios.get(url);
         const $ = cheerio.load(response.data);
@@ -313,7 +352,22 @@ const filterExternalDepartmentTables = ($, dates) => {
     }
 }
 
-const filterDepartmentDatesAsText = async ($, department) => {
+/**
+ * Funktion zum Filtern von Terminen als Listen.
+ * 
+ * Die Funktion nimmt ein Cheerio Objekt 
+ * und den ausgeählten Fachbereich, 
+ * um die in Listenform aufgeführten Termine zu laden.
+ * 
+ * @param $ 
+ *  Cheerio Objekt, dass die zu filternde Seite enthält
+ * @param department 
+ *  ausgewählter Fachbereich
+ * 
+ * @returns content
+ *  gefilterter Inhalt
+ */
+const filterDepartmentDatesAsList = async ($, department) => {
     try {
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const response = await axios.get(url);

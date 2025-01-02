@@ -5,6 +5,10 @@ const cheerio = require('cheerio');
 /**
  * Funktion zum Laden der Semesterzeiträume.
  * 
+ * Die Funktion filtert die Tabelle der Semesterzeiträume, 
+ * indem sie diese zeilenweise durchläuft 
+ * und die nötigen Daten extrahiert.
+ * 
  * @param req 
  * @param res 
  */ 
@@ -40,9 +44,18 @@ const getSemesterDates = async (req, res) => {
     }
 }
 
+/**
+ * Endpunkt zum Laden der Rückmeldedaten.
+ * 
+ * Die Funktion greift auf die Informationen zu, 
+ * indem die jeweils spezifischen HTML Elemente 
+ * individuell geparst werden.
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getFeedbackDates = async (req, res) => {
     try{
-
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const $ = await fetchHTML(url);
 

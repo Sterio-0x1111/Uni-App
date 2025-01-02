@@ -10,7 +10,7 @@ export const useDepartmentStore = defineStore('department', {
             try {
 
                 if(this.departments.length < 1){
-                    const url = 'http://localhost:3000/api/semester/departments';
+                    const url = 'http://localhost:3000/api/departments';
                     const response = await axios.get(url);
                     this.departments = response.data.departments;
                 }
