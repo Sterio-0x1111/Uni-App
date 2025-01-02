@@ -22,6 +22,10 @@
 import { ref } from 'vue';
 import { IonContent, IonHeader, IonPage, IonTitle, IonButton, IonImg } from '@ionic/vue';
 import ToolbarMenu from './ToolbarMenu.vue';
+//import { useLocationStore } from '@/stores/locationStore';
+
+//const locationStore = useLocationStore();
+//locationStore.locateClient();
 
 const menuTitle = ref('Startseite');
 </script>
