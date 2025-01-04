@@ -8,3 +8,10 @@ http://ionicframework.com/docs/theming/ */
     --ion-color-primary: #3880ff;
     --ion-color-secondary: #3dc2ff;
 }
+
+.custom-divider {
+    min-height: 1px;
+    height: 2px;
+    background-color: blue;
+    margin: 4px 0;
+}

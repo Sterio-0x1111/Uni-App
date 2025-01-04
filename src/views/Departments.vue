@@ -201,9 +201,5 @@ const resetStatus = () => {
 </script>
 
 <style scoped>
-.custom-divider {
-  height: 4px; /* Höhe des Dividers */
-  background-color: var(--ion-color-primary); /* Farbe des Dividers */
-  margin: 8px 0; /* Abstand um den Divider */
-}
+
 </style>
