@@ -5,10 +5,6 @@
     </ion-header>
 
     <ion-content>
-      <!-- teste ohne überschrift, da titel in toolbar leiste steht
-      <h2>Notenspiegel</h2>
-      -->
-
       <div class="select-container">
         <h6>Abschluss</h6>
         <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
@@ -19,33 +15,59 @@
 
         <h6>Studiengang</h6>
         <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
-          <ion-select-option v-for="course in courses" :key="course">
+          <ion-select-option v-for="course in currentCourses" :key="course">
             {{ course }}
           </ion-select-option>
         </ion-select>
-
+        
         <h6>Filter</h6>
         <ion-select v-if="scores" v-model="selectedOption">
           <ion-select-option v-for="option in selectOptions" :key="option.id" aria-placeholder="Filter auswählen">
             {{ option.text }}
           </ion-select-option>
         </ion-select>
-      </div>
-
-      <div v-if="scores">
         <p>Klicken Sie auf eine Prüfung, um mehr Details zu erhalten.</p>
-        <ion-grid >
+      </div>
+      
+      <div v-if="scores">
+        <ion-grid class="score-grid">
           <ion-row>
             <!-- Table Headers -->
-            <ion-col class="score-row" v-for="header in limitedHeaders" :key="header.id" :size="4" :size-md="6" size-lg="4">
+            <!--<ion-col class="score-row" v-for="header in limitedHeaders" :key="header.id" size="6" size-sm="6" size-md="4" size-lg="3">
               <h4>{{ header.text }}</h4>
+            </ion-col>
+            -->
+
+            <ion-col class="score-row header-row" size="5" size-sm="6" size-md="4" size-lg="4">
+              <h4 class="cell">{{ limitedHeaders[0].text }}</h4> <!-- Modulname -->
+            </ion-col>
+
+            <ion-col class="score-row header-row" size="3" size-sm="6" size-md="4" size-lg="4">
+              <h4 class="cell">{{ limitedHeaders[1].text }}</h4><!-- Note -->
+            </ion-col>
+
+            <ion-col class="score-row header-row" size="4" size-sm="6" size-md="4" size-lg="4">
+              <h4 class="cell">{{ limitedHeaders[2].text }}</h4> <!-- Datum -->
             </ion-col>
           </ion-row>
 
           <ion-row v-for="row in filteredScores" :key="row" @click="showModal(row)" >
+            <!--
             <ion-col v-for="index in headerIndices" :key="index" class="score-row" :size="4" :size-md="6" size-lg="4">
               <h5>{{ row[index] }}</h5>
             </ion-col>
+            -->
+            <ion-col class="score-row" :size="5" :size-md="6" size-lg="4">
+              <span>{{ row[ headerIndices[0] ] }}</span>
+            </ion-col>
+            <ion-col class="score-row" :size="3" :size-md="6" size-lg="4">
+              <span>{{ row[ headerIndices[1] ] }}</span>
+            </ion-col>
+            <ion-col class="score-row" :size="4" :size-md="6" size-lg="4">
+              <span>{{ row[ headerIndices[2] ] }}</span>
+            </ion-col>
+
+            <ion-item-divider class="custom-divider"></ion-item-divider>
           </ion-row>
         </ion-grid>
       </div>
@@ -57,7 +79,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, } from "@ionic/vue";
+import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider } from "@ionic/vue";
 import axios from "axios";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
@@ -73,9 +95,9 @@ const selectedCourse = ref(null);
 const currentCourses = computed(() => {
     switch(selectedDegree.value){
         case 'Abschluss BA Bachelor':
-            return courses;
+            return courses.value;
         case 'Abschluss MA Master':
-            return masterCourses;
+            return masterCourses.value;
         default:
             return null;
     }
@@ -257,30 +279,32 @@ const limitedScores = computed(() => {
 
 <style scoped>
 .select-container {
-  
+  margin: 10px;
 }
 
-ion-grid {
+.score-grid {
   margin-bottom: 20px;
 }
 
 .score-row h4,
-.score-row h5 {
-  font-size: 15px;
+.score-row span {
+  font-size: 14px;
   display: inline-block;
   flex: 1;
-  text-align: left;
-  border: 1px solid yellow;
-  margin: 0;
-  width: 50px;
-
-  white-space: normal;
-  word-wrap: break-word;
+  text-align: center;
 }
 
 .score-row {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+}
+
+.header-row {
+  background-color: blue;
+}
+
+.cell {
+  text-align: center;
 }
 </style>
