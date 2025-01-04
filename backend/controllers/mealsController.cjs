@@ -34,7 +34,7 @@ const getDates = async (req, res) => {
     });
 
     if (dateSelection.length > 0) {
-      res.json({ options: dateSelection });
+      res.status(200).json({ options: dateSelection });
       console.log('Successfully sent date selection options.');
     } else {
       res.status(204).json({ message: 'Keine Mensapläne gefunden.' });
