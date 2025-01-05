@@ -5,30 +5,45 @@
         </ion-header>
 
         <ion-content>
-            <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
-                <ion-select-option v-for="degree in degrees" :key="degree">
-                    {{ degree }}
-                </ion-select-option>
-            </ion-select>
+            <div class="select-container">
+                <h4>Angemeldete Prüfungen</h4>
+                <h6>Abschluss</h6>
+                <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
+                    <ion-select-option v-for="degree in degrees" :key="degree">
+                        {{ degree }}
+                    </ion-select-option>
+                </ion-select>
 
-            <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
-                <ion-select-option v-for="course in courses" :key="course">
-                    {{ course }}
-                </ion-select-option>
-            </ion-select>
+                <h6>Studiengang</h6>
+                <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
+                    <ion-select-option v-for="course in courses" :key="course">
+                        {{ course }}
+                    </ion-select-option>
+                </ion-select>
+                <p>Klicken Sie auf eine Prüfung, um mehr Details zu erhalten.</p>
+            </div>
+            
             <!-- <course-selection /> -->
-            <ion-grid v-if="found">
+            <ion-grid class="score-grid" v-if="found">
                 <ion-row> <!-- table headers, aktuell noch hardkodiert, später parsen und mitschicken -->
-                    <ion-col v-for="header in limitedHeaders" :key="header.id">
-                        {{ header.text }}
+                    <ion-col class="score-row header-row" size="6" size-sm="6" size-md="4" size-lg="4">
+                        <h4 class="score-row">{{ limitedHeaders[0].text }}</h4>
+                    </ion-col>
+
+                    <ion-col class="score-row header-row" size="3" size-sm="3" size-md="4" size-lg="4">
+                        <h4 class="score-row">{{ limitedHeaders[1].text }}</h4>
+                    </ion-col>
+
+                    <ion-col class="score-row header-row" size="3" size-sm="3" size-md="4" size-lg="4">
+                        <h4 class="score-row">{{ limitedHeaders[2].text }}</h4>
                     </ion-col>
                 </ion-row>
 
                 <ion-row v-for="exam in exams.data" :key="exam" @click="showModal(exam)">
-                    <ion-col>{{ exam[1] }}</ion-col>
-                    <ion-col>{{ exam[2] }}</ion-col>
-                    <ion-col>{{ exam[5] }}</ion-col>
-                    
+                    <ion-col class="score-row" size="6" size-sm="6" size-md="4" size-lg="4"><span class="score-row">{{ exam[1] }}</span></ion-col>
+                    <ion-col class="score-row" size="3" size-sm="3" size-md="4" size-lg="4"><span class="score-row">{{ exam[2] }}</span></ion-col>
+                    <ion-col class="score-row" size="3" size-sm="3" size-md="4" size-lg="4"><span class="score-row">{{ exam[5] }}</span></ion-col>
+                    <ion-item-divider class="custom-divider"></ion-item-divider>
                 </ion-row>
             </ion-grid>
 
@@ -41,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption, IonItemDivider } from '@ionic/vue';
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
@@ -49,7 +64,7 @@ import ToolbarMenu from '../ToolbarMenu.vue';
 import { checkAuthentication } from '@/helpers/authGuard';
 import ScoreDetails from "./ScoreDetails.vue";
 
-const toolbarTitle = 'Angemeldete Prüfungen'
+const toolbarTitle = 'Meine Prüfungen'
 
 const headers = [
     { id: 0, text: 'Prüfungsnr.' },
@@ -77,9 +92,9 @@ const selectedCourse = ref(null);
 const currentCourses = computed(() => {
     switch(selectedDegree.value){
         case 'Abschluss BA Bachelor':
-            return courses;
+            return courses.value;
         case 'Abschluss MA Master':
-            return masterCourses;
+            return masterCourses.value;
         default:
             return null;
     }
