@@ -58,13 +58,21 @@
             </ion-col>
             -->
             <ion-col class="score-row" :size="5" :size-md="6" size-lg="4">
-              <span>{{ row[ headerIndices[0] ] }}</span>
+              
+                <span>{{ row[ headerIndices[0] ] }}</span>
+              
             </ion-col>
+
             <ion-col class="score-row" :size="3" :size-md="6" size-lg="4">
-              <span>{{ row[ headerIndices[1] ] }}</span>
+              
+                <span>{{ row[ headerIndices[1] ] }}</span>
+              
             </ion-col>
+
             <ion-col class="score-row" :size="4" :size-md="6" size-lg="4">
-              <span>{{ row[ headerIndices[2] ] }}</span>
+              
+                <span>{{ row[ headerIndices[2] ] }}</span>
+              
             </ion-col>
 
             <ion-item-divider class="custom-divider"></ion-item-divider>
@@ -79,7 +87,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider } from "@ionic/vue";
+import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonText } from "@ionic/vue";
 import axios from "axios";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
@@ -278,33 +286,5 @@ const limitedScores = computed(() => {
 </script>
 
 <style scoped>
-.select-container {
-  margin: 10px;
-}
 
-.score-grid {
-  margin-bottom: 20px;
-}
-
-.score-row h4,
-.score-row span {
-  font-size: 14px;
-  display: inline-block;
-  flex: 1;
-  text-align: center;
-}
-
-.score-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.header-row {
-  background-color: blue;
-}
-
-.cell {
-  text-align: center;
-}
 </style>
