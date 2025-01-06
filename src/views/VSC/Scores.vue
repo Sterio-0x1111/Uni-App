@@ -5,7 +5,7 @@
     </ion-header>
 
     <ion-content>
-      <ion-toggle class="custom-toggle" v-model="showSelection">{{ toggleText }}</ion-toggle>
+      <CustomToggle v-model="showSelection" />
       <div class="select-container" v-if="showSelection">
         <h6>Abschluss</h6>
         <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
@@ -94,6 +94,7 @@
 import { ref, onMounted, computed } from "vue";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonToggle } from "@ionic/vue";
 import axios from "axios";
+import CustomToggle from "./CustomToggle.vue";
 import ExamTables from "./ExamTables.vue";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
@@ -101,9 +102,6 @@ import { checkAuthentication } from "@/helpers/authGuard";
 import { useCourseStore } from '@/stores/courseStore';
 
 const showSelection = ref(true);
-const toggleText = computed(() => {
-  return (showSelection.value) ? 'Optionen ausblenden' : 'Optionen einblenden';
-});
 
 const degrees = ref([]);
 const courses = ref([]);

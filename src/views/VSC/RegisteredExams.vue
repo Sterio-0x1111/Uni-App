@@ -5,7 +5,8 @@
         </ion-header>
 
         <ion-content>
-            <div class="select-container">
+            <custom-toggle v-model="showSelection" />
+            <div class="select-container" v-if="showSelection">
                 <h4>Angemeldete Prüfungen</h4>
                 <h6>Abschluss</h6>
                 <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
@@ -23,9 +24,6 @@
                 <p>Klicken Sie auf eine Prüfung, um mehr Details zu erhalten.</p>
             </div>
             
-            <!-- <course-selection /> -->
-            
-
             <div v-if="exams">
                 <ExamTables :headers="limitedHeaders" :tableIndices="tableIndices" :data="exams" :popup="showModal"/>
             </div>
@@ -43,8 +41,10 @@ import ToolbarMenu from '../ToolbarMenu.vue';
 import { checkAuthentication } from '@/helpers/authGuard';
 import ExamTables from './ExamTables.vue';
 import ScoreDetails from './ScoreDetails.vue';
+import CustomToggle from './CustomToggle.vue';
 
 const toolbarTitle = 'Meine Prüfungen'
+const showSelection = ref(true);
 
 const tableIndices = [1, 2, 5];
 
