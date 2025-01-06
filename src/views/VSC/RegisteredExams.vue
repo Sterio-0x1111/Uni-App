@@ -24,33 +24,12 @@
             </div>
             
             <!-- <course-selection /> -->
-            <ion-grid class="score-grid" v-if="found">
-                <ion-row> <!-- table headers, aktuell noch hardkodiert, später parsen und mitschicken -->
-                    <ion-col class="score-row header-row" size="6" size-sm="6" size-md="4" size-lg="4">
-                        <h4 class="score-row">{{ limitedHeaders[0].text }}</h4>
-                    </ion-col>
+            
 
-                    <ion-col class="score-row header-row" size="3" size-sm="3" size-md="4" size-lg="4">
-                        <h4 class="score-row">{{ limitedHeaders[1].text }}</h4>
-                    </ion-col>
-
-                    <ion-col class="score-row header-row" size="3" size-sm="3" size-md="4" size-lg="4">
-                        <h4 class="score-row">{{ limitedHeaders[2].text }}</h4>
-                    </ion-col>
-                </ion-row>
-
-                <ion-row v-for="exam in exams.data" :key="exam" @click="showModal(exam)">
-                    <ion-col class="score-row" size="6" size-sm="6" size-md="4" size-lg="4"><span class="score-row">{{ exam[1] }}</span></ion-col>
-                    <ion-col class="score-row" size="3" size-sm="3" size-md="4" size-lg="4"><span class="score-row">{{ exam[2] }}</span></ion-col>
-                    <ion-col class="score-row" size="3" size-sm="3" size-md="4" size-lg="4"><span class="score-row">{{ exam[5] }}</span></ion-col>
-                    <ion-item-divider class="custom-divider"></ion-item-divider>
-                </ion-row>
-            </ion-grid>
-
-            <p v-else>Keine Daten gefunden.</p>
-
+            <div v-if="exams">
+                <ExamTables :headers="limitedHeaders" :tableIndices="tableIndices" :data="exams" :popup="showModal"/>
+            </div>
             <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" @close="isModalOpen = false"/>
-
         </ion-content>
     </ion-page>
 </template>
@@ -62,9 +41,12 @@ import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
 import ToolbarMenu from '../ToolbarMenu.vue';
 import { checkAuthentication } from '@/helpers/authGuard';
-import ScoreDetails from "./ScoreDetails.vue";
+import ExamTables from './ExamTables.vue';
+import ScoreDetails from './ScoreDetails.vue';
 
 const toolbarTitle = 'Meine Prüfungen'
+
+const tableIndices = [1, 2, 5];
 
 const headers = [
     { id: 0, text: 'Prüfungsnr.' },
@@ -129,8 +111,10 @@ const loadData = async () => {
             throw new Error(`${response.status}`);
         }
 
-        exams.value = response.data;
+        //exams.value = response.data;
+        exams.value = response.data.data;
         found.value = exams.value.found;
+        console.log(exams.value);
 
     } catch(error){
         console.log('Fehler beim Laden der angemeldeten Prüfungen.', error);

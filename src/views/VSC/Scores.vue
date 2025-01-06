@@ -29,7 +29,7 @@
         <p>Klicken Sie auf eine Prüfung, um mehr Details zu erhalten.</p>
       </div>
       
-      <div v-if="scores">
+      <div v-if="false">
         <ion-grid class="score-grid">
           <ion-row>
             <!-- Table Headers -->
@@ -79,6 +79,10 @@
           </ion-row>
         </ion-grid>
       </div>
+      
+      <div class="grid-container" v-if="filteredScores">
+        <ExamTables :headers="limitedHeaders" :tableIndices="headerIndices" :data="filteredScores" :popup="showModal" />
+      </div>
 
       <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" :backdropDismiss="backdropDismiss" @close="isModalOpen = false"/>
     </ion-content>
@@ -89,6 +93,7 @@
 import { ref, onMounted, computed } from "vue";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonText } from "@ionic/vue";
 import axios from "axios";
+import ExamTables from "./ExamTables.vue";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
 import { checkAuthentication } from "@/helpers/authGuard";
