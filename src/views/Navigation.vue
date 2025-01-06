@@ -6,7 +6,7 @@
 
     <ion-content>
       <ion-list>
-        <ion-button class="custom-button" v-for="route in filteredRoutes" :key="route.id"  :router-link="route.path">
+        <ion-button class="custom-button" v-for="route in filteredRoutes" :key="route.id"  @click="navigateTo(route.path)">
           {{ route.title }}
           <ion-icon name="key" v-if="route.requiresAuth" slot="start">
 
@@ -65,6 +65,17 @@ import { key } from 'ionicons/icons';
 addIcons({ 
   'key': key
 });
+
+const router = useRouter();
+const navigateTo = (path: string) => {
+  try {
+    console.log('CALLED NAVIGATE TO');
+    router.push(path);
+  } catch(error){
+    console.log('Navigation error: ', error);
+  }
+};
+
 </script>
 
 <style scoped>
