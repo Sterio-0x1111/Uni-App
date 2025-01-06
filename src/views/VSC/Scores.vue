@@ -5,7 +5,8 @@
     </ion-header>
 
     <ion-content>
-      <div class="select-container">
+      <ion-toggle class="custom-toggle" v-model="showSelection">{{ toggleText }}</ion-toggle>
+      <div class="select-container" v-if="showSelection">
         <h6>Abschluss</h6>
         <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
           <ion-select-option v-for="degree in degrees" :key="degree">
@@ -91,13 +92,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonText } from "@ionic/vue";
+import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonToggle } from "@ionic/vue";
 import axios from "axios";
 import ExamTables from "./ExamTables.vue";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
 import { checkAuthentication } from "@/helpers/authGuard";
 import { useCourseStore } from '@/stores/courseStore';
+
+const showSelection = ref(true);
+const toggleText = computed(() => {
+  return (showSelection.value) ? 'Optionen ausblenden' : 'Optionen einblenden';
+});
 
 const degrees = ref([]);
 const courses = ref([]);
@@ -291,5 +297,18 @@ const limitedScores = computed(() => {
 </script>
 
 <style scoped>
+.custom-toggle {
+  display: block;
+  margin-right: 10px;
+  margin-left: 10px;
+}
 
+/*.custom-toggle {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: black;
+  z-index: 1000;
+}*/
 </style>
