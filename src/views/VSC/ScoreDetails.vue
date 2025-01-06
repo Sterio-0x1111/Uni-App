@@ -1,5 +1,5 @@
 <template>
-    <ion-modal :is-open="isOpen" :backdrop-dismiss="backdropDismiss">
+    <ion-modal :is-open="isOpen" :backdrop-dismiss="true" @didDismiss="closeModal">
         <ion-header>
             <ion-toolbar>
                 <ion-title>Details</ion-title>
@@ -22,8 +22,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, isMemoSame } from 'vue';
 import { IonHeader, IonToolbar, IonTitle, IonModal, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
+import { onBeforeRouteLeave } from 'vue-router';
 
 const props = defineProps({
     isOpen: Boolean, 
@@ -52,6 +53,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', handleKeyDown);
 });
+
+onBeforeRouteLeave(() => {
+    if(props.isOpen){
+        closeModal();
+    }
+})
 </script>
 
 <style scoped>
