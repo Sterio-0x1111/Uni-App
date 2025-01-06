@@ -68,16 +68,5 @@ addIcons({
 </script>
 
 <style scoped>
-.custom-button{
-  display: blocK;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-top: 10px;
 
-  
-}
-
-ion-icon {
-  
-}
 </style>

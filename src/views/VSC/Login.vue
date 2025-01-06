@@ -23,7 +23,7 @@
                         <ion-input v-model="password" type="password" required></ion-input>
                     </ion-item>
 
-                    <ion-button expand="block" @click="handleLogin" >Anmelden</ion-button>
+                    <ion-button class="custom-button" expand="block" @click="handleLogin" >Anmelden</ion-button>
                 </ion-card-content>
             </ion-card>
         </ion-content>
