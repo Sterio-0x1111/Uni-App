@@ -63,7 +63,7 @@ const loginToVSC = async (req, res) => {
             const data = response.data;
 
             if (data.includes('Meine Prüfungen')) {
-                req.session.loggedInVSC = false; // provisorisch deaktiviert
+                req.session.loggedInVSC = true; // provisorisch deaktiviert
                 req.session.user = { username };
                 req.session.vscCookies = cookieJar;
                 req.session.save();
@@ -125,10 +125,10 @@ const logoutFromVSC = async (req, res) => {
                 res.status(500).json({ message: 'VSC Logout fehlgeschlagen.' })
             }
 
-            res.json({
+            /*res.json({
                 data,
                 state: req.session.loggedInVSC
-            });
+            });*/
 
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
