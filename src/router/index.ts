@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
 import HomePage from '../views/HomePage.vue'
 import Navigation from '../views/Navigation.vue';
 import Exams from '../views/VSC/Exams.vue'
@@ -55,11 +56,29 @@ const routes: Array<RouteRecordRaw> = [
     path: "/exams/results",
     name: "Scores",
     component: Scores,
+    beforeEnter: (to, from, next) => {
+      console.log('INDEX TS BEFORE ENTER');
+      const authStore = useAuthStore();
+      if (!authStore.isLoggedInVSC) {
+        next({ path: '/navigation' });
+      } else {
+        next();
+      }
+    }
   },
   {
     path: "/exams/registered",
     name: "Registered exams",
     component: RegisteredExams,
+    beforeEnter: (to, from, next) => {
+      console.log('INDEX TS BEFORE ENTER');
+      const authStore = useAuthStore();
+      if (!authStore.isLoggedInVSC) {
+        next({ path: '/navigation' });
+      } else {
+        next();
+      }
+    }
   },
   {
     path: '/login',

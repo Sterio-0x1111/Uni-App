@@ -25,31 +25,49 @@ import ToolbarMenu from "./ToolbarMenu.vue";
 import { useAuthStore } from "@/stores/authStore";
 
 const toolbarTitle = ref("Menü");  
+
 const authStore = useAuthStore();
 const loginState = computed(() => authStore.isLoggedIn);
+//const loginStateVSC = computed(() => authStore.isLoggedInVSC);
+const loginStateVSC = computed(() => authStore.isLoggedInVSC);
+console.log(loginStateVSC.value)
 
-const routes: Route[] = [
-  { id: 0, title: "Mensaplan",            path: "/meals",       requiresAuth: false },
-  { id: 1, title: "Semestertermine",      path: "/semester",    requiresAuth: false },
-  { id: 2, title: "Fachbereichstermine",  path: "/departments", requiresAuth: false },
-  { id: 3, title: "Lagepläne",            path: "/locations",   requiresAuth: false },
-  { id: 4, title: "Meine Prüfungen",      path: "/exams",       requiresAuth: true },
+/*const routes: Route[] = [
+  { id: 0, title: "Mensaplan",            path: "/meals",       requiresAuth: false, login: false },
+  { id: 1, title: "Semestertermine",      path: "/semester",    requiresAuth: false, login: false },
+  { id: 2, title: "Fachbereichstermine",  path: "/departments", requiresAuth: false, login: false },
+  { id: 3, title: "Lagepläne",            path: "/locations",   requiresAuth: false, login: false },
+  { id: 4, title: "Meine Prüfungen",      path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
 //{ id: 2, title: "Login", path: "/login", requiresAuth: false },
-];
+];*/
+
+const routes = computed(() => {
+  return [
+  { id: 0, title: "Mensaplan",            path: "/meals",       requiresAuth: false, login: false },
+  { id: 1, title: "Semestertermine",      path: "/semester",    requiresAuth: false, login: false },
+  { id: 2, title: "Fachbereichstermine",  path: "/departments", requiresAuth: false, login: false },
+  { id: 3, title: "Lagepläne",            path: "/locations",   requiresAuth: false, login: false },
+  { id: 4, title: "Meine Prüfungen",      path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
+//{ id: 2, title: "Login", path: "/login", requiresAuth: false },
+]
+});
 
 const filteredRoutes = computed(() => {
-  return routes.filter((route) => {
-    //if (loginState.value && route.path === "/login") {
-      // Login-Route ausblenden, wenn der Benutzer eingeloggt ist
-      //return false;
-    //}
+  return routes.value.filter((route) => {
+    if(route.requiresAuth){
+      return route.login;
+    }
+    return true;
+  })
+
+  /*return routes.filter((route) => {
     if (!loginState.value && route.requiresAuth) {
       // Geschützte Routen ausblenden, wenn der Benutzer nicht eingeloggt ist
       return false;
     }
     // Ansonsten die Route anzeigen
     return true;
-  });
+  });*/
 });
 
 
@@ -58,6 +76,7 @@ interface Route {
   title: string;
   path: string;
   requiresAuth: boolean;
+  login: boolean;
 }
 
 import { addIcons } from 'ionicons'; 

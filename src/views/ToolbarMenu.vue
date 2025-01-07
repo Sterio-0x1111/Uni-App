@@ -13,11 +13,11 @@
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button v-if="!loginState" router-link="/login">
+      <ion-button v-if="!loginStateVSC" router-link="/login">
         <ion-icon name="login" aria-label="Login"></ion-icon> 
       </ion-button>
 
-      <ion-button v-if="loginState" @click="logout"> <!-- Logout Routine implementieren -->
+      <ion-button v-if="loginStateVSC" @click="logout"> <!-- Logout Routine implementieren -->
         <ion-icon name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
@@ -32,7 +32,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const authStore = useAuthStore();
-const loginState = computed(() => authStore.isLoggedIn);
+const loginStateVSC = computed(() => authStore.isLoggedInVSC);
 const router = useRouter();
 
 const props = defineProps({
@@ -59,8 +59,10 @@ const logout = async () => {
     const response = await axios.get(url, { withCredentials: true });
 
     if(response.status === 200){
-      authStore.logout();
-      loginState.value = authStore.isLoggedIn;
+      //authStore.logout();
+      //loginState.value = authStore.isLoggedIn;
+      await authStore.getStates();
+      console.log(loginStateVSC.value);
       router.push('/navigation');
     }
 

@@ -91,15 +91,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onBeforeMount } from "vue";
 import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonToggle } from "@ionic/vue";
 import axios from "axios";
 import CustomToggle from "./CustomToggle.vue";
 import ExamTables from "./ExamTables.vue";
 import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
-import { checkAuthentication } from "@/helpers/authGuard";
-import { useCourseStore } from '@/stores/courseStore';
+import { useAuthStore } from "@/stores/authStore";
+import { useCourseStore } from "@/stores/courseStore";
+import { useRouter } from 'vue-router';
 
 const showSelection = ref(true);
 
@@ -167,21 +168,19 @@ const showModal = (row : any[]) => {
 };
 
 onMounted(async () => {
-  if (checkAuthentication()) {
-    try {
-      const courseStore = useCourseStore();
+  try {
+    const courseStore = useCourseStore();
+  
+    degrees.value = courseStore.degrees;
+    selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
+  
+    courses.value = courseStore.bachelorCourses;
+    selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
+          
+    await loadData();
     
-      degrees.value = courseStore.degrees;
-      selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
-    
-      courses.value = courseStore.bachelorCourses;
-      selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
-            
-      await loadData();
-      
-    } catch (error) {
-      console.log(error);
-    }
+  } catch (error) {
+    console.log(error);
   }
 });
 
@@ -280,7 +279,6 @@ const filteredScores = computed(() => {
 });
 
 const limitedScores = computed(() => {
-  
   switch (selectedOption.value) {
     case selectOptions[1].text:
       return [

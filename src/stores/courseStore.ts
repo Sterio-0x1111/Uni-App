@@ -50,7 +50,7 @@ export const useCourseStore = defineStore('courseStore', {
         },
         async fetchCourses() {
             const authStore = useAuthStore();
-            if (!authStore.isLoggedIn) {
+            if (!authStore.isLoggedInVSC) {
                 console.log('Studiengänge können nicht geladen werden. Nicht angemeldet.');
                 return;
             }
