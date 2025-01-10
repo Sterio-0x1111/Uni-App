@@ -100,6 +100,7 @@ import ScoreDetails from "./ScoreDetails.vue";
 import ToolbarMenu from "../ToolbarMenu.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useCourseStore } from "@/stores/courseStore";
+import { useExamStore } from "@/stores/examStore";
 import { useRouter } from 'vue-router';
 
 const showSelection = ref(true);
@@ -170,6 +171,7 @@ const showModal = (row : any[]) => {
 onMounted(async () => {
   try {
     const courseStore = useCourseStore();
+    const examStore = useExamStore();
   
     degrees.value = courseStore.degrees;
     selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
@@ -177,7 +179,11 @@ onMounted(async () => {
     courses.value = courseStore.bachelorCourses;
     selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
           
-    await loadData();
+    //await loadData();
+    scores.value = await examStore.loadData(category, selectedDegree.value, selectedCourse.value);
+    mpScores.value = examStore.mpScores;
+    slScores.value = examStore.slScores;
+    pkScores.value = examStore.pkScores;
     
   } catch (error) {
     console.log(error);
