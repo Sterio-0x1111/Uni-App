@@ -74,19 +74,27 @@ const getMeals = async (req, res) => {
 
     // filtert die Tabelle mit den Menüs und Preisen
     $('.meals tbody tr').each((index, element) => {
-      //const categoryIcon = $(element).find('.meals__icon-category').attr('alt');
+      const categoryIcon = $(element).find('.meals__icon-category').attr('alt');
+      const supplyIcon = $(element).find('.meals__icon-supply').attr('alt');
       const title = $(element).find('.meals__title').text().trim();
       const priceStudent = $(element).find('td:nth-child(4)').text().trim();
       const priceEmployee = $(element).find('td:nth-child(5)').text().trim();
       const priceGuest = $(element).find('td:nth-child(6)').text().trim();
 
       mealsTable.push({
-        //categoryIcon,
+        categoryIcon,
+        supplyIcon,
         title,
         priceStudent,
         priceEmployee,
         priceGuest
       })
+    })
+
+    mealsTable.forEach((meal, index) => {
+      if(!meal.title && !meal.priceStudent){
+        mealsTable[index].title = 'Beiwerke';
+      }
     })
 
     if (mealsTable.length > 0) {
