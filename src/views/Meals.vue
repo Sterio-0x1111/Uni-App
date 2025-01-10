@@ -168,5 +168,6 @@ h2, .info-text, .selection {
 
 .grid-container {
     margin-bottom: 20px;
+    margin-right: 2px;
 }
 </style>
