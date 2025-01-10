@@ -1,5 +1,15 @@
 const axios = require('axios');
 
+/**
+ * TODO: Login / Logout zentralisieren
+ * 1. alle Login Endpunkte hierher als Funktion integrieren
+ * 2. zentrale Login / Logout Endpunkte definieren und die einzelnen Funktionen aufrufen
+ * 3. beim Login setTimeout für automatischen logout setzen, falls Session abläuft
+ * 4. beim Logout Session zerstören 
+ * 5. im Frontend authStore setTimeout setzen, um nach Ablauf zu zerstören
+ * 6. im Frontend authStore bei Login / Logout jeweils die Endpunkte aufrufen
+ */
+
 const centralLogin = async (req, res) => {
     try {
 
