@@ -1,6 +1,6 @@
 <template>
   <ion-toolbar class="custom-toolbar">
-    <ion-title class="menu-title">{{ menuTitle }}</ion-title>
+    <ion-title class="menu-title"><ion-icon :name="iconName"></ion-icon> {{ menuTitle }}</ion-title>
     <!--
     <div class="logo-container">
       <img class="logo" src="/assets/logos/logo_with_text.png" />
@@ -39,18 +39,23 @@ const props = defineProps({
   menuTitle: {
     type: String, 
     required: true
+  },
+  iconName: {
+    type: String, 
+    required: false
   }
 });
 
 import { addIcons } from 'ionicons'; 
-import { home, menu, logIn, list, person, logOut } from 'ionicons/icons'; 
+import { home, menu, logIn, list, person, logOut, compass } from 'ionicons/icons'; 
 addIcons({ 
   'home': home,
   'menu': menu,
   'login': logIn,
   'logout': logOut,
   'list': list,
-  'person': person
+  'person': person,
+  'compass': compass,
 });
 
 const logout = async () => {
