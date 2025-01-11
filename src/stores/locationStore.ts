@@ -1,0 +1,143 @@
+import { defineStore, StoreDefinition } from 'pinia';
+import * as geolib from 'geolib';
+
+interface DistanceWrapper { 
+    location: string, 
+    distance: number
+}
+
+function getGeolocation(): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      } else {
+        reject(new Error('Geolocation is not supported by your browser'));
+      }
+    });
+}
+
+export const useLocationStore = defineStore('loc', {
+    state: () => ({
+        nextLocation: '' as string,
+        nextLocationDistance: -1 as number,
+        latitude: 0.0 as number,
+        longtitude: 0.0 as number
+        
+    }), 
+    /*actions: {
+        async locateClient() {
+            console.log('Entered locateClient()');
+            const success = (position : GeolocationPosition) => {
+                console.log('Entered success()');
+                
+                interface Location {
+                    latitude: number;
+                    longitude: number;
+                }
+
+                // Typisierung des Objekts mit einer Index-Signatur
+                const universityLocations: { [key: string]: Location } = {
+                    "Hagen":        { latitude: 51.36652513985188, longitude: 7.497639741477852 },
+                    "Iserlohn":     { latitude: 51.36833327365097, longitude: 7.687424370598792 },
+                    "Meschede":     { latitude: 51.36216487349944, longitude: 8.295251412925401 },
+                    "Soest":        { latitude: 51.56199805254962, longitude: 8.113431427758739 },
+                    "Lüdenscheid":  { latitude: 51.221819170670535, longitude: 7.630204529517563 }
+                };
+                
+                const currentPosition : Location = {
+                    latitude:   position.coords.latitude,
+                    longitude:  position.coords.longitude
+                };
+                
+                const distances : DistanceWrapper[] = [];
+                Object.keys(universityLocations).forEach(key => {
+                    const university = universityLocations[key as keyof typeof universityLocations];  // Type Assertion
+                    distances.push({
+                        location: key,
+                        distance: geolib.getDistance(currentPosition, university)
+                    });
+                });
+
+                const minimalDistance : DistanceWrapper = distances.reduce((min, loc) => loc.distance < min.distance ? loc : min)
+                this.nextLocation = minimalDistance.location;
+                this.nextLocationDistance = minimalDistance.distance;
+
+                console.log(this.nextLocation, this.nextLocationDistance);
+                
+            }
+        
+            const error = () => {
+                console.log('Unable to retrieve your location');
+                this.nextLocation = '';
+                this.nextLocationDistance = -1;
+            }
+        
+            if (!navigator.geolocation) {
+                console.log('Geolocation is not supported by your browser');
+            } else {
+                console.log('Locating...');
+                navigator.geolocation.getCurrentPosition(success, error);
+            }
+        }
+    },*/
+    actions: {
+        async locateClient() : Boolean {
+          console.log('Entered locateClient()');
+          try {
+            const position = await getGeolocation(); // wartet auf das Ergebnis der Geolokalisierung
+      
+            interface Location {
+              latitude: number;
+              longitude: number;
+            }
+      
+            const universityLocations: { [key: string]: Location } = {
+              "Hagen": { latitude: 51.36652513985188, longitude: 7.497639741477852 },
+              "Iserlohn": { latitude: 51.36833327365097, longitude: 7.687424370598792 },
+              "Meschede": { latitude: 51.36216487349944, longitude: 8.295251412925401 },
+              "Soest": { latitude: 51.56199805254962, longitude: 8.113431427758739 },
+              "Lüdenscheid": { latitude: 51.221819170670535, longitude: 7.630204529517563 }
+            };
+      
+            const currentPosition: Location = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            };
+      
+            const distances: DistanceWrapper[] = [];
+            Object.keys(universityLocations).forEach(key => {
+              const university = universityLocations[key as keyof typeof universityLocations];
+              distances.push({
+                location: key,
+                distance: geolib.getDistance(currentPosition, university)
+              });
+            });
+      
+            const minimalDistance: DistanceWrapper = distances.reduce((min, loc) => loc.distance < min.distance ? loc : min);
+            
+            // Aktualisiere den Zustand
+            this.$patch({
+              nextLocation: minimalDistance.location,
+              nextLocationDistance: minimalDistance.distance
+            });
+      
+            console.log(this.nextLocation, this.nextLocationDistance);
+            return true;
+            
+          } catch (error) {
+            console.log('Unable to retrieve your location', error);
+            this.$patch({
+              nextLocation: '',
+              nextLocationDistance: -1
+            });
+            return false;
+          }
+        }
+      },
+    
+    persist: {
+        storage: sessionStorage,
+    }
+})
+
+

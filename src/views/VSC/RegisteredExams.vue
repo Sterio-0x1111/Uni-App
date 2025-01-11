@@ -5,47 +5,49 @@
         </ion-header>
 
         <ion-content>
-            <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
-                <ion-select-option v-for="degree in degrees" :key="degree">
-                    {{ degree }}
-                </ion-select-option>
-            </ion-select>
+            <custom-toggle v-model="showSelection" />
+            <div class="select-container" v-if="showSelection">
+                <h4>Angemeldete Prüfungen</h4>
+                <h6>Abschluss</h6>
+                <ion-select v-if="degrees" v-model="selectedDegree" :disabled="degrees.length <= 1">
+                    <ion-select-option v-for="degree in degrees" :key="degree">
+                        {{ degree }}
+                    </ion-select-option>
+                </ion-select>
 
-            <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
-                <ion-select-option v-for="course in courses" :key="course">
-                    {{ course }}
-                </ion-select-option>
-            </ion-select>
-            <!-- <course-selection /> -->
-            <ion-grid v-if="found">
-                <ion-row> <!-- table headers, aktuell noch hardkodiert, später parsen und mitschicken -->
-                    <ion-col v-for="header in limitedHeaders" :key="header.id">
-                        {{ header.text }}
-                    </ion-col>
-                </ion-row>
-
-                <ion-row v-for="exam in exams.data" :key="exam">
-                    <ion-col>{{ exam[1] }}</ion-col>
-                    <ion-col>{{ exam[2] }}</ion-col>
-                    <ion-col>{{ exam[5] }}</ion-col>
-                    
-                </ion-row>
-            </ion-grid>
-
-            <p v-else>Keine Daten gefunden.</p>
+                <h6>Studiengang</h6>
+                <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
+                    <ion-select-option v-for="course in courses" :key="course">
+                        {{ course }}
+                    </ion-select-option>
+                </ion-select>
+                <p>Klicken Sie auf eine Prüfung, um mehr Details zu erhalten.</p>
+            </div>
+            
+            <div v-if="exams">
+                <ExamTables :headers="limitedHeaders" :tableIndices="tableIndices" :data="exams" :popup="showModal"/>
+            </div>
+            <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" @close="isModalOpen = false"/>
         </ion-content>
     </ion-page>
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption, IonItemDivider } from '@ionic/vue';
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
 import ToolbarMenu from '../ToolbarMenu.vue';
-import { checkAuthentication } from '@/helpers/authGuard';
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
+import ExamTables from './ExamTables.vue';
+import ScoreDetails from './ScoreDetails.vue';
+import CustomToggle from './CustomToggle.vue';
 
-const toolbarTitle = 'Angemeldete Prüfungen'
+const toolbarTitle = 'Meine Prüfungen'
+const showSelection = ref(true);
+
+const tableIndices = [1, 2, 5];
 
 const headers = [
     { id: 0, text: 'Prüfungsnr.' },
@@ -73,32 +75,30 @@ const selectedCourse = ref(null);
 const currentCourses = computed(() => {
     switch(selectedDegree.value){
         case 'Abschluss BA Bachelor':
-            return courses;
+            return courses.value;
         case 'Abschluss MA Master':
-            return masterCourses;
+            return masterCourses.value;
         default:
             return null;
     }
 })
 
 onMounted(async () => {
-    if (checkAuthentication()) {
-        try {
-            const courseStore = useCourseStore();
-    
-            degrees.value = courseStore.degrees;
-            selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
-    
-            courses.value = courseStore.bachelorCourses;
-            selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
-            
-            await loadData();
-    
-        } catch(error){
-            console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
-        }
+    try {
+        const courseStore = useCourseStore();
+
+        degrees.value = courseStore.degrees;
+        selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
+
+        courses.value = courseStore.bachelorCourses;
+        selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
+        
+        await loadData();
+
+    } catch(error){
+        console.log('Fehler beim Laden der angemeldeten Prüfungen vom Server.', error);
     }
-})
+});
 
 const loadData = async () => {
     try {
@@ -110,12 +110,32 @@ const loadData = async () => {
             throw new Error(`${response.status}`);
         }
 
-        exams.value = response.data;
+        //exams.value = response.data;
+        exams.value = response.data.data;
         found.value = exams.value.found;
+        console.log(exams.value);
 
     } catch(error){
         console.log('Fehler beim Laden der angemeldeten Prüfungen.', error);
     }
+}
+
+const isModalOpen = ref(false);
+const selectedRowData = ref(null);
+const showModal = (row : any[]) => {
+    selectedRowData.value = {
+        'Prüfungsnr.':      row[0],
+        'Prüfungstext':     row[1],
+        zugelassen:         row[2],
+        Vorbehalt:          row[3],
+        Freivermerk:        row[4],
+        Versuch:            row[5],
+        'Prüfer/in':        row[6], 
+        Semester:           row[7],
+        'Prüfungsdatum':    row[8]
+    }
+
+    isModalOpen.value = true;
 }
 
 </script>

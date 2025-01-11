@@ -33,8 +33,8 @@ export const useCourseStore = defineStore('courseStore', {
                 const doc = parser.parseFromString(data, 'text/html');
                 const ul = doc.querySelectorAll('ul.treelist')[master ? 2 : 1];
                 const links = Array.from(ul.querySelectorAll('li a[href]')).map((el) => el.getAttribute('href'));
-                const courses = Array.from(ul.querySelectorAll('li span')).map((el) =>
-                    el.textContent.replace(/[\n\t]/g, '').trim()
+                const courses = Array.from(ul.querySelectorAll('li span')).map((el) => 
+                    el.textContent?.replace(/[\n\t]/g, '').trim() || ''
                 );
 
                 const mappedResults = links.map((link, index) => ({
@@ -50,7 +50,7 @@ export const useCourseStore = defineStore('courseStore', {
         },
         async fetchCourses() {
             const authStore = useAuthStore();
-            if (!authStore.isLoggedIn) {
+            if (!authStore.isLoggedInVSC) {
                 console.log('Studiengänge können nicht geladen werden. Nicht angemeldet.');
                 return;
             }

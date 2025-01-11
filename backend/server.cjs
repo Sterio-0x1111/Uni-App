@@ -6,13 +6,19 @@ const { CookieJar } = require("tough-cookie");
 
 const session = require("express-session");
 
+const dotenv = require('dotenv');
+const path = require('path');
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+
 const PORT = process.env.PORT;
 const app = express();
+
 
 // Middlewars
 app.use(
   cors({
-    origin: "http://localhost:5173", // Frontend-URL
+    origin: "http://localhost:8100", 
+    //origin: "http://localhost:5173", // Frontend-URL
     credentials: true, // Cookies und andere Anmeldeinformationen zulassen
   })
 );
@@ -57,6 +63,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api/departments', require('./routes/departments.cjs'));
+app.use('/api/auth', require('./routes/centralAuthentication.cjs'));
 app.use("/api/hochschulportal", require("./routes/hochschulportal.cjs"));
 app.use("/api/vpis", require("./routes/vpis.cjs"));
 app.use("/api/vpisPlaner", require("./routes/vpisPlaner.cjs"));
@@ -104,6 +112,12 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Interner Serverfehler." });
 });
+
+// für Fall, dass .env noch nicht funktioniert
+/*const PORT2 = 3000;
+app.listen(PORT2, () => {
+  console.log(`Server läuft auf Port ${PORT2}.`);
+});*/
 
 app.listen(PORT, () => {
   console.log(`Server läuft auf Port ${PORT}.`);

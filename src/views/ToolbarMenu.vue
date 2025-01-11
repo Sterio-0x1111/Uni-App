@@ -1,6 +1,11 @@
 <template>
-  <ion-toolbar>
+  <ion-toolbar class="custom-toolbar">
     <ion-title class="menu-title">{{ menuTitle }}</ion-title>
+    <!--
+    <div class="logo-container">
+      <img class="logo" src="/assets/logos/logo_with_text.png" />
+    </div>
+    -->
     <ion-buttons slot="start">
       <ion-button router-link="/navigation">
         <ion-icon name="menu" aria-label="Navigation"></ion-icon> 
@@ -8,11 +13,11 @@
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button v-if="!loginState" router-link="/login">
+      <ion-button v-if="!loginStateVSC" router-link="/login">
         <ion-icon name="login" aria-label="Login"></ion-icon> 
       </ion-button>
 
-      <ion-button v-else @click="logout"> <!-- Logout Routine implementieren -->
+      <ion-button v-if="loginStateVSC" @click="logout"> <!-- Logout Routine implementieren -->
         <ion-icon name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
@@ -21,13 +26,13 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
-import { ref, defineProps, onMounted } from 'vue';
+import { ref, computed, defineProps, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const authStore = useAuthStore();
-const loginState = ref(authStore.isLoggedIn);
+const loginStateVSC = computed(() => authStore.isLoggedInVSC);
 const router = useRouter();
 
 const props = defineProps({
@@ -54,8 +59,10 @@ const logout = async () => {
     const response = await axios.get(url, { withCredentials: true });
 
     if(response.status === 200){
-      authStore.logout();
-      loginState.value = authStore.isLoggedIn;
+      //authStore.logout();
+      //loginState.value = authStore.isLoggedIn;
+      await authStore.getStates();
+      console.log(loginStateVSC.value);
       router.push('/navigation');
     }
 
@@ -76,5 +83,21 @@ ion-toolbar {
 .menu-title {
   text-align: center; 
   flex-grow: 1;
+}
+
+
+.logo-container {
+  display: flex;
+  justify-content: center; /* Zentriert das Logo horizontal */
+  align-items: center; /* Zentriert das Logo vertikal */
+  position: fixed;
+  top: 50%; /* Abstand von oben */
+  left: 50%; /* Abstand von links */
+  z-index: 1000; /* Sicherstellen, dass das Logo immer über anderem Inhalt bleibt */
+}
+
+.logo {
+  width: 100px; /* Angepasste Größe des Logos */
+  height: auto;
 }
 </style>

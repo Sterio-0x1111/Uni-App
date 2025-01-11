@@ -23,7 +23,7 @@
                         <ion-input v-model="password" type="password" required></ion-input>
                     </ion-item>
 
-                    <ion-button expand="block" @click="handleLogin" >Anmelden</ion-button>
+                    <ion-button class="custom-button" expand="block" @click="handleLogin" >Anmelden</ion-button>
                 </ion-card-content>
             </ion-card>
         </ion-content>
@@ -56,19 +56,20 @@ const handleLogin = async () => {
     try {
 
         const centralLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
-        console.log(centralLogin.headers['set-cookie']);
+        //console.log(centralLogin.headers['set-cookie']);
         
         if(centralLogin.status === 200){
             // TODO: ggf. login States für jede Plattform (vsc, vpis, hsp)
-            authStore.login();
+            //authStore.login();
 
             //const cookies = centralLogin.headers['set-cookie'];
             /*cookies.forEach(cookie => {
                 document.cookie = cookie;
             })*/
-            
+           
+            await authStore.getStates();
             const courseStore = useCourseStore();
-            console.log('Login: ', authStore.isLoggedIn);
+            console.log('Login: ', authStore.isLoggedInVSC);
             await courseStore.fetchCourses();
             router.push('/navigation');
         }

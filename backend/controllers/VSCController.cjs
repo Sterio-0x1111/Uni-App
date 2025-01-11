@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { fetchHTML, handleError, createAxiosClient, deserializeCookieJar, getAndParseHTML } = require("../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -40,7 +41,7 @@ const loginToVSC = async (req, res) => {
     if (!req.session.vscCookies) {
         console.log('ENTERED LOGIN');
         const { username, password } = req.body;
-        const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
+        const loginPageURL = process.env.VSC_LOGIN_URL;
 
         const cookieJar = new CookieJar();
         const client = wrapper(axios.create({ jar: cookieJar, withCredentials: true }));
@@ -62,7 +63,7 @@ const loginToVSC = async (req, res) => {
             const data = response.data;
 
             if (data.includes('Meine Prüfungen')) {
-                req.session.loggedInVSC = false; // provisorisch deaktiviert
+                req.session.loggedInVSC = true; // provisorisch deaktiviert
                 req.session.user = { username };
                 req.session.vscCookies = cookieJar;
                 req.session.save();
@@ -94,7 +95,7 @@ const logoutFromVSC = async (req, res) => {
         const cookieJar = deserializeCookieJar(req.session.vscCookies);
         const client = createAxiosClient(cookieJar);
 
-        const url = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const url = process.env.VSC_HOMEPAGE_URL;
         const response = await client.get(url);
         const initialData = response.data;
         const $ = cheerio.load(response.data);
@@ -124,10 +125,10 @@ const logoutFromVSC = async (req, res) => {
                 res.status(500).json({ message: 'VSC Logout fehlgeschlagen.' })
             }
 
-            res.json({
+            /*res.json({
                 data,
                 state: req.session.loggedInVSC
-            });
+            });*/
 
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
@@ -163,10 +164,11 @@ const getExamResults2 = async (req, res) => {
 const getExamResults = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
-        //const course = req.params.course;
-        const course = 'Informatik  (PO-Version 19)';
+        const course = req.params.course;
+        const degree = req.params.degree;
+        //const course = 'Informatik  (PO-Version 19)';
 
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const homepageUrl = process.env.VSC_HOMEPAGE_URL;
 
         try {
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
@@ -220,7 +222,7 @@ const getExamsData = async (req, res) => {
     if(req.session.vscCookies){
 
         const client = createAxiosClient(req.session.vscCookies);
-        const homepageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const homepageURL = process.env.VSC_HOMEPAGE_URL;
 
         const degree = req.params.degree;
         const course = req.params.course;
@@ -296,7 +298,7 @@ const getRegisteredExams = async (req, res) => {
         const course = req.params.course;
 
         const client = createAxiosClient(req.session.vscCookies);
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const homepageUrl = process.env.VSC_HOMEPAGE_URL;
 
         try {
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
@@ -358,7 +360,7 @@ const getRegisteredExams = async (req, res) => {
 const getReg = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const homepageUrl = process.env.VSC_HOMEPAGE_URL;
         const avaibleDegrees = ['Abschluss BA Bachelor'];
 
         try {
@@ -429,7 +431,7 @@ const getCoursesAndDegrees = (data, master = false) => {
 const testNav = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const homepageUrl = process.env.VSC_HOMEPAGE_URL;
         const avaibleDegrees = ['Abschluss BA Bachelor', 'Abschluss MA Master'];
 
         try {
