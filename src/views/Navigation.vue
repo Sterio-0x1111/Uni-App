@@ -1,14 +1,15 @@
 <template>
   <ion-page>
     <ion-header>
-      <toolbar-menu :menuTitle="toolbarTitle" />
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="compass" />
     </ion-header>
 
     <ion-content>
       <ion-list>
         <ion-button class="custom-button" v-for="route in filteredRoutes" :key="route.id"  @click="navigateTo(route.path)">
-          {{ route.title }}
-          <ion-icon name="key" v-if="route.requiresAuth" slot="start">
+          <span><ion-icon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon"></ion-icon></span>
+          <span class="button-text">{{ route.title }}</span>
+          <ion-icon name="key" v-if="route.requiresAuth" slot="end">
 
           </ion-icon>
         </ion-button>
@@ -33,22 +34,21 @@ const loginStateVSC = computed(() => authStore.isLoggedInVSC);
 console.log(loginStateVSC.value)
 
 /*const routes: Route[] = [
-  { id: 0, title: "Mensaplan",            path: "/meals",       requiresAuth: false, login: false },
-  { id: 1, title: "Semestertermine",      path: "/semester",    requiresAuth: false, login: false },
-  { id: 2, title: "Fachbereichstermine",  path: "/departments", requiresAuth: false, login: false },
-  { id: 3, title: "Lagepläne",            path: "/locations",   requiresAuth: false, login: false },
-  { id: 4, title: "Meine Prüfungen",      path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
+  { id: 0, title: "Mensaplan",            icon: 'restaurant',     path: "/meals",       requiresAuth: false, login: false },
+  { id: 1, title: "Semestertermine",      icon: 'time',           path: "/semester",    requiresAuth: false, login: false },
+  { id: 2, title: "Fachbereichstermine",  icon: 'calendar',       path: "/departments", requiresAuth: false, login: false },
+  { id: 3, title: "Lagepläne",            icon: 'location',       path: "/locations",   requiresAuth: false, login: false },
+  { id: 4, title: "Meine Prüfungen",      icon: 'document-text',  path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
 //{ id: 2, title: "Login", path: "/login", requiresAuth: false },
 ];*/
 
 const routes = computed(() => {
   return [
-  { id: 0, title: "Mensaplan",            path: "/meals",       requiresAuth: false, login: false },
-  { id: 1, title: "Semestertermine",      path: "/semester",    requiresAuth: false, login: false },
-  { id: 2, title: "Fachbereichstermine",  path: "/departments", requiresAuth: false, login: false },
-  { id: 3, title: "Lagepläne",            path: "/locations",   requiresAuth: false, login: false },
-  { id: 4, title: "Meine Prüfungen",      path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
-//{ id: 2, title: "Login", path: "/login", requiresAuth: false },
+  { id: 0, title: "Mensaplan",            icon: 'restaurant',     path: "/meals",       requiresAuth: false, login: false },
+  { id: 1, title: "Semestertermine",      icon: 'time',           path: "/semester",    requiresAuth: false, login: false },
+  { id: 2, title: "Fachbereichstermine",  icon: 'calendar',       path: "/departments", requiresAuth: false, login: false },
+  { id: 3, title: "Lagepläne",            icon: 'location',       path: "/locations",   requiresAuth: false, login: false },
+  { id: 4, title: "Meine Prüfungen",      icon: 'document-text',  path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
 ]
 });
 
@@ -80,9 +80,14 @@ interface Route {
 }
 
 import { addIcons } from 'ionicons'; 
-import { key } from 'ionicons/icons'; 
+import { key, location, restaurant, time, calendar, documentText} from 'ionicons/icons'; 
 addIcons({ 
-  'key': key
+  'key': key,
+  'location': location,
+  'restaurant': restaurant,
+  'time': time,
+  'calendar': calendar,
+  'document-text': documentText,
 });
 
 const router = useRouter();
@@ -98,5 +103,20 @@ const navigateTo = (path: string) => {
 </script>
 
 <style scoped>
+.custom-button {
+  justify-content: flex start;
+  text-align: center;
+  position: relative;
+}
 
+.button-icon {
+  position: relative;
+  left: 16px;
+  font-size: 200px;
+  
+}
+
+.button-text {
+  flex: 1;
+}
 </style>
