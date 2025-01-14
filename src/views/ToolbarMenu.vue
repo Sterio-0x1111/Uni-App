@@ -8,17 +8,17 @@
     -->
     <ion-buttons slot="start">
       <ion-button router-link="/navigation">
-        <ion-icon name="menu" aria-label="Navigation"></ion-icon> 
+        <ion-icon color="primary" name="menu" aria-label="Navigation"></ion-icon> 
       </ion-button>
     </ion-buttons>
 
     <ion-buttons slot="end">
       <ion-button v-if="!loginStateVSC" router-link="/login">
-        <ion-icon name="login" aria-label="Login"></ion-icon> 
+        <ion-icon color="primary" name="person" aria-label="Login"></ion-icon> 
       </ion-button>
 
       <ion-button v-if="loginStateVSC" @click="logout"> <!-- Logout Routine implementieren -->
-        <ion-icon name="logout" aria-label="Logout"></ion-icon> 
+        <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
