@@ -13,7 +13,8 @@ import Data from '../views/Data.vue';
 import VpisLogin from '../views/vpisLogin.vue';
 import VpisPlaner from '../views/Planer.vue';
 import PruefungsForm from '../views/PruefungsForm.vue';
-import VpisIserlohnPruefungsEinsicht from '../views/pruefungsplaene/iserlohn/vpisIserlohnPruefungsEinsicht.vue';
+import VpisPruefungsplaene from "../views/pruefungsplaene/VpisPruefungsplaene.vue";
+import ExamCalendar from "../views/pruefungsplaene/ExamCalendar.vue";
 import LocationPlans from '../views/LocationPlans.vue';
 import Departments from '../views/Departments.vue';
 
@@ -57,33 +58,33 @@ const routes: Array<RouteRecordRaw> = [
     name: "Scores",
     component: Scores,
     beforeEnter: (to, from, next) => {
-      console.log('INDEX TS BEFORE ENTER');
+      console.log("INDEX TS BEFORE ENTER");
       const authStore = useAuthStore();
       if (!authStore.isLoggedInVSC) {
-        next({ path: '/navigation' });
+        next({ path: "/navigation" });
       } else {
         next();
       }
-    }
+    },
   },
   {
     path: "/exams/registered",
     name: "Registered exams",
     component: RegisteredExams,
     beforeEnter: (to, from, next) => {
-      console.log('INDEX TS BEFORE ENTER');
+      console.log("INDEX TS BEFORE ENTER");
       const authStore = useAuthStore();
       if (!authStore.isLoggedInVSC) {
-        next({ path: '/navigation' });
+        next({ path: "/navigation" });
       } else {
         next();
       }
-    }
+    },
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: Login
+    path: "/login",
+    name: "Login",
+    component: Login,
   },
   {
     path: "/vpisLogin",
@@ -101,20 +102,25 @@ const routes: Array<RouteRecordRaw> = [
     component: PruefungsForm,
   },
   {
-    path: "/vpisIserlohnPruefungsEinsicht",
-    name: "VpisIserlohnPruefungsEinsicht",
-    component: VpisIserlohnPruefungsEinsicht,
+    path: "/vpisPruefungsplaene",
+    name: "VpisPruefungsplaene",
+    component: VpisPruefungsplaene,
+  },
+  {
+    path: "/calendar",
+    name: "Calendar",
+    component: ExamCalendar,
   },
   {
     path: "/locations",
     name: "Locations",
-    component: LocationPlans
+    component: LocationPlans,
   },
   {
     path: "/departments",
     name: "Departments",
-    component: Departments
-  }
+    component: Departments,
+  },
 ];
 
 const router = createRouter({

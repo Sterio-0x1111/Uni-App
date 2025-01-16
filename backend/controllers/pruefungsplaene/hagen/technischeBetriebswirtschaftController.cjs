@@ -1,6 +1,4 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const { handleError } = require("../../../utils/helpers.cjs");
+const { handleError, fetchHTML } = require("../../../utils/helpers.cjs");
 
 // Funktion zum Scrapen aller Seiten der Prüfungsinformationen
 const scrapeTechnischeBetriebswirtschaft = async (req, res) => {
@@ -13,11 +11,10 @@ const scrapeTechnischeBetriebswirtschaft = async (req, res) => {
         params.append(key, req.query[key]);
       }
     });
+
     const url = `${req.query.url}&${params.toString()}`; // Dynamische URL erstellen
     if (!url) {
-      return res
-        .status(400)
-        .json({ error: "Es muss eine gültige URL angegeben werden." });
+      return res.status(400).json({ error: "Es muss eine gültige URL angegeben werden." });
     }
     
     let currentPage = 1;
@@ -27,8 +24,7 @@ const scrapeTechnischeBetriebswirtschaft = async (req, res) => {
     while (hasMorePages) {
       // Füge die aktuelle Seite zur URL hinzu
       const paginatedUrl = `${url}&page=${currentPage}`;
-      const response = await axios.get(paginatedUrl);
-      const $ = cheerio.load(response.data);
+      const $ = await fetchHTML(paginatedUrl);
 
       // Scrape die Prüfungsdaten von der aktuellen Seite
       $(".table.table-striped tbody tr").each((i, row) => {
@@ -65,10 +61,7 @@ const scrapeTechnischeBetriebswirtschaft = async (req, res) => {
 
     res.json(exams); // Rückgabe der strukturierten Prüfungsdaten
   } catch (error) {
-    handleError(
-      res,
-      `Fehler beim Scraping der Prüfungsinformationen: ${error.message}`
-    );
+    handleError(res, `Fehler beim Scraping der Prüfungsinformationen: ${error.message}`);
   }
 };
 

@@ -1,28 +1,19 @@
 const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
-const {
-  extractInfoBoxText,
-  extractPlans,
-} = require("../../../utils/scrapeHelper.cjs");
+const { extractUnifiedData } = require("../../../utils/scrapeUnifiedData.cjs");
 
-// Funktion zum Scrapen der Prüfungsinformationen für Maschinenbau-Automatisierungstechnik in Soest
 const scrapeMaschinenbauAutomatisierung = async (req, res) => {
   try {
-    const $ = await fetchHTML(
-      "https://www.fh-swf.de/de/studierende/studienorganisation/pruefungsplaene/soest/index.php"
-    );
+    const url = "https://www.fh-swf.de/de/studierende/studienorganisation/pruefungsplaene/soest/index.php";
+    const $ = await fetchHTML(url);
 
-    const infoBox = extractInfoBoxText($, ".bubble-box__wrapper p"); // Extrahiert Infobox-Daten
-    const pruefungsplaene = extractPlans($, ".accordion__wrapper .accordion__item"); // Extrahiert Prüfungspläne
-
-    res.json({
-      infoBox,
-      pruefungsplaene,
+    const unifiedData = await extractUnifiedData($, {
+      contentSelector: "div.bubble-box__wrapper.marginal.bs.mb--16.lg-mb--24.bs:not(.theme--inverted)",
+      planSelector: ".accordion .accordion__wrapper .accordion__item"
     });
+
+    res.json(unifiedData);
   } catch (error) {
-    handleError(
-      res,
-      `Fehler beim Scraping der Maschinenbau-Automatisierungstechnik Prüfungsinformationen: ${error.message}`
-    );
+    handleError(res, `Fehler beim Scraping der Maschinenbau-Automatisierungstechnik Prüfungsinformationen: ${error.message}`);
   }
 };
 
