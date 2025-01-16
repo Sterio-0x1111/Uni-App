@@ -5,16 +5,18 @@
         </ion-header>
 
         <ion-content>
-            <ion-select v-model="selectedLocation">
+            <ion-select v-model="selectedLocation" :disabled="loading">
                 <ion-select-option v-for="location in locations" :key="location">
                     {{ location }}
                 </ion-select-option>
             </ion-select>
+
+            <ion-loading :is-open="loading" message="Warten auf Standortermittlung..."></ion-loading>
             
-        <div v-if="nextDistance">
-            <p>Nächster Studienstandort: {{ nextLocation }}</p>
-            <p>Entfernung: {{ nextDistance }} km</p>
-        </div>
+            <div v-if="nextDistance">
+                <p>Nächster Studienstandort: {{ nextLocation }}</p>
+                <p>Entfernung: {{ nextDistance }} km</p>
+            </div>
 
             <div v-for="image in filteredImages" :key="image">
                 <img :src="image.path" />
@@ -24,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonContent, IonSelect, IonSelectOption } from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonSelect, IonSelectOption, IonLoading } from '@ionic/vue';
 import { ref, onMounted, computed, onBeforeMount } from 'vue';
 import ToolbarMenu from './ToolbarMenu.vue';
 import { useLocationStore } from '@/stores/locationStore';
@@ -32,25 +34,37 @@ import { useLocationStore } from '@/stores/locationStore';
 const toolbarTitle = 'Lagepläne';
 const images = ref([]);
 const locations = [ 'Hagen', 'Iserlohn', 'Meschede', 'Soest', 'Lüdenscheid' ];
-const selectedLocation = ref(locations[0]);
+const selectedLocation = ref(locations[1]);
 const nextLocation = ref(null);
 const locationStore = useLocationStore();
 const nextDistance = ref(null);
+const loading = ref(false);
 
 const filteredImages = computed(() => {
     return images.value.filter((image) => image.location === selectedLocation.value);
 })
 
 onMounted(async () => {
-    const success = await locationStore.locateClient();
-    console.log(success);
-    //nextDistance.value = locationStore.nextLocationDistance;
-    //console.log(nextDistance.value, locationStore.nextLocationDistance);
-    if(success){
-        console.log('Entered -1', nextDistance.value);
-        selectedLocation.value = locationStore.nextLocation;
-        nextLocation.value = locationStore.nextLocation;
-        nextDistance.value = Math.round( (locationStore.nextLocationDistance / 1000) * 100 ) / 100; // Umrechnung in km
+    const locationStore = useLocationStore();
+    
+    try {
+        if(!locationStore.nextLocation){
+            loading.value = true;
+            const success = await locationStore.locateClient();
+
+            if(success){
+                selectedLocation.value = locationStore.nextLocation;
+                nextLocation.value = locationStore.nextLocation;
+                nextDistance.value = Math.round( (locationStore.nextLocationDistance / 1000) * 100 ) / 100; // Umrechnung in km
+            }
+            loading.value = false;
+        } else {
+            selectedLocation.value = locationStore.nextLocation;
+            nextLocation.value = locationStore.nextLocation;
+            nextDistance.value = Math.round( (locationStore.nextLocationDistance / 1000) * 100 ) / 100; // Umrechnung in km
+        }
+    } catch(error){
+        console.log('Fehler bei Standortermittlung', error);
     }
 
     images.value = [

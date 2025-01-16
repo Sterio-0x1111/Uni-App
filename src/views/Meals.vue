@@ -6,9 +6,13 @@
 
         <ion-content>
             <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
+            <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
+            <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
+            
+
             <ion-item>
                 <ion-select class="selection" v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
-                    <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.id">
+                    <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.name">
                         {{ mensa.name }}
                     </ion-select-option>
                 </ion-select>
@@ -49,16 +53,18 @@
             <div v-else>
                 <p class="info-text">Mensa auswählen oder kein Plan gefunden.</p>
             </div>
+            <ion-loading :is-open="loading" :message="loadingMessage"></ion-loading>
         </ion-content>
     </ion-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonItemDivider } from '@ionic/vue';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonItemDivider, IonLoading } from '@ionic/vue';
 import ToolbarMenu from "./ToolbarMenu.vue";
+import { useLocationStore } from '@/stores/locationStore';
 
 const menuTitle = ref('Mensaplan');
 
@@ -90,37 +96,75 @@ const categoryIcons = {
 
 
 // Reaktive Variablen
-const selectedMensa = ref(null)
-const mensaPlan = ref(null)
+const selectedMensa = ref(null);
+const mensaPlan = ref(null);
 const selectedDate = ref(null);
 const dateSelection = ref([]);
 
 // Berechne den Namen der ausgewählten Mensa
 const selectedMensaName = computed(() => {
-    const mensa = mensas.find(m => m.id === selectedMensa.value)
+    const mensa = mensas.find(m => m.name === selectedMensa.value)
     return mensa ? mensa.name : ''
+})
+
+const nextLocation = ref('');
+const nextDistance = ref(-1);
+const loading = ref(false);
+const loadingMessage = ref('');
+
+onMounted(async () => {
+    const locationStore = useLocationStore();
+    
+    if(!locationStore.nextLocation){
+        loadingMessage.value = 'Warten auf Standortermittlung...';
+        loading.value = true;
+        const success = await locationStore.locateClient();
+
+        if(success){
+            selectedMensa.value = locationStore.nextLocation;
+            nextLocation.value = locationStore.nextLocation;
+            nextDistance.value = Math.round( (locationStore.nextLocationDistance / 1000) * 100 ) / 100; // Umrechnung in km
+            loading.value = false;
+            await loadSelectionOptions();
+            //loading.value = false;
+        } else {
+            loading.value = false;
+        }
+    } else {
+        selectedMensa.value = locationStore.nextLocation;
+        nextLocation.value = locationStore.nextLocation;
+        nextDistance.value = Math.round( (locationStore.nextLocationDistance / 1000) * 100 ) / 100; // Umrechnung in km
+        await loadSelectionOptions();
+    }
 })
 
 // Lade den Mensaplan basierend auf der ausgewählten Mensa
 const loadMensaPlan = async () => {
-    console.log(selectedDate);
-    const mensa = mensas.find(m => m.id === selectedMensa.value)
+    loadingMessage.value = 'Lade Mensaplan...';
+    const mensa = mensas.find(m => m.name === selectedMensa.value);
+    //const mensa = selectedMensa.value.toLowerCase();
 
     if (mensa) {
         try {
-            console.log('Lade Mensaplan für', mensa.name)
+            console.log('Lade Mensaplan für', mensa.name);
             const response = await axios.get(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
             const meals = response.data;
+            console.log(meals.value);
             mensaPlan.value = (meals && response.status === 200) ? meals.table : null;
         } catch (error) {
             console.log('Fehler beim Laden des Mensaplan:', error);
             mensaPlan.value = null;
+        } finally {
+            loading.value = false;
         }
-    }
+    } 
+    loading.value = false;
 }
 
 const loadSelectionOptions = async () => {
-    const mensaName = selectedMensaName.value.toLowerCase();
+    loadingMessage.value = 'Lade verfügbare Daten...';
+    //const mensaName = selectedMensaName.value.toLowerCase();
+    const mensaName = selectedMensa.value;
 
     try {
         const response = await axios.get(`http://localhost:3000/api/mensa/options/${mensaName}`);
@@ -129,7 +173,7 @@ const loadSelectionOptions = async () => {
         // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
         dateSelection.value = data.options;
         selectedDate.value = data.options[0].optionValue;
-        loadMensaPlan();
+        await loadMensaPlan();
     } catch (error) {
         console.log('Fehler beim Laden der Optionen:', error);
         dateSelection.value = [];
