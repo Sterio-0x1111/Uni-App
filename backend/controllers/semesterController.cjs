@@ -1,6 +1,4 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
-const axios = require('axios');
-const cheerio = require('cheerio');
 
 /**
  * Funktion zum Laden der Semesterzeiträume.

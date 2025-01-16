@@ -25,7 +25,7 @@ const loginToHSP = async (req, res) => {
             loginData.append('ajax-token', ajaxToken);
             loginData.append('asdf', username);
             loginData.append('fdsa', password);
-            loginData.append('submit', '');
+            loginData.append('submit', 'Anmelden');
 
             // 3. Sende den POST-Request zum Login mit den extrahierten Tokens
             const loginResponse = await req.clientHSP.post(

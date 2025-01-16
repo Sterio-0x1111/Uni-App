@@ -4,6 +4,6 @@ const {
 } = require("../../../controllers/pruefungsplaene/meschede/ingenieurWirtschaftsController.cjs");
 const router = express.Router();
 
-router.get("/ingenieur-wirtschafts", scrapeIngenieurWirtschafts);
+router.get("/ingenieur-wirtschaftswissenschaften", scrapeIngenieurWirtschafts);
 
 module.exports = router;
