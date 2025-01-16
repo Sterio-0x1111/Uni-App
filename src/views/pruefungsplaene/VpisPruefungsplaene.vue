@@ -8,7 +8,7 @@
     <IonContent>
       <custom-toggle v-model="showSelection" />
 
-      <!-- Auswahl des Standorts (Department/Standort der FH) -->
+      <!-- Standort-Auswahl (Department/Standort der FH) -->
       <ion-item v-if="showSelection">
         <ion-label>Wähle einen Standort</ion-label>
         <ion-select v-model="selectedStandort" @ionChange="onStandortChange" placeholder="Standort wählen">
@@ -18,28 +18,14 @@
         </ion-select>
       </ion-item>
 
-      <!-- Auswahl des Fachbereichs (hätte auch dynamisch sein können) -->
-      <ion-item v-if="selectedStandort !== null && showSelection">
+      <!-- Fachbereich-Auswahl -->
+      <ion-item v-if="selectedStandort && showSelection">
         <ion-label>Wähle einen Fachbereich</ion-label>
         <ion-select v-model="selectedDepartment" @ionChange="onDepartmentChange" placeholder="Fachbereich wählen">
-          <ion-select-option v-if="selectedStandort === 'iserlohn'" value="informatik-naturwissenschaft">Informatik &
-            Naturwissenschaft</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'iserlohn'"
-            value="maschinenbau">Maschinenbau</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'hagen'"
-            value="elektrotechnik-informationstechnik">Elektrotechnik und Informationstechnik</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'hagen'" value="technische-betriebswirtschaft">Technische
-            Betriebswirtschaft</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'soest'"
-            value="agrarwirtschaft">Agrarwirtschaft</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'soest'" value="bildungs-gesellschaftswissenschaften">Bildungs-
-            und Gesellschaftswissenschaften</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'soest'" value="elektrische-energietechnik">Elektrische
-            Energietechnik</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'soest'"
-            value="maschinenbau-automatisierungstechnik">Maschinenbau-Automatisierungstechnik</ion-select-option>
-          <ion-select-option v-if="selectedStandort === 'meschede'"
-            value="ingenieur-wirtschaftswissenschaften">Ingenieur-Wirtschaftswissenschaften</ion-select-option>
+          <ion-select-option v-for="option in departmentOptions[selectedStandort]" :key="option.value"
+            :value="option.value">
+            {{ option.label }}
+          </ion-select-option>
         </ion-select>
       </ion-item>
 
@@ -70,21 +56,17 @@
         </ion-select>
       </ion-item>
 
-      <!-- Button zum Abrufen des Prüfungsplans -->
-      <ion-button :disabled="loading || !selectedStandort || !selectedDepartment ||
-        // Falls kein Studiengang ausgewählt wurde und der Standort nicht in den Ausnahmebereichen ist:
-        (!selectedStudiengang && selectedStandort !== 'soest' && selectedStandort !== 'hagen') ||
-        // Spezialfall Iserlohn: Bei Präsenz-Studiengang ist zudem ein Semester erforderlich:
-        (selectedStandort === 'iserlohn' && selectedStudiengang && selectedStudiengang.type === 'praesenz' && !selectedSemester)" 
-        expand="block" @click="fetchPruefungsplan">
+      <!-- Button zum Laden des Prüfungsplans -->
+      <ion-button
+        :disabled="isButtonDisabled" expand="block" @click="fetchPruefungsplan">
         <span v-if="!loading">Prüfungsplan anzeigen</span>
         <ion-spinner v-else name="crescent"></ion-spinner>
       </ion-button>
 
-      <!-- Fehlermeldung anzeigen -->
+      <!-- Fehlermeldung -->
       <div v-if="error" class="error-message">{{ error }}</div>
 
-      <!-- Anzeige der InfoBoxes und Prüfungspläne nur, wenn ein Prüfungsplan vorhanden ist -->
+      <!-- Anzeige der InfoBoxes und Prüfungspläne -->
       <template v-if="!loading && pruefungsplan && (
         (selectedStandort === 'hagen' && selectedDepartment === 'elektrotechnik-informationstechnik') ||
         (selectedStandort === 'soest' && selectedDepartment)
@@ -102,7 +84,6 @@
                 <p>{{ box.text }}</p>
               </template>
               <template v-else-if="box.type === 'div'">
-                <!-- Nutze v-html, um mögliche Formatierungen (z. B. Zeilenumbrüche) zu erhalten -->
                 <div v-html="box.text"></div>
               </template>
               <template v-else-if="box.type === 'a'">
@@ -143,7 +124,7 @@
         </IonGrid>
       </template>
 
-      <!-- Beispielhafte Tabellen zur Anzeige von Daten -->
+      <!-- Tabellen zur Anzeige von Daten -->
       <IonGrid v-if="pruefungsplan?.teilzeitraeume && !loading && selectedStudiengang?.type === 'praesenz'">
         <h3>Prüfungsteilzeiträume (gesamter Standort)</h3>
         <IonRow class="header">
@@ -158,7 +139,7 @@
         </IonRow>
       </IonGrid>
 
-      <!-- Tabelle zur Anzeige der Anmeldungsfristen (Antrag auf Zulassung zu Modulprüfungen) -->
+      <!-- Tabelle zur Anzeige der Anmeldungsfristen -->
       <IonGrid v-if="pruefungsplan?.teilzeitraeume && !loading && selectedStudiengang?.type === 'praesenz'">
         <h3>Fristen zur Anmeldung (Antrag auf Zulassung) zu den Modulprüfungen</h3>
         <IonRow class="header">
@@ -203,7 +184,7 @@
       <IonGrid v-if="showVerbundDetails && selectedStudiengang && selectedStudiengang.type === 'verbund'">
         <IonRow>
           <IonCol>
-            <!-- Name und optionale Zusatzinfo -->
+            <!-- Name und Zusatzinfo -->
             <h2>{{ selectedStudiengang.name }}</h2>
             <p v-if="selectedStudiengang.additionalInfo">{{ selectedStudiengang.additionalInfo }}</p>
           </IonCol>
@@ -239,11 +220,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import CustomToggle from '@vsc/CustomToggle.vue';
 
+// States
 const selectedStandort = ref<string | null>(null);
 const accessibleSemesters = ref([]);
 const praesenzStudiengaenge = ref([]);
@@ -256,46 +238,61 @@ const pruefungsplan = ref<any>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const showSelection = ref(true);
+
+// Standorte und Fachbereiche
 const locations = ['Hagen', 'Iserlohn', 'Lüdenscheid', 'Meschede', 'Soest'];
+const departmentOptions = {
+  hagen: [
+    { value: 'elektrotechnik-informationstechnik', label: 'Elektrotechnik & Informationstechnik' },
+    { value: 'technische-betriebswirtschaft', label: 'Technische Betriebswirtschaft' }
+  ],
+  iserlohn: [
+    { value: 'informatik-naturwissenschaft', label: 'Informatik & Naturwissenschaft' },
+    { value: 'maschinenbau', label: 'Maschinenbau' }
+  ],
+  meschede: [
+    { value: 'ingenieur-wirtschaftswissenschaften', label: 'Ingenieur-Wirtschaftswissenschaften' }
+  ],
+  soest: [
+    { value: 'agrarwirtschaft', label: 'Agrarwirtschaft' },
+    { value: 'bildungs-gesellschaftswissenschaften', label: 'Bildungs- und Gesellschaftswissenschaften' },
+    { value: 'elektrische-energietechnik', label: 'Elektrische Energietechnik' },
+    { value: 'maschinenbau-automatisierungstechnik', label: 'Maschinenbau-Automatisierungstechnik' }
+  ]
+};
 
-onMounted(async () => {
-  if(selectedStandort.value === 'iserlohn'){
-    await loadAccessibleSemesters();
-  }
-});
-
+// Funktionen
 const onStandortChange = async () => {
-  selectedDepartment.value = null;
-  selectedSemester.value = null;
-  selectedStudiengang.value = null;
-  accessibleSemesters.value = [];
-  praesenzStudiengaenge.value = [];
-  verbundStudiengaenge.value = [];
-  showVerbundDetails.value = false;
-  pruefungsplan.value = null;
-  error.value = null;
-  
-  // Lade die Semester nur, wenn Standort "iserlohn" gewählt ist
-  if (selectedStandort.value === 'iserlohn') {
-    await loadAccessibleSemesters();
-  }
+  resetSelections();
+  if (selectedStandort.value === 'iserlohn') await loadAccessibleSemesters();
 };
 
 const onDepartmentChange = async () => {
-  praesenzStudiengaenge.value = [];
-  verbundStudiengaenge.value = [];
-  showVerbundDetails.value = false;
-  selectedStudiengang.value = null;
-  
-  if (selectedDepartment.value && selectedStandort.value === 'iserlohn')
-    await loadStudiengaenge();
+  resetStudiengaenge();
+  if (selectedStandort.value === 'iserlohn') await loadStudiengaenge();
 };
 
 const onStudiengangChange = () => {
-  // Wenn es kein Verbundstudiengang ist, dann Tabelle ausblenden
-  if (!selectedStudiengang.value || selectedStudiengang.value.type !== 'verbund')
-    showVerbundDetails.value = false;
+  if (!selectedStudiengang.value || selectedStudiengang.value.type !== 'verbund') showVerbundDetails.value = false;
 };
+
+const isButtonDisabled = computed(() => {
+  if (loading.value) return true; // Deaktiviert, wenn Daten geladen werden
+  if (!selectedStandort.value || !selectedDepartment.value) return true; // Pflichtfelder leer
+  if (selectedStandort.value === 'iserlohn') {
+    if (!selectedStudiengang.value) return true; // Studiengang erforderlich
+    if (selectedStudiengang.value?.type === 'praesenz' && !selectedSemester.value) return true; // Semester erforderlich
+  }
+  return false; // Aktiv, wenn alle Bedingungen erfüllt sind
+});
+
+/*
+"loading || !selectedStandort || !selectedDepartment ||
+// Falls kein Studiengang ausgewählt wurde und der Standort nicht in den Ausnahmebereichen ist:
+(!selectedStudiengang && selectedStandort !== 'soest' && selectedStandort !== 'hagen') ||
+// Spezialfall Iserlohn: Bei Präsenz-Studiengang ist zudem ein Semester erforderlich:
+(selectedStandort === 'iserlohn' && selectedStudiengang && selectedStudiengang.type === 'praesenz' && !selectedSemester)"
+*/
 
 const loadAccessibleSemesters = async () => {
   try {
@@ -314,20 +311,10 @@ const loadStudiengaenge = async () => {
     loading.value = true;
     const response = await axios.get(`http://localhost:3000/api/pruefungsplaene/iserlohn/${selectedDepartment.value}`);
     const { praesenzStudiengaenge: pStudien, verbundStudiengaenge: vStudien } = response.data;
-    
-    // Präsenz mit type: 'praesenz'
-    praesenzStudiengaenge.value = pStudien.map(sg => ({
-      ...sg,
-      type: 'praesenz'
-    }));
-    
-    // Verbund mit type: 'verbund'
-    verbundStudiengaenge.value = vStudien.map(sg => ({
-      ...sg,
-      type: 'verbund'
-    }));
+    praesenzStudiengaenge.value = pStudien.map(sg => ({ ...sg, type: 'praesenz' })); // präsenz
+    verbundStudiengaenge.value = vStudien.map(sg => ({ ...sg, type: 'verbund' })); // verbund
   } catch (err) {
-    error.value = "Fehler beim Laden der Studiengänge";
+    error.value = 'Fehler beim Laden der Studiengänge';
   } finally {
     loading.value = false;
   }
@@ -337,7 +324,6 @@ async function loadPruefungsplan() {
   try {
     loading.value = true;
     const response = await axios.get(`http://localhost:3000/api/pruefungsplaene/${selectedStandort.value}/${selectedDepartment.value}`);
-    console.log(`http://localhost:3000/api/pruefungsplaene/${selectedStandort.value}/${selectedDepartment.value}`);
     pruefungsplan.value = response.data;
   } catch (err) {
     error.value = "Fehler beim Laden des Prüfungsplans";
@@ -354,14 +340,14 @@ const fetchPruefungsplan = async () => {
     pruefungsplan.value = null;
     showVerbundDetails.value = false;
 
-    // Falls ein Verbundstudiengang ausgewählt wurde, einfach die Verbund-Details anzeigen.
+    // Falls ein Verbundstudiengang ausgewählt wurde, die Verbund-Details anzeigen
     if (selectedStudiengang.value && selectedStudiengang.value.type === 'verbund') {
       showVerbundDetails.value = true;
       return;
     } else if ((selectedStandort.value === 'hagen' && selectedDepartment.value === 'elektrotechnik-informationstechnik') || (selectedDepartment.value && selectedStandort.value === 'soest')) {
       return await loadPruefungsplan();
     } else if (selectedStudiengang.value) {
-      // Präsenz-Variante: Semester und Studiengang-Code ermitteln
+      // Präsenz-Variante
       const semester = selectedSemester.value.split('/')[0];
       const studiengangCode = selectedStudiengang.value.link.split('Studiengang=')[1].split('&')[0];
 
@@ -377,6 +363,22 @@ const fetchPruefungsplan = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Hilfsfunktionen
+const resetSelections = () => {
+  selectedDepartment.value = null;
+  selectedSemester.value = null;
+  selectedStudiengang.value = null;
+  praesenzStudiengaenge.value = [];
+  verbundStudiengaenge.value = [];
+  accessibleSemesters.value = [];
+};
+
+const resetStudiengaenge = () => {
+  selectedStudiengang.value = null;
+  praesenzStudiengaenge.value = [];
+  verbundStudiengaenge.value = [];
 };
 </script>
 

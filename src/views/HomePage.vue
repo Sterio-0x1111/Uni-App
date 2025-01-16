@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header :translucent="true">
-      <toolbar-menu :menuTitle="menuTitle" />
+      <toolbar-menu :menuTitle="menuTitle" iconName="home" />
     </ion-header>
 
     <ion-content :fullscreen="true">
@@ -22,10 +22,6 @@
 import { ref } from 'vue';
 import { IonContent, IonHeader, IonPage, IonTitle, IonButton, IonImg } from '@ionic/vue';
 import ToolbarMenu from './ToolbarMenu.vue';
-//import { useLocationStore } from '@/stores/locationStore';
-
-//const locationStore = useLocationStore();
-//locationStore.locateClient();
 
 const menuTitle = ref('Startseite');
 </script>

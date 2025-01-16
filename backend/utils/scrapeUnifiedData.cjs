@@ -15,24 +15,27 @@ const { extractInfoBoxText, extractPlans, scrapeCourses } = require("./scrapeHel
  * @returns {Promise<Object>} - Objekt mit den Schlüsseln infoBoxes, plans, courses
  */
 const extractUnifiedData = async ($, config = {}) => {
-  let infoBoxes = [];
+  const infoBoxes = [];
 
-  // 1. Extrahiere klassische Infoboxen (falls infoBoxSelector übergeben wurde)
+  // Extrahiere klassische Infoboxen, falls ein entsprechender Selektor vorhanden ist.
   if (config.infoBoxSelector) {
     const classicInfo = extractInfoBoxText($, config.infoBoxSelector);
-    classicInfo.forEach(text => infoBoxes.push({ type: "p", text }));
+    classicInfo.forEach(text => {
+      infoBoxes.push({ type: "p", text });
+    });
   }
 
-  // 2. Extrahiere Inhalte aus dem angegebenen Container (contentSelector)
+  // Verarbeite Inhalte des angegebenen Containers, falls definiert.
   if (config.contentSelector) {
     const $container = $(config.contentSelector);
-    
-    // Verarbeitung der direkten Kindelemente
+
+    // Schleife durch die direkten Kindelemente des Containers.
     $container.children().each((_, element) => {
       const $el = $(element);
       const tag = $el.prop("tagName").toLowerCase();
 
-      if (tag === "h3" || tag === "p" || tag === "div" || tag === "strong") {
+      // Je nach Tag verarbeite den Inhalt.
+      if (["h3", "p", "div", "strong"].includes(tag)) {
         const text = $el.text().trim();
         infoBoxes.push({ type: tag, text });
       } else if (tag === "ul") {
@@ -43,33 +46,26 @@ const extractUnifiedData = async ($, config = {}) => {
         const href = $el.attr("href") || "";
         infoBoxes.push({ type: tag, text: linkText, href });
       }
-      // Weitere Tags können bei Bedarf ergänzt werden.
     });
-    
-    // Zusätzlich: Durchsuche verschachtelte <a>-Elemente im Container, falls diese nicht als direkte Kinder erscheinen
+
+    // Füge zusätzliche verschachtelte Links im Container hinzu, sofern nicht redundant.
     $container.find("a").each((_, element) => {
       const $el = $(element);
       const linkText = $el.text().trim();
       const href = $el.attr("href") || "";
-      // Duplikate: Falls ein <a>-Objekt mit demselben Text und href bereits in infoBoxes steht, füge es nicht erneut hinzu.
-      const exists = infoBoxes.some(item => item.type === "a" && item.text === linkText && item.href === href);
-      if (!exists) {
+
+      // Prüfe, ob der Link bereits existiert, bevor er hinzugefügt wird.
+      if (!infoBoxes.some(item => item.type === "a" && item.text === linkText && item.href === href)) {
         infoBoxes.push({ type: "a", text: linkText, href });
       }
     });
   }
 
-  // 3. Extrahiere Prüfungspläne (falls planSelector übergeben wurde)
-  let plans = [];
-  if (config.planSelector) {
-    plans = extractPlans($, config.planSelector);
-  }
+  // Extrahiere Prüfungspläne, falls ein Selektor angegeben ist.
+  const plans = config.planSelector ? extractPlans($, config.planSelector) : [];
 
-  // 4. Optional: Lade Kursdaten, falls courseUrl angegeben wurde.
-  let courses = null;
-  if (config.courseUrl) {
-    courses = await scrapeCourses(config.courseUrl);
-  }
+  // Lade zusätzliche Kursdaten, falls eine URL definiert ist.
+  const courses = config.courseUrl ? await scrapeCourses(config.courseUrl) : null;
 
   return {
     infoBoxes,
