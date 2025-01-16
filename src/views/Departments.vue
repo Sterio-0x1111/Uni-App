@@ -4,25 +4,25 @@
         <toolbar-menu :menuTitle="toolbarTitle" />
     </ion-header>
 
-    <!-- Notiz für Controller: Versuche über alle Headings zu iterieren und dabei die Inhalte zwischen den Headings zu parsen -->
-
     <ion-content>
-        <ion-select v-if="departments" v-model="selectedDepartment" @ionChange="loadData()" placeholder="Fachbereich auswählen">
-            <ion-select-option v-for="department in departments" :key="department.department" :value="department">
-                {{ department.department }}
-            </ion-select-option>
-        </ion-select>
-        <ion-select v-if="courseOptions" v-model="selectedCourse" @ionChange="loadCourseData" placeholder="Studiengang auswählen">
-            <ion-select-option v-for="course in courseOptions" :key="course.name" :value="course.url">
-                {{ course.name }}
-            </ion-select-option>
-        </ion-select>
+        <div class="select-container">
+            <ion-select v-if="departments" v-model="selectedDepartment" @ionChange="loadData()" placeholder="Fachbereich auswählen">
+                <ion-select-option v-for="department in departments" :key="department.department" :value="department">
+                    {{ department.department }}
+                </ion-select-option>
+            </ion-select>
+            <ion-select v-if="courseOptions" v-model="selectedCourse" @ionChange="loadCourseData" placeholder="Studiengang auswählen">
+                <ion-select-option v-for="course in courseOptions" :key="course.name" :value="course.url">
+                    {{ course.name }}
+                </ion-select-option>
+            </ion-select>
+        </div>
 
         <div v-if="tables">
             <ion-grid v-for="table in tables" :key="table">
                 <h6>{{ table.heading }}</h6>
                 <ion-row>
-                    <ion-col v-for="header in tableHeaders" :key="header">
+                    <ion-col :size="6" :size-sm="6" v-for="header in tableHeaders" :key="header">
                         <h2>{{ header }}</h2>
                     </ion-col>
                 </ion-row>
@@ -40,20 +40,22 @@
 
         <div v-if="dates">
             <ion-grid>
-                <ion-row>
-                    <ion-col v-for="header in tableHeaders" :key="header">
-                        <h2>{{ header }}</h2>
+                <ion-row class="table-row header-row">
+                    <ion-col class="table-col" :size="6" v-for="header in tableHeaders" :key="header">
+                        <span>{{ header }}</span>
                     </ion-col>
                 </ion-row>
 
-                <ion-row v-for="date in dates" :key="date">
-                    <ion-col>
-                        <span>{{ date.date }}</span>
-                    </ion-col>
-                    <ion-col>
+                <ion-row class="table-row" v-for="date in dates" :key="date">
+                    <ion-col class="table-col" :size="6" :size-sm="6">
                         <span>{{ date.event }}</span>
                     </ion-col>
+                    <ion-col class="table-col" :size="6" :size-sm="6">
+                        <span>{{ date.date }}</span>
+                    </ion-col>
+                    <ion-item-divider class="custom-divider"></ion-item-divider>
                 </ion-row>
+                
             </ion-grid>
         </div>
 
@@ -129,7 +131,7 @@ const dates = ref(null);
 const tables = ref(null);
 const lists = ref(null);
 
-const tableHeaders = ['Termin', 'Ereignis'];
+const tableHeaders = ['Ereignis', 'Termin'];
 const courseOptions = ref(null);
 const selectedCourse = ref(null);
 
@@ -201,5 +203,20 @@ const resetStatus = () => {
 </script>
 
 <style scoped>
+ion-row.header-row span {
+    font-size: 32px;
+}
+.table-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+}
 
+.table-col {
+    font-size: 17px;
+    display: inline-block;
+    flex: 1;
+    text-align: center;
+}
 </style>
