@@ -5,12 +5,11 @@
     </ion-header>
 
     <ion-content>
-      <ion-list>
+      <ion-list class="light-list">
         <ion-button class="custom-button" v-for="route in filteredRoutes" :key="route.id"  @click="navigateTo(route.path)">
           <span><ion-icon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon"></ion-icon></span>
           <span class="button-text">{{ route.title }}</span>
           <ion-icon name="key" v-if="route.requiresAuth" slot="end">
-
           </ion-icon>
         </ion-button>
       </ion-list>
@@ -49,6 +48,9 @@ const routes = computed(() => {
   { id: 2, title: "Fachbereichstermine",  icon: 'calendar',       path: "/departments", requiresAuth: false, login: false },
   { id: 3, title: "Lagepläne",            icon: 'location',       path: "/locations",   requiresAuth: false, login: false },
   { id: 4, title: "Meine Prüfungen",      icon: 'document-text',  path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
+  { id: 5, title: "Prüfungspläne",        icon: 'document-text',  path: "/vpisPruefungsplaene",       requiresAuth: false,  login: false },
+  { id: 6, title: "Wochenplan",           icon: 'calendar',  path: "/calendar",       requiresAuth: false,  login: false },
+  { id: 7, title: "Prüfungsform",         icon: 'calendar',  path: "/pruefungsForm",       requiresAuth: false,  login: false }, // ggf. requiresAuth und Login anpassen
 ]
 });
 
@@ -118,5 +120,11 @@ const navigateTo = (path: string) => {
 
 .button-text {
   flex: 1;
+}
+
+.light-list {
+  --background: #ffffff; /* Heller Hintergrund */
+  --ion-item-background: #ffffff; /* Heller Hintergrund für Items */
+  --ion-item-color: #000000; /* Schwarzer Text */
 }
 </style>
