@@ -1,10 +1,11 @@
-import { defineStore, StoreDefinition } from 'pinia';
+import { defineStore } from 'pinia';
 import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         isLoggedIn: false as boolean,
-        isLoggedInVSC: false as boolean
+        isLoggedInVSC: false as boolean,
+        isLoggedInHSP: false as boolean
     }), 
     actions: {
         login(){
@@ -17,17 +18,16 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const url = 'http://localhost:3000/api/states';
                 const response = await axios.get(url, { withCredentials: true });
-
                 if(response.status === 200){
                     const data = response.data;
                     this.isLoggedInVSC = data.stateVSC;
-                    console.log(this.isLoggedInVSC);
+                    this.isLoggedInHSP = data.stateHSP;
                 }
 
                 return {
                     vsc:    this.isLoggedInVSC,
-                    vpis:   false,
-                    hsp:    false
+                    hsp:    this.isLoggedInHSP,
+                    vpis:   false
                 }
 
             } catch(error){

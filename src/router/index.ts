@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
+import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import HomePage from '../views/HomePage.vue'
+import HomePage from '../views/HomePage.vue';
 import Navigation from '../views/Navigation.vue';
-import Exams from '../views/VSC/Exams.vue'
-import Scores from '../views/VSC/Scores.vue'
+import Exams from '../views/VSC/Exams.vue';
+import Scores from '../views/VSC/Scores.vue';
 import RegisteredExams from '../views/VSC/RegisteredExams.vue';
 import Login from '../views/VSC/Login.vue';
 import Semester from '../views/Semester.vue';
@@ -13,10 +14,24 @@ import Data from '../views/Data.vue';
 import VpisLogin from '../views/vpisLogin.vue';
 import VpisPlaner from '../views/Planer.vue';
 import PruefungsForm from '../views/PruefungsForm.vue';
-import VpisPruefungsplaene from "../views/pruefungsplaene/VpisPruefungsplaene.vue";
 import ExamCalendar from "../views/pruefungsplaene/ExamCalendar.vue";
+import VpisPruefungsplaene from "../views/pruefungsplaene/VpisPruefungsplaene.vue";
 import LocationPlans from '../views/LocationPlans.vue';
 import Departments from '../views/Departments.vue';
+import LoginHSP from "../views/test.vue";
+import PayReport from "../views/HSP/PayReport.vue";
+
+const requireAuth = (authType: 'VSC' | 'HSP') => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+    const authStore = useAuthStore();
+    
+    if (authType === 'VSC' && !authStore.isLoggedInVSC) {
+      next({ path: '/navigation' });
+    } else if (authType === 'HSP' && !authStore.isLoggedInHSP) {
+      next({ path: '/navigation' });
+    } else {
+      next();
+    }
+};
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -57,29 +72,13 @@ const routes: Array<RouteRecordRaw> = [
     path: "/exams/results",
     name: "Scores",
     component: Scores,
-    beforeEnter: (to, from, next) => {
-      console.log("INDEX TS BEFORE ENTER");
-      const authStore = useAuthStore();
-      if (!authStore.isLoggedInVSC) {
-        next({ path: "/navigation" });
-      } else {
-        next();
-      }
-    },
+    beforeEnter: requireAuth("VSC"),
   },
   {
     path: "/exams/registered",
     name: "Registered exams",
     component: RegisteredExams,
-    beforeEnter: (to, from, next) => {
-      console.log("INDEX TS BEFORE ENTER");
-      const authStore = useAuthStore();
-      if (!authStore.isLoggedInVSC) {
-        next({ path: "/navigation" });
-      } else {
-        next();
-      }
-    },
+    beforeEnter: requireAuth("VSC"),
   },
   {
     path: "/login",
@@ -90,6 +89,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/vpisLogin",
     name: "VpisLogin",
     component: VpisLogin,
+  },
+  {
+    path: "/test",
+    name: "LoginHSP",
+    component: LoginHSP,
   },
   {
     path: "/vpisPlaner",
@@ -112,6 +116,12 @@ const routes: Array<RouteRecordRaw> = [
     component: ExamCalendar,
   },
   {
+    path: "/PayReport",
+    name: "PayReport",
+    component: PayReport,
+    beforeEnter: requireAuth("HSP"),
+  },
+  {
     path: "/locations",
     name: "Locations",
     component: LocationPlans,
@@ -127,5 +137,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
+
+
 
 export default router

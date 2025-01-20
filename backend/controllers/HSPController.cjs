@@ -1,77 +1,72 @@
-const cheerio = require('cheerio');
+require("dotenv").config();
+const axios = require("axios");
+const cheerio = require("cheerio");
+const { wrapper } = require("axios-cookiejar-support");
+const { CookieJar } = require("tough-cookie");
 
-/***
- * Anmeldung im Hochschuloprtal.
- */
 const loginToHSP = async (req, res) => {
     if (!req.session.loggedInHSP) {
         const { username, password } = req.body;
-        const url = 'https://hochschulportal.fh-swf.de/qisserver/pages/cs/sys/portal/hisinoneStartPage.faces';
+        const loginPageURL = process.env.HSP_LOGIN_URL;
 
         try {
+            const cookieJar = new CookieJar();
+            const client = wrapper(axios.create({ jar: cookieJar, withCredentials: true }));
 
-            // 1. Sende eine GET-Anfrage, um die Seite zu laden und die Tokens zu extrahieren
-            const initialResponse = await req.clientHSP.get(url);
+            // Initiale GET-Anfrage
+            const initialResponse = await client.get(loginPageURL);
             const $ = cheerio.load(initialResponse.data);
 
-            // Extrahiere die notwendigen Tokens (z.B. javax.faces.ViewState, ajaxToken, authenticityToken)
+            // ViewState und Tokens extrahieren
             const viewState = $('input[name="javax.faces.ViewState"]').val();
+            const authenticityToken = $('input[name="authenticity_token"]').val(); // Optional
             const ajaxToken = $('input[name="ajaxToken"]').val();
-            const authenticityToken = $('input[name="authenticity_token"]').val();
 
-            // 2. Bereite die Login-Daten als URL-encoded Form-Daten auf
+            // Login-Daten erstellen
             const loginData = new URLSearchParams();
-            loginData.append('userInfo', ''); // Falls leer, kann optional sein
-            loginData.append('ajax-token', ajaxToken);
-            loginData.append('asdf', username);
-            loginData.append('fdsa', password);
-            loginData.append('submit', 'Anmelden');
+            loginData.append("userInfo", "");
+            loginData.append("ajax-token", ajaxToken);
+            loginData.append("javax.faces.ViewState", viewState);
+            loginData.append("asdf", username);
+            loginData.append("fdsa", password);
+            loginData.append("submit", "Anmelden");
 
-            // 3. Sende den POST-Request zum Login mit den extrahierten Tokens
-            const loginResponse = await req.clientHSP.post(
-                'https://hochschulportal.fh-swf.de/qisserver/rds?state=user&type=1&category=auth.login',
-                loginData.toString(), // URL-encoded Form-Daten
+            // POST-Anfrage zum Login
+            const loginResponse = await client.post(
+                "https://hochschulportal.fh-swf.de/qisserver/rds?state=user&type=1&category=auth.login",
+                loginData.toString(),
                 {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
-                        'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Sec-GPC': '1',
-                        'Upgrade-Insecure-Requests': '1',
-                        'Sec-Fetch-Dest': 'document',
-                        'Sec-Fetch-Mode': 'navigate',
-                        'Sec-Fetch-Site': 'same-origin',
-                        'Sec-Fetch-User': '?1',
-                        'Priority': 'u=0, i',
-                        'Referer': 'https://hochschulportal.fh-swf.de/qisserver/pages/cs/sys/portal/hisinoneStartPage.faces',
-                    }
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "User-Agent": "Mozilla/5.0",
+                        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                        Referer: loginPageURL,
+                    },
                 }
             );
 
             const html = loginResponse.data;
 
-            // 4. Falls der Login erfolgreich war, sende das HTML als JSON zurück
-            if (html.includes('Chiporello')) {
-                req.session.loggedInHSP = true;
-                console.log('HSP Login erfolgreich!');
-
-                // Sende die HTML-Daten als JSON
-                // nach Bedarf anpassen
-                res.json({
-                    message: 'SUCCESS',
-                    html
-                })
+            // Prüfen, ob der Login erfolgreich war
+            if (html.includes("Chiporello-Bild-Upload")) {
+              // Session-Daten speichern
+              req.session.loggedInHSP = true;
+              req.session.user = { username };
+              req.session.hspCookies = cookieJar;
+              req.session.authenticityToken = authenticityToken;
+              req.session.viewState = viewState;
+              req.session.save();
+              res.json({ message: "SUCCESS" });
             } else {
-                console.error('Login fehlgeschlagen:', loginResponse.status);
-                res.json({
-                    message: 'FAILURE'
-                })
+                res.status(401).json({ message: "FAILURE" });
             }
         } catch (error) {
-            console.error('Login to HSP failed.', error);
+            console.error("Failed to login to HSP:", error);
+            res.status(500).json({ message: "Login failed", error: error.message });
         }
+    } else {
+        res.json({ message: "HSP: Bereits eingeloggt." });
     }
-}
+};
 
-module.exports = { loginToHSP }
+module.exports = { loginToHSP };

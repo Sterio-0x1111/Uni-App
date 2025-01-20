@@ -82,7 +82,7 @@ const loginToVSC = async (req, res) => {
             }
 
         } catch (error) {
-            console.log('Failed to login to VSC.', error);
+            console.log('Failed to login to VSC:', error);
             res.status(500).send('Fehler beim Login.');
         }
     } else {
