@@ -13,10 +13,6 @@
             </div>
             <ion-item-divider class="custom-divider" />
 
-            <ion-icon name="lock-open"></ion-icon>
-            <ion-icon name="lock-closed"></ion-icon>
-            <ion-icon name="compass"></ion-icon>
-
             <ion-grid class="semester-grid" v-if="semesterPeriods">
                 <h4>Semesterzeiträume</h4>
                 <ion-row class="header-row">

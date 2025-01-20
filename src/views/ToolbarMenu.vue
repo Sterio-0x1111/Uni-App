@@ -60,7 +60,7 @@ addIcons({
 
 const logout = async () => {
   try {
-    const url = 'http://localhost:3000/api/vsc/logout';
+    /*const url = 'http://localhost:3000/api/vsc/logout';
     const response = await axios.get(url, { withCredentials: true });
 
     if(response.status === 200){
@@ -69,7 +69,9 @@ const logout = async () => {
       await authStore.getStates();
       console.log(loginStateVSC.value);
       router.push('/navigation');
-    }
+    }*/
+
+   authStore.logout();
 
   } catch(error){
     console.log('Fehler beim Abmelden.', error);

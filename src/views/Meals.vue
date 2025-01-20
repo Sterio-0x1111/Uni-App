@@ -5,6 +5,7 @@
         </ion-header>
 
         <ion-content>
+            
             <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
             <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
             <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
@@ -65,6 +66,7 @@ import * as cheerio from 'cheerio'
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonItemDivider, IonLoading } from '@ionic/vue';
 import ToolbarMenu from "./ToolbarMenu.vue";
 import { useLocationStore } from '@/stores/locationStore';
+//import CustomToggle from '@/views/CustomToggle.vue';
 
 const menuTitle = ref('Mensaplan');
 
@@ -164,7 +166,7 @@ const loadMensaPlan = async () => {
 const loadSelectionOptions = async () => {
     loadingMessage.value = 'Lade verfügbare Daten...';
     //const mensaName = selectedMensaName.value.toLowerCase();
-    const mensaName = selectedMensa.value;
+    const mensaName = selectedMensa.value.toLowerCase();
 
     try {
         const response = await axios.get(`http://localhost:3000/api/mensa/options/${mensaName}`);

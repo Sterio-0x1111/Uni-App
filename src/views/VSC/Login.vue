@@ -55,10 +55,22 @@ const url = 'http://localhost:3000/api/vsc/login';
 const handleLogin = async () => {
     try {
 
-        const centralLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
+        const login = await authStore.centralLogin(username.value, password.value);
+
+        if(login){
+            console.log('Frontend Login erfolgreich!', login);
+            alert('Sie sind jetzt eingeloggt!');
+            await useCourseStore().fetchCourses();
+            router.push('/navigation');
+        } else {
+            console.log('Frontend Login fehlgeschlagen.');
+            alert('Login fehlgeschlagen.');
+        }
+
+        //const centralLogin = await axios.post(url, { username: username.value, password: password.value }, { withCredentials: true });
         //console.log(centralLogin.headers['set-cookie']);
         
-        if(centralLogin.status === 200){
+        //if(centralLogin.status === 200){
             // TODO: ggf. login States für jede Plattform (vsc, vpis, hsp)
             //authStore.login();
 
@@ -67,12 +79,12 @@ const handleLogin = async () => {
                 document.cookie = cookie;
             })*/
            
-            await authStore.getStates();
+            /*await authStore.getStates();
             const courseStore = useCourseStore();
             console.log('Login: ', authStore.isLoggedInVSC);
             await courseStore.fetchCourses();
-            router.push('/navigation');
-        }
+            router.push('/navigation');*/
+        //}
 
     } catch(error){
         console.log('Fehler beim Login.', error);
