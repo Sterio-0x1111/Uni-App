@@ -14,14 +14,24 @@ export const useAuthStore = defineStore('auth', {
         async centralLogin(username: string, password: string) : Promise<boolean> {
             const vscURL = 'http://localhost:3000/api/vsc/login';
             const vscResponse = await axios.post(vscURL, { username: username, password: password }, { withCredentials: true });
+            
+            const hspURL = "http://localhost:3000/api/hsp/login";
+            const hspResponse = await axios.post(hspURL, { username: username, password: password }, { withCredentials: true });
 
             if(vscResponse.status === 200){
                 this.isLoggedInVSC = true;
-                setTimeout(this.logout, 1000*20);
-                return true;
-            } 
-            return false;
+            }
 
+            if(hspResponse.status === 200){
+                this.isLoggedInHSP = true;
+            }
+
+            if(this.isLoggedInHSP && this.isLoggedInVSC){
+                setTimeout(this.logout, 1000 * 60 * 25);
+                return true;
+            }
+            
+            return false;
         },
         async login(){ // vsc
             try {
@@ -42,6 +52,9 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const vscURL = 'http://localhost:3000/api/vsc/logout';
                 const vscResponse = await axios.get(vscURL, { withCredentials: true });
+
+                // const hspURL = 'http://localhost:3000/api/vsc/logout';
+                // const hspResponse = await axios.get(hspURL, { withCredentials: true });
 
                 if(vscResponse.status === 200){
                     this.isLoggedInVSC = false;

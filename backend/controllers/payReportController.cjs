@@ -125,7 +125,7 @@ const payReport = async (req, res) => {
       },
     });
 
-    console.log(response.url)
+    console.log("debug", response.url);
 
     const $ = cheerio.load(response.data);
     // console.log(response.data);
