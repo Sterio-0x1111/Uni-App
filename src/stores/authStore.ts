@@ -1,4 +1,4 @@
-import { defineStore, StoreDefinition } from 'pinia';
+import { defineStore } from 'pinia';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -57,7 +57,6 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const url = 'http://localhost:3000/api/states';
                 const response = await axios.get(url, { withCredentials: true });
-
                 if(response.status === 200){
                     const data = response.data;
                     this.isLoggedInVSC = data.stateVSC;
