@@ -6,7 +6,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { IonSpinner } from '@ionic/vue';
 
 // Definiert die Props für die Komponente

@@ -31,13 +31,10 @@
 
 <script setup lang="ts">
 import axios from 'axios';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { wrapper } from 'axios-cookiejar-support';
-import { CookieJar } from 'tough-cookie';
 import { useAuthStore } from '@/stores/authStore';
-import { checkAuthentication } from '@/helpers/authGuard';
 import { useCourseStore } from '@/stores/courseStore';
 import ToolbarMenu from './ToolbarMenu.vue';
 import loadingOverlay from './LoadingOverlay.vue';

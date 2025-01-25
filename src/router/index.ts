@@ -21,11 +21,15 @@ import Departments from "../views/Departments.vue";
 import LoginHSP from "../views/test.vue";
 import PayReport from "../views/HSP/PayReport.vue";
 
-const requireAuth = (authType: "VSC" | "HSP") => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const authStore = useAuthStore();
     if (authType === "VSC" && !authStore.isLoggedInVSC) {
       next({ path: "/navigation" });
     } else if (authType === "HSP" && !authStore.isLoggedInHSP) {
+      next({ path: "/navigation" });
+    } else if (authType === "VPIS" && !authStore.isLoggedInVPIS) {
+      next({ path: "/navigation" });
+    } else if (authType === "isLogged" && authStore.isLoggedInHSP) {
       next({ path: "/navigation" });
     } else {
       next();
@@ -83,6 +87,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login",
     name: "Login",
     component: Login,
+    beforeEnter: requireAuth("isLogged"),
   },
   {
     path: "/vpisLogin",

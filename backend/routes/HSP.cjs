@@ -5,9 +5,9 @@ const { scrapeMyS, scrapePayments, payReport } = require("../controllers/hsp/pay
 const router = express.Router();
 
 router.post('/login', loginToHSP);
+router.get("/logout", logoutFromHSP);
 router.get("/scrapeMyS", scrapeMyS);
 router.get("/scrapePayments", scrapePayments);
 router.get("/payReport", payReport);
-router.get("/logout", logoutFromHSP);
 
 module.exports = router;

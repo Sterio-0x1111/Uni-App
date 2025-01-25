@@ -15,11 +15,10 @@ const centralLogin = async (req, res) => {
 
         const { username, password } = req.body;
 
-        const baseURL = 'http://localhost:3000/api/vsc/login';
-        const vscResponse = await axios.post(baseURL, { username, password }, { withCredentials: true });
-        // const vscResponse = await axios.post(baseURL + '/vsc/login', { username, password }, { withCredentials: true });
-        // const vpisResponse = await axios.get(baseURL + '/vpis/login', { withCredentials: true });
-        // const hspResponse = await axios.get(baseURL + '/hsp/login', { withCredentials: true });
+        const baseURL = 'http://localhost:3000/api';
+        const vscResponse = await axios.post(baseURL + '/vsc/login', { username, password }, { withCredentials: true });
+        const hspResponse = await axios.get(baseURL + '/hsp/login', { username, password }, { withCredentials: true });
+        const vpisResponse = await axios.get(baseURL + '/vpis/login', { username, password }, { withCredentials: true });
 
         let resCode = 401;
         let message = 'Nicht eingeloggt.';
