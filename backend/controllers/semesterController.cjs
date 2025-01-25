@@ -1,4 +1,7 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
+const SemesterService = require('../services/SemesterService.cjs');
+
+const semesterService = SemesterService.instance;
 
 /**
  * Funktion zum Laden der Semesterzeiträume.
@@ -11,7 +14,9 @@ const { fetchHTML, handleError } = require("../utils/helpers.cjs");
  * @param res 
  */ 
 const getSemesterDates = async (req, res) => {
-    try{
+    const semesterDates = await SemesterService.getSemesterDates();
+    res.status(200).json({ table: semesterDates });
+    /*try{
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const $ = await fetchHTML(url);
 
@@ -39,7 +44,7 @@ const getSemesterDates = async (req, res) => {
         }
     } catch(err){
         console.log('Fehler beim Laden der Semesterdaten.', err);
-    }
+    }*/
 }
 
 /**
@@ -53,7 +58,16 @@ const getSemesterDates = async (req, res) => {
  * @param {*} res 
  */
 const getFeedbackDates = async (req, res) => {
-    try{
+    const feedbackDates = await SemesterService.getFeedbackDates();
+    res.status(200).json({ 
+        targetArticle: feedbackDates.targetArticle, 
+        headline: feedbackDates.headline,
+        nextSemester: feedbackDates.nextSemester, 
+        nextDate: feedbackDates.nextDate,
+        infoText: feedbackDates.infoText
+     });
+
+    /*try{
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const $ = await fetchHTML(url);
 
@@ -73,7 +87,6 @@ const getFeedbackDates = async (req, res) => {
 
     } catch(error){
         console.log('Fehler beim Laden der Rückmeldeinformationen.', error);
-    }
+    }*/
 }
-
 module.exports = { getSemesterDates, getFeedbackDates }

@@ -1,29 +1,29 @@
 const Portal = require('./Portal.cjs');
 const cheerio = require('cheerio');
 
-class VSCPortal extends Portal {
-    constructor(){
+class VSCPortalService extends Portal {
+    constructor() {
         super();
     }
 
-    async getAndParseHTML(client, url, keyword, tag = 'a', attribute = 'href'){
+    async getAndParseHTML(client, url, keyword, tag = 'a', attribute = 'href') {
         const response = await client.get(url);
         const html = response.data;
         const $ = cheerio.load(html);
-      
+
         const filteredLinks = $(tag).filter(function () {
-          return $(this).text().includes(keyword);
+            return $(this).text().includes(keyword);
         });
         //console.log(filteredLinks);
-      
+
         const filteredURL = filteredLinks.first().attr('href');
         return {
-          filteredURL,
-          html
+            filteredURL,
+            html
         };
     }
 
-    async getExamsResults(){
+    async getExamsResults() {
         const homepageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
         const client = this.createAxiosClient();
 
@@ -39,7 +39,7 @@ class VSCPortal extends Portal {
             let courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
 
             // falls Liste mit Studiengängen aufgeklappt ist, um korekte Funktionsweise zu gewährleisten
-            if(!courseResponse.data.includes(course)){
+            if (!courseResponse.data.includes(course)) {
                 degreeResponse = await getAndParseHTML(client, categoryResponse.filteredURL, degree);
                 courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
             }
@@ -47,7 +47,7 @@ class VSCPortal extends Portal {
             // Parsen der Zielseite nach Ergebnistabelle
             let $ = cheerio.load(courseResponse.data);
 
-            const ul = $('ul.treelist').eq( (degree.includes('Master')) ? 2 : 1 );
+            const ul = $('ul.treelist').eq((degree.includes('Master')) ? 2 : 1);
             const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
             const courseNames = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
 
@@ -84,7 +84,7 @@ class VSCPortal extends Portal {
 
             return data;
 
-        } catch(error){
+        } catch (error) {
             console.log('Fehler beim Parsen der Abschluss- und Studiengangsdaten');
             res.status(500).send('Fehler beim Laden der Studiengangsinformationen.');
         }
@@ -136,7 +136,7 @@ class VSCPortal extends Portal {
         }*/
     }
 
-    async login(loginPayload){
+    async login(loginPayload) {
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
         const client = this.createAxiosClient();
 
@@ -160,6 +160,58 @@ class VSCPortal extends Portal {
             return false;
         }
     }
+
+    async getExamsData(category, degree, course) {
+        console.log('DEBUG');
+        const homepageURL = process.env.VSC_HOMEPAGE_URL;
+        const client = this.createAxiosClient();
+
+        try {
+            // navigiere zur richtigen Seite
+            const homepageResponse = await this.getAndParseHTML(client, homepageURL, 'Meine Prüfungen');
+            const categoryResponse = await this.getAndParseHTML(client, homepageResponse.filteredURL, category);
+            let degreeResponse = await this.getAndParseHTML(client, categoryResponse.filteredURL, degree);
+            let courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
+
+            // falls Liste mit Studiengängen aufgeklappt ist, um korekte Funktionsweise zu gewährleisten
+            if (!courseResponse.data.includes(course)) {
+                degreeResponse = await getAndParseHTML(client, categoryResponse.filteredURL, degree);
+                courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
+            }
+
+            // Parsen der Zielseite nach Ergebnistabelle
+            let $ = cheerio.load(courseResponse.data);
+
+            const ul = $('ul.treelist').eq((degree.includes('Master')) ? 2 : 1);
+            const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+            const courseNames = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+
+            const response = await client.get(links[courseNames.indexOf(course)], { withCredentials: true });
+            const html = response.data;
+
+            // Parsen der Ergebnistabelle
+            $ = cheerio.load(html);
+            const table = $('table').eq((degree.includes('Master') ? 2 : 1));
+            const rows = $(table).find('tr');
+            const headers = $(table).find('th');
+
+            const tableHeaders = $(headers).map((index, header) => $(header).text().trim()).get();
+            const tableData = [];
+
+            $(rows.slice(1)).each((index, row) => {
+                const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
+                tableData.push(cells);
+            })
+
+            const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
+
+            return clearedTable;
+
+        } catch (error) {
+            console.log(error);
+            //res.status(500).send('Fehler beim Laden der Studiengangsinformationen.');
+        }
+    }
 }
 
-module.exports = { VSCPortal };
+module.exports = VSCPortalService;

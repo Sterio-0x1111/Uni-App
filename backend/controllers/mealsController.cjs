@@ -1,6 +1,8 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
+const MealsService = require('../services/MealsService.cjs');
+//const mealsService = new MealsService();
 
 /**
  * Laden der Daten, für die ein Mensaplan verfügbar ist.
@@ -13,7 +15,20 @@ const cheerio = require('cheerio');
  *  Ausgewählter Standort
  */
 const getDates = async (req, res) => {
+  const location = req.params.loc.toLowerCase();
   try {
+    const options = await MealsService.getDates(location);
+    if(options.length > 0){
+      res.status(200).json({ options });
+    } else {
+      res.status(204).json({ options });
+    }
+
+  } catch(error){
+    res.status(500).json({ message: 'Fehler beim Laden der Auswahloption.', error });
+  }
+
+  /*try {
     const location = req.params.loc.toLowerCase();
     const url = `https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/${location}`;
 
@@ -43,7 +58,7 @@ const getDates = async (req, res) => {
   } catch (error) {
     console.error('Error while providing selection options.', error);
     res.status(500).json({ error: 'Failed to send date selection options.' });
-  }
+  }*/
 }
 
 /**
@@ -60,7 +75,19 @@ const getDates = async (req, res) => {
  *  Das Datum des zu ladenden Mensaplans.
  */
 const getMeals = async (req, res) => {
-  try {
+  const location = req.params.mensa.toLowerCase(); // Holt den Mensanamen aus der URL
+  const date = req.params.date;
+  const result = await MealsService.getMeals(location, date);
+
+  if(result.length > 0){
+    res.status(200).json({ table: result });
+  } else {
+    res.status(204).json({ table: result });
+  }
+
+
+  
+  /*try {
     const location = req.params.mensa.toLowerCase(); // Holt den Mensanamen aus der URL
     const date = req.params.date;
     const url = `https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/${location}/${date}`;
@@ -107,7 +134,7 @@ const getMeals = async (req, res) => {
   } catch (err) {
     res.status(500).json({ err: 'Fehler! Daten wurden nicht gesendet!' });
     console.log('Fehler beim Laden der Daten.', err);
-  }
+  }*/
 }
 
 module.exports = { getMeals, getDates };
