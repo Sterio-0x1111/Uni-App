@@ -20,56 +20,57 @@
 
 <script>
 import axios from 'axios';
+import { ref } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 
 export default {
   name: 'Test',
-  data() {
-    return {
-      username: '',
-      password: '',
-      statusMessage: '',
-      isSuccess: false
-    };
-  },
   setup() {
+    const username = ref('');
+    const password = ref('');
+    const statusMessage = ref('');
+    const isSuccess = ref(false);
+    
     const authStore = useAuthStore();
-    const courseStore = useCourseStore();
     const router = useRouter();
 
-    return { authStore, courseStore, router };
-  },
-  methods: {
-    async handleLogin() {
+    const handleLogin = async () => {
       const url = 'http://localhost:3000/api/hsp/login';
       try {
         const response = await axios.post(
           url,
-          { username: this.username, password: this.password },
+          { username: username.value, password: password.value },
           { withCredentials: true }
         );
         if (response.status === 200 && response.data) {
-          this.isSuccess = true;
-          this.statusMessage = 'Login erfolgreich: ' + response.data.message;
+          isSuccess.value = true;
+          statusMessage.value = 'Login erfolgreich: ' + response.data.message;
 
-          await this.authStore.getStates();
-          // await this.courseStore.fetchCourses();
-          // this.router.push('/payReport');
+          await authStore.getStates();
+          // router.push('/payReport');
         } else {
           throw new Error('Unerwartete Serverantwort');
         }
       } catch (error) {
-        this.isSuccess = false;
+        isSuccess.value = false;
         if (error.response) {
-          this.statusMessage = 'Login fehlgeschlagen: ' + (error.response.data?.message || 'Fehlerhafte Serverantwort');
+          statusMessage.value = 'Login fehlgeschlagen: ' + (error.response.data?.message || 'Fehlerhafte Serverantwort');
         } else if (error.request) {
-          this.statusMessage = 'Login fehlgeschlagen: Keine Antwort vom Server.';
+          statusMessage.value = 'Login fehlgeschlagen: Keine Antwort vom Server.';
         } else {
-          this.statusMessage = 'Login fehlgeschlagen: ' + error.message;
+          statusMessage.value = 'Login fehlgeschlagen: ' + error.message;
         }
       }
-    }
+    };
+
+    return {
+      username,
+      password,
+      statusMessage,
+      isSuccess,
+      handleLogin
+    };
   }
 };
 </script>

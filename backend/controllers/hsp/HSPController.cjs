@@ -1,7 +1,6 @@
 require("dotenv").config();
-const axios = require("axios");
 const cheerio = require("cheerio");
-const { wrapper } = require("axios-cookiejar-support");
+const { createAxiosClient } = require("../../utils/helpers.cjs");
 const { CookieJar } = require("tough-cookie");
 
 const loginToHSP = async (req, res) => {
@@ -11,7 +10,7 @@ const loginToHSP = async (req, res) => {
 
         try {
             const cookieJar = new CookieJar();
-            const client = wrapper(axios.create({ jar: cookieJar, withCredentials: true }));
+            const client = createAxiosClient(cookieJar);
 
             // Initiale GET-Anfrage
             const initialResponse = await client.get(loginPageURL);
@@ -69,4 +68,42 @@ const loginToHSP = async (req, res) => {
     }
 };
 
-module.exports = { loginToHSP };
+const logoutFromHSP = async (req, res) => {
+  if (req.session.loggedInHSP) {
+    const client = createAxiosClient(req.session.hspCookies);
+
+    const url = process.env.HSP_LOGIN_URL;
+    const response = await client.get(url);
+    const initialData = response.data;
+    const $ = cheerio.load(response.data);
+
+    const filteredLinks = $("a").filter(function () {
+      return $(this).text().includes("bmelden");
+    });
+
+    const logoutURL = "https://hochschulportal.fh-swf.de" + filteredLinks.first().attr("href");
+
+    try {
+      const response = await client.get(logoutURL);
+      const data = response.data;
+
+      if (data.includes("sukzessive")) {
+        console.log("HSP: Erfolgreich ausgeloggt.");
+        req.session.loggedInHSP = false;
+        req.session.hspCookies = undefined;
+
+        res.status(200).json({ data });
+      } else {
+        console.log("Logout fehlgeschlagen.");
+        res.status(500).json({ message: "HSP Logout fehlgeschlagen." });
+      }
+    } catch (error) {
+      console.log("HSP: Fehler beim Ausloggen.\n", error);
+      res.status(500).json({ data: initialData });
+    }
+  } else {
+    res.status(200).json({ message: "HSP bereits ausgeloggt." });
+  }
+};
+
+module.exports = { loginToHSP, logoutFromHSP };

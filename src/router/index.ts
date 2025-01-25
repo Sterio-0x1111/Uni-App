@@ -7,7 +7,7 @@ import Navigation from "../views/Navigation.vue";
 import Exams from "../views/VSC/Exams.vue";
 import Scores from "../views/VSC/Scores.vue";
 import RegisteredExams from "../views/VSC/RegisteredExams.vue";
-import Login from "../views/VSC/Login.vue";
+import Login from "../views/Login.vue";
 import Semester from "../views/Semester.vue";
 import Meals from "../views/Meals.vue";
 import Data from "../views/Data.vue";

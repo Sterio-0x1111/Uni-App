@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -53,13 +52,14 @@ export const useAuthStore = defineStore('auth', {
                 const vscURL = 'http://localhost:3000/api/vsc/logout';
                 const vscResponse = await axios.get(vscURL, { withCredentials: true });
 
-                // const hspURL = 'http://localhost:3000/api/vsc/logout';
-                // const hspResponse = await axios.get(hspURL, { withCredentials: true });
+                const hspURL = "http://localhost:3000/api/hsp/logout";
+                const hspResponse = await axios.get(hspURL, { withCredentials: true });
 
-                if(vscResponse.status === 200){
+                if(vscResponse.status === 200 && hspResponse.status === 200){
                     this.isLoggedInVSC = false;
+                    this.isLoggedInHSP = false;
                     this.cancelLogoutTimer();
-                    alert('Sie wurden vom VSC ausgeloggt.');
+                    alert('Sie wurden vom VSC, hsp ausgeloggt.');
                     window.location.reload();
                 }
             } catch(error){

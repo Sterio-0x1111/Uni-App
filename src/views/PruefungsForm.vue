@@ -26,7 +26,7 @@
                                             <IonSelectOption value="">---------</IonSelectOption>
                                             <IonSelectOption value="255">n.n</IonSelectOption>
                                             <IonSelectOption value="1183">Albrecht, Arnd</IonSelectOption>
-                                            <!-- Weitere Optionen hinzufügen -->
+                                            <!-- Optionen hinzufügen -->
                                         </IonSelect>
                                     </IonItem>
                                 </IonCol>
@@ -40,7 +40,7 @@
                                             <IonSelectOption value="">---------</IonSelectOption>
                                             <IonSelectOption value="K">Klausur</IonSelectOption>
                                             <IonSelectOption value="M">Mündliche Prüfung</IonSelectOption>
-                                            <!-- Weitere Optionen hinzufügen -->
+                                            <!-- Optionen hinzufügen -->
                                         </IonSelect>
                                     </IonItem>
                                 </IonCol>
@@ -51,7 +51,7 @@
                                         <IonSelect v-model="semester" placeholder="Semester auswählen">
                                             <IonSelectOption value="8">Wintersemester 2024/25</IonSelectOption>
                                             <IonSelectOption value="7">Sommersemester 2024</IonSelectOption>
-                                            <!-- Weitere Optionen hinzufügen -->
+                                            <!-- Optionen hinzufügen -->
                                         </IonSelect>
                                     </IonItem>
                                 </IonCol>
@@ -68,8 +68,7 @@
                                 </IonCol>
                             </IonRow>
 
-                            <!-- Weitere Felder hier hinzufügen -->
-
+                            <!-- Felder hier hinzufügen -->
                             <IonRow>
                                 <IonCol>
                                     <IonButton expand="block" type="submit" color="primary">Suchen</IonButton>
@@ -161,5 +160,4 @@ export default {
 </script>
 
 <style scoped>
-/* Füge hier spezifische Styles hinzu */
 </style>
