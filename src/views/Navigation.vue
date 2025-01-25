@@ -68,7 +68,7 @@ import { useRouter } from "vue-router";
 import ToolbarMenu from "./ToolbarMenu.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { addIcons } from 'ionicons';
-import { key, lockClosed, shieldCheckmark, location, restaurant, time, calendar, documentText } from 'ionicons/icons';
+import { key, lockClosed, shieldCheckmark, location, restaurant, time, calendar, documentText, person } from 'ionicons/icons';
 
 addIcons({
   'key': key,
@@ -79,6 +79,7 @@ addIcons({
   'time': time,
   'calendar': calendar,
   'document-text': documentText,
+  'person': person,
 });
 
 const toolbarTitle = ref("Menü");
@@ -97,7 +98,8 @@ const routes = computed(() => {
     { id: 4, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
     { id: 5, title: "Prüfungspläne", icon: 'document-text', path: "/vpisPruefungsplaene", requiresAuth: false, authType: null },
     { id: 6, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
-    { id: 7, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: false, authType: null },
+    { id: 7, title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
+    { id: 8, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: false, authType: null },
     // authType: 'VPIS'
   ]
 });

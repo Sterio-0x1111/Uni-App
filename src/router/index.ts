@@ -20,6 +20,7 @@ import LocationPlans from "../views/LocationPlans.vue";
 import Departments from "../views/Departments.vue";
 import LoginHSP from "../views/test.vue";
 import PayReport from "../views/HSP/PayReport.vue";
+import PersonalInformation from "../views/HSP/PersonalInformation.vue";
 
 const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const authStore = useAuthStore();
@@ -123,6 +124,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/PayReport",
     name: "PayReport",
     component: PayReport,
+    beforeEnter: requireAuth("HSP"),
+  },
+  {
+    path: "/PersonalInformation",
+    name: "PersonalInformation",
+    component: PersonalInformation,
     beforeEnter: requireAuth("HSP"),
   },
   {
