@@ -109,7 +109,6 @@ const logoutFromVSC = async (req, res) => {
         try {
             const response = await client.get(logoutURL);
             const data = response.data;
-            //const $ = cheerio.load(data);
 
             if (data.includes('Sicherheitshinweis')) {
                 console.log('VSC: Erfolgreich ausgeloggt.');

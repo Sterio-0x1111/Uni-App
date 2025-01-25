@@ -47,9 +47,9 @@ app.use(
  * sodass der Benutzer anfrageübergreifend eingeloggt bleibt.
  */
 app.use((req, res, next) => {
-  /*if (!req.session.vscCookies) {
+  if (!req.session.vscCookies) {
     req.session.vscCookies = new CookieJar();
-  }*/
+  }
 
   if (!req.session.hspCookies) {
     req.session.hspCookies = new CookieJar();
@@ -66,7 +66,7 @@ app.use((req, res, next) => {
 app.use('/api/departments', require('./routes/departments.cjs'));
 app.use('/api/auth', require('./routes/centralAuthentication.cjs'));
 app.use("/api/hochschulportal", require("./routes/hochschulportal.cjs"));
-app.use("/api/vpis", require("./routes/vpis.cjs"));
+app.use("/api/vpis", require("./routes/VPIS.cjs"));
 app.use("/api/vpisPlaner", require("./routes/vpisPlaner.cjs"));
 app.use("/api/meals", require("./routes/meals.cjs"));
 app.use("/api/mensa/options", require("./routes/meals.cjs"));

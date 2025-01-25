@@ -6,7 +6,7 @@ export const useAuthStore = defineStore('auth', {
         isLoggedIn:     false as boolean,
         isLoggedInVSC:  false as boolean,
         isLoggedInHSP:  false as boolean,
-        isLoggedInVPIS:  false as boolean,
+        isLoggedInVPIS: false as boolean,
         timer: null as number | null,
     }), 
     actions: {
@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
             }
 
             if (vpisResponse.status === 200) {
-              this.isLoggedInHSP = true;
+                this.isLoggedInVPIS = true;
             }
 
             if(this.isLoggedInHSP && this.isLoggedInVSC && this.isLoggedInVPIS){

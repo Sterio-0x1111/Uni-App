@@ -1,73 +1,6 @@
 const cheerio = require("cheerio");
 const { createAxiosClient } = require("../../utils/helpers.cjs");
-
-/**
- * Überprüft, ob der Benutzer eingeloggt ist und die notwendigen Session-Daten vorhanden sind.
- * @returns {Boolean} - True, wenn die Session gültig ist, sonst False.
- */
-const verifySession = (req, res) => {
-  if (!req.session.loggedInHSP || !req.session.hspCookies) {
-    res.status(401).json({ message: "Nicht eingeloggt. Bitte zuerst anmelden." });
-    return false;
-  }
-  return true;
-};
-
-/**
- * Extrahiert den FlowExecutionKey aus einer gegebenen URL.
- * @param {String} url - Die URL, aus der der FlowExecutionKey extrahiert werden soll.
- * @returns {String|null} - Der extrahierte FlowExecutionKey oder null, wenn nicht gefunden.
- */
-const extractFlowExecutionKey = (url) => {
-  try {
-    const params = new URL(url).searchParams;
-    return params.get('_flowExecutionKey');
-  } catch (error) {
-    console.error("Fehler beim Extrahieren des FlowExecutionKey:", error);
-    return null;
-  }
-};
-
-const scrapeMyS = async (req, res) => {
-  if (!verifySession(req, res)) return;
-
-  const payReportURL = "https://hochschulportal.fh-swf.de/qisserver/pages/cm/exa/enrollment/info/start.xhtml?_flowId=studyservice-flow&_flowExecutionKey=e1s1";
-
-  try {
-    const client = createAxiosClient(req.session.hspCookies);
-
-    const response = await client.get(payReportURL, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-    });
-
-    const $ = cheerio.load(response.data);
-
-    // Tabelle mit den gewünschten Daten auswählen
-    const rows = $("#studyserviceForm\\:stgStudent\\:collapsibleFieldsetCourseOfStudies\\:fieldsetDegreeProgram_1\\:degreeProgramProgresTable\\:degreeProgramProgresTableTable tbody tr");
-
-    const extractedData = rows.map((_, row) => {
-      const columns = $(row).find("td");
-      return {
-        Fach: $(columns[0]).find("span:last-child").text().trim(),
-        Fachsemester: $(columns[1]).find("span:last-child").text().trim(),
-        Fachkennzeichen: $(columns[2]).find("span:last-child").text().trim(),
-        Prüfungsordnungsversion: $(columns[3]).find("span:last-child").text().trim(),
-      };
-    }).get();
-
-    res.status(200).json(extractedData);
-  } catch (error) {
-    console.error("Fehler beim Abrufen des PayReports:", error);
-    res.status(500).json({
-      message: "Fehler beim Laden des PayReports",
-      error: error.message,
-    });
-  }
-};
+const { verifySession, extractFlowExecutionKey } = require("./hspHelpers.cjs");
 
 /**
  * Funktion zum Scrapen der Zahlungen und Rückmeldungen.
@@ -236,7 +169,7 @@ const payReport = async (req, res) => {
   }
 };
 
-module.exports = { scrapeMyS, scrapePayments, payReport };
+module.exports = { scrapePayments, payReport };
 
 // const serializedCookies = cookieJar.serializeSync();
 // req.session.hspCookies = serializedCookies;

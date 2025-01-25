@@ -1,7 +1,8 @@
 // routes/HSPController.cjs
 const express = require("express");
 const { loginToHSP, logoutFromHSP } = require("../controllers/hsp/HSPController.cjs");
-const { scrapeMyS, scrapePayments, payReport } = require("../controllers/hsp/payReportController.cjs");
+const { scrapePayments, payReport } = require("../controllers/hsp/payReportController.cjs");
+const { scrapeMyS } = require("../controllers/hsp/PersonalInformationController.cjs");
 const router = express.Router();
 
 router.post('/login', loginToHSP);
