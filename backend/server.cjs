@@ -63,13 +63,13 @@ app.use((req, res, next) => {
 app.use('/api/departments', require('./routes/departments.cjs'));
 app.use('/api/auth', require('./routes/centralAuthentication.cjs'));
 app.use("/api/hochschulportal", require("./routes/hochschulportal.cjs"));
-app.use("/api/vpis", require("./routes/VPIS.cjs"));
 app.use("/api/vpisPlaner", require("./routes/vpisPlaner.cjs"));
 app.use("/api/meals", require("./routes/meals.cjs"));
 app.use("/api/mensa/options", require("./routes/meals.cjs"));
 app.use("/api/semester", require("./routes/semester.cjs"));
 app.use("/api/hsp", require("./routes/HSP.cjs"));
 app.use("/api/vsc", require("./routes/VSC.cjs"));
+app.use("/api/vpis", require("./routes/VPIS.cjs"));
 app.use("/api", require("./routes/states.cjs"));
 
 app.get("/api/vsc/pruefungen");

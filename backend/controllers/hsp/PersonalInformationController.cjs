@@ -68,6 +68,8 @@ const scrapeMyS = async (req, res) => {
     });
 
     extractedData.push({ personendaten: personData });
+    const infoData = await scrapeMyInfo(req, res);
+    extractedData.push({ infoData });
     res.status(200).json(extractedData);
   } catch (error) {
     console.error("Fehler beim Abrufen des PayReports:", error);
@@ -78,6 +80,58 @@ const scrapeMyS = async (req, res) => {
   }
 };
 
+const scrapeMyInfo = async (req, res) => {
+  if (!verifySession(req, res)) return;
 
+  const contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e1s1";
 
-module.exports = { scrapeMyS };
+  try {
+    const client = createAxiosClient(req.session.hspCookies);
+
+    const formData = new URLSearchParams();
+    formData.append("_flowId", "showOwnContactData-flow");
+    formData.append("_flowExecutionKey", "e1s1");
+
+    const response = await client.post(contactDataURL, formData.toString(), {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+    });
+
+    const $ = cheerio.load(response.data);
+
+    // Kontaktinformationen extrahieren
+    const contactData = [];
+
+    $(".tileFieldsetColumn").each((_, element) => {
+      const sectionTitle = $(element).find("h2.withMarginLeft").text().trim();
+
+      const emailElements = $(element).find(".emailDataContainer.tileDataContainer div");
+      const emailAddresses = emailElements.map((_, el) => $(el).text().trim()).get();
+
+      const phoneElements = $(element).find(".phoneDataContainer.tileDataContainer div");
+      const phoneNumbers = phoneElements.map((_, el) => $(el).text().trim()).get();
+
+      const addressElements = $(element).find(".addressBlock .adressRow");
+      const address = addressElements.map((_, el) => $(el).text().trim()).get().join(", ");
+
+      contactData.push({
+        section: sectionTitle,
+        emails: emailAddresses.length > 0 ? emailAddresses : null,
+        phones: phoneNumbers.length > 0 ? phoneNumbers : null,
+        address: address || null,
+      });
+    });
+
+    return { kontaktinformationen: contactData };
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Kontaktinformationen:", error);
+    return {
+      message: "Fehler beim Laden der Kontaktinformationen",
+      error: error.message,
+    };
+  }
+};
+
+module.exports = { scrapeMyS, scrapeMyInfo };
