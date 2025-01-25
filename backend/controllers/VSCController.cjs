@@ -4,7 +4,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
-const { VSCPortalService } = require('../services/VSCPortalService.cjs');
+const VSCPortalService = require('../services/VSCPortalService.cjs');
 
 const loginToVSC2 = async (req, res) => {
     console.log('LOGIN');
@@ -30,7 +30,7 @@ const loginToVSC2 = async (req, res) => {
                 res.status(401).json({ message: 'VSC: Login fehlgeschlagen.' });
             }
         } catch (error) {
-
+            console.log('Fehler beim Login VSC.', error);
         }
 
     } else {
@@ -39,6 +39,8 @@ const loginToVSC2 = async (req, res) => {
 }
 
 const loginToVSC = async (req, res) => {
+    console.log('ENTERED LOGIN');
+    console.log(req.session.vscCookies);
     if (!req.session.vscCookies) {
         const { username, password } = req.body;
         const loginPageURL = process.env.VSC_LOGIN_URL;
@@ -89,7 +91,30 @@ const loginToVSC = async (req, res) => {
 }
 
 const logoutFromVSC = async (req, res) => {
-    if (req.session.loggedInVSC) {
+    if(req.session.vsc){
+        try {
+            const vscPortal = new VSCPortalService();
+            const cookies = req.session.vsc;
+            vscPortal.cookies = cookies;
+            //const vscPortal = VSCPortalService.fromJSON(req.session.vsc);
+            const logout = await vscPortal.logout();
+
+            if(logout){
+                console.log('VSC: Erfolgreich ausgeloggt.');
+                req.session.loggedInVSC = false;
+                req.session.vsc = null;
+                res.status(200).json({ message: 'VSC: Erfolgreich ausgeloggt.' });
+            } else {
+                console.log('VSC: Nicht ausgeloggt!');
+            }
+        } catch(error){
+            res.status(500).json({ message: 'VSC: Logout fehlgeschlagen.' });
+        }
+    } else {
+        res.status(401).json({ message: 'VSC: Nicht eingeloggt.' });
+    }
+    
+    /*if (req.session.loggedInVSC) {
         const cookieJar = deserializeCookieJar(req.session.vscCookies);
         const client = createAxiosClient(cookieJar);
 
@@ -122,21 +147,16 @@ const logoutFromVSC = async (req, res) => {
                 res.status(500).json({ message: 'VSC Logout fehlgeschlagen.' })
             }
 
-            /*res.json({
-                data,
-                state: req.session.loggedInVSC
-            });*/
-
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
             res.status(500).json({ data: initialData });
         }
     } else {
         res.status(200).json({ message: 'VSC bereits ausgeloggt.' })
-    }
+    }*/
 }
 
-const getExamResults2 = async (req, res) => {
+/*const getExamResults2 = async (req, res) => {
     if (req.session.vsc) {
         const vscPortal = new VSCPortal();
         vscPortal.cookies = req.session.vsc;
@@ -158,9 +178,9 @@ const getExamResults2 = async (req, res) => {
         console.log(deserializeCookieJar(req.session.vscCookies));
         res.status(401).json({ message: 'Nicht eingeloggt.' });
     }
-}
+}*/
 
-const getExamResults = async (req, res) => {
+/*const getExamResults = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
         const course = req.params.course;
@@ -214,25 +234,28 @@ const getExamResults = async (req, res) => {
         console.log(deserializeCookieJar(req.session.vscCookies));
         res.status(401).json({ message: 'Nicht eingeloggt.' });
     }
-}
+}*/
 
 // zentrale Logik zum Parsen von Abschluss / Studiengang Links und Tabellen
 const getExamsData = async (req, res) => {
     if (req.session.vsc) {
+        console.log('SUCCESS');
         
         const degree = req.params.degree;
         const course = req.params.course;
         const category = req.params.category; // Notenspiegel, Infos über angemeldete Prüfungen
-        console.log(category);
-        console.log(degree);
-        console.log(course);
-        try {
-            
-            const vscPortal = new VSCPortal();
-            vscPortal.cookies = req.session.vsc;
-            const data = vscPortal.getExamsData(category, degree, course);
 
-            res.status(200).json({ data, found: true });
+        try {
+            const vscPortal = new VSCPortalService();
+            vscPortal.cookies = req.session.vsc;
+            const data = await vscPortal.getExamsData(category, degree, course);
+
+            if(data.length > 0){
+                res.status(200).json({ data, found: false });
+            } else {
+                res.status(204).json({ data });
+            }
+            
 
         } catch (error) {
             console.log('Fehler beim Parsen der Abschluss- und Studiengangsdaten');
@@ -317,7 +340,7 @@ const getExamsData = async (req, res) => {
     }*/
 }
 
-const getRegisteredExams = async (req, res) => {
+/*const getRegisteredExams = async (req, res) => {
     if (req.session.vscCookies) {
         const degree = req.params.degree;
         const course = req.params.course;
@@ -380,19 +403,32 @@ const getRegisteredExams = async (req, res) => {
         console.log('VSC: Nicht eingeloggt.');
         res.status(401).send('Nicht eingeloggt!');
     }
-}
+}*/
 
-const getReg = async (req, res) => {
-    if (req.session.vscCookies) {
-        const client = createAxiosClient(req.session.vscCookies);
+const getDegreesAndCourses = async (req, res) => {
+    if(req.session.vsc){
+        const vscPortal = new VSCPortalService();
+        vscPortal.cookies = req.session.vsc;
+        const result = await vscPortal.getDegreesAndCourses();
+        console.log('NEUER ENDPUNKT', result.m);
+        res.status(200).json({ degrees: result.degrees, bachelorPage: result.bachelorPage, masterPage: result.m });
+
+    } else {
+        res.status(401).json({ message: 'VSC: Nicht eingeloggt!' });
+    }
+    /*if (req.session.vsc) {
+        const client = createAxiosClient(req.session.vsc);
         const homepageUrl = process.env.VSC_HOMEPAGE_URL;
         const avaibleDegrees = ['Abschluss BA Bachelor'];
 
         try {
             const homepageResponse = await getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalInformationPageResponse = await getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
+            console.log('DEBUG 2');
             let degreeSelectionPage = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, avaibleDegrees[0]);
+            console.log('DEBUG 3');
             let examsPage = await client.get(degreeSelectionPage.filteredURL, { withCredentials: true });
+            console.log('DEBUG 4');
 
             if (!examsPage.data.includes('Diesen Zweig zuklappen')) {
                 degreeSelectionPage = await getAndParseHTML(client, generalInformationPageResponse.filteredURL, avaibleDegrees[0]);
@@ -403,26 +439,7 @@ const getReg = async (req, res) => {
             // TODO: Für Master Studiengänge erweitern
             res.status(200).json({ degrees: avaibleDegrees, bachelorPage: data });
 
-            /*const resultsBachelor = getCoursesAndDegrees(examsPage.data);
-
-            console.log('BACHELOR');
-            console.log(resultsBachelor);
-
-            // TODO: Umbauen auf Master Studiengänge parsen (ul treelist holen und kurse und links parsen, wie unten bei bachelor)
-            const masterAvailable = degreeSelectionPage.html.includes('Master')
-
-            if (masterAvailable) {
-                avaibleDegrees.push('Abschluss MA Master');
-
-                const resultsMaster = getCoursesAndDegrees(examspage.data, true);
-            }
-
-            // aktuell werden nur Bachelor Daten gesendet, umstellen für Master
-            res.status(200).json({
-                degrees: avaibleDegrees,
-                bachelor: resultsBachelor,
-                ...(masterAvailable && { master: resultsMaster })
-            });*/
+            
 
         } catch (error) {
             console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
@@ -431,10 +448,10 @@ const getReg = async (req, res) => {
     } else {
         console.log('VSC: Nicht eingeloggt.');
         res.status(401).send('Nicht eingeloggt!');
-    }
+    }*/
 }
 
-const getCoursesAndDegrees = (data, master = false) => {
+/*const getCoursesAndDegrees = (data, master = false) => {
     try {
         const $ = cheerio.load(data);
         const ul = $('ul.treelist').eq((master) ? 2 : 1);
@@ -451,9 +468,9 @@ const getCoursesAndDegrees = (data, master = false) => {
     } catch (error) {
         console.log('Fehler beim Laden der Studiengänge und Abschlüsse.', error);
     }
-}
+}*/
 
-const testNav = async (req, res) => {
+/*const testNav = async (req, res) => {
     if (req.session.vscCookies) {
         const client = createAxiosClient(req.session.vscCookies);
         const homepageUrl = process.env.VSC_HOMEPAGE_URL;
@@ -474,7 +491,7 @@ const testNav = async (req, res) => {
         console.log('VSC: Nicht eingeloggt.');
         res.status(401).send('Nicht eingeloggt!');
     }
-}
+}*/
 
 const getStudiesProgress = async (req, res) => {
     if (req.session.vscCookies) {
@@ -533,4 +550,4 @@ const getStudiesProgress = async (req, res) => {
     }
 }
 
-module.exports = { loginToVSC, logoutFromVSC, loginToVSC2, testNav, getExamResults, getExamResults2, getRegisteredExams, getReg, getExamsData, getStudiesProgress };
+module.exports = { loginToVSC, logoutFromVSC, loginToVSC2, getDegreesAndCourses, getExamsData, };

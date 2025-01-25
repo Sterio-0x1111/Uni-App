@@ -4,14 +4,14 @@ const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 
 class Portal {
-    constructor() {
+    constructor(loginState, cookies) {
         if (new.target === Portal) {
             throw new Error('Die abstrakte Klasse Portal kann nicht instanziiert werden.');
         }
 
-        this._loginState = false;
+        this._loginState = loginState;
         //this.baseURL = baseURL;
-        this.cookies = new CookieJar();
+        this.cookies = cookies;
     }
 
     get loginState(){
