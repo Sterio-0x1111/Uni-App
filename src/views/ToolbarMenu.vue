@@ -13,11 +13,11 @@
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button v-if="!loginStateVSC" router-link="/login">
+      <ion-button v-if="!loginStateVSC && router.currentRoute._value.fullPath !== '/login'" router-link="/login">
         <ion-icon color="primary" name="person" aria-label="Login"></ion-icon> 
       </ion-button>
 
-      <ion-button v-if="loginStateVSC" @click="logout"> <!-- Logout Routine implementieren -->
+      <ion-button v-if="loginStateVSC" @click="logout">
         <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
@@ -29,8 +29,8 @@ import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIco
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
 
+import axios from 'axios';
 const authStore = useAuthStore();
 const loginStateVSC = computed(() => authStore.isLoggedInVSC);
 const router = useRouter();
