@@ -215,15 +215,18 @@
           </IonCol>
         </IonRow>
       </IonGrid>
+
+      <examCalendar v-if="showCalendar" :choice="calendarChoice" />
     </IonContent>
   </IonPage>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import CustomToggle from '@vsc/CustomToggle.vue';
+import examCalendar from './ExamCalendar.vue';
 
 // States
 const selectedStandort = ref<string | null>(null);
@@ -238,6 +241,8 @@ const pruefungsplan = ref<any>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const showSelection = ref(true);
+const calendarChoice = ref<string | null>(null);
+const showCalendar = ref(false);
 
 // Standorte und Fachbereiche
 const locations = ['Hagen', 'Iserlohn', 'Lüdenscheid', 'Meschede', 'Soest'];
@@ -338,7 +343,9 @@ const fetchPruefungsplan = async () => {
     loading.value = true;
     error.value = null;
     pruefungsplan.value = null;
+    calendarChoice.value = null;
     showVerbundDetails.value = false;
+    showCalendar.value = false;
 
     // Falls ein Verbundstudiengang ausgewählt wurde, die Verbund-Details anzeigen
     if (selectedStudiengang.value && selectedStudiengang.value.type === 'verbund') {
@@ -356,6 +363,13 @@ const fetchPruefungsplan = async () => {
         { params: { semester, studiengangCode } }
       );
       pruefungsplan.value = response.data;
+    } else if ((selectedStandort.value === 'meschede' && selectedDepartment.value === 'ingenieur-wirtschaftswissenschaften') ||
+    (selectedStandort.value === 'hagen' && selectedDepartment.value === 'technische-betriebswirtschaft')) {
+      showCalendar.value = true;
+      if (selectedDepartment.value === 'ingenieur-wirtschaftswissenschaften')
+        calendarChoice.value = 'ingenieur-wirtschaftswissenschaften';
+      else if (selectedDepartment.value === 'technische-betriebswirtschaft')
+        calendarChoice.value = 'technische-betriebswirtschaft';
     }
   } catch (err) {
     error.value = "Fehler beim Abrufen des Prüfungsplans";
@@ -373,12 +387,14 @@ const resetSelections = () => {
   praesenzStudiengaenge.value = [];
   verbundStudiengaenge.value = [];
   accessibleSemesters.value = [];
+  showCalendar.value = false;
 };
 
 const resetStudiengaenge = () => {
   selectedStudiengang.value = null;
   praesenzStudiengaenge.value = [];
   verbundStudiengaenge.value = [];
+  showCalendar.value = false;
 };
 </script>
 

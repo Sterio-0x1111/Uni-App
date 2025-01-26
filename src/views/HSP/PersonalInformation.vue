@@ -6,7 +6,7 @@
 
         <IonContent :fullscreen="true" class="ion-padding">
             <!-- Ladeanzeige -->
-            <IonLoading :is-open="loading" />
+            <loadingOverlay :isLoading="loading" />
 
             <!-- Fehleranzeige -->
             <IonText v-if="error" color="danger" class="error-message">
@@ -96,6 +96,7 @@ import axios from 'axios';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonList, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonText, IonLoading, IonAccordionGroup, IonAccordion } from '@ionic/vue';
 import toolbarMenu from "../ToolbarMenu.vue";
+import loadingOverlay from '../LoadingOverlay.vue';
 
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
