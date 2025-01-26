@@ -193,6 +193,7 @@ onMounted(async () => {
 const loadData = async () => {
   try {
     const url = `http://localhost:3000/api/vsc/exams/${category}/${selectedDegree.value}/${selectedCourse.value}`;
+    console.log(url);
     const response = await axios.get(url, { withCredentials: true });
     if (response.status !== 200) {
       throw new Error(`${response.status}`);

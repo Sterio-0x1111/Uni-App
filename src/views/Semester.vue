@@ -33,6 +33,7 @@
 import { onMounted, ref } from 'vue';
 import { IonPage, IonHeader, IonContent, IonToolbar, IonTitle, IonGrid, IonRow, IonCol, IonItemDivider, IonIcon } from '@ionic/vue';
 import ToolbarMenu from './ToolbarMenu.vue';
+import axios from 'axios';
 
 const menuTitle = "Semesterzeiten";
 const semesterPeriods = ref(null);
@@ -45,8 +46,11 @@ onMounted(async () => {
 
 const getSemesterDates = async () => {
     try {
-        const response = await fetch('http://localhost:3000/api/semester/dates');
-        const data = await response.json();
+        //const response = await fetch('http://localhost:3000/api/semester/dates');
+        //const data = await response.json();
+        const response = await axios.get('http://localhost:3000/api/semester/dates');
+        const data = response.data;
+        console.log(data);
         semesterPeriods.value = data;
     } catch(error){
         console.error('Fehler beim Laden der Semesterdaten.', error);

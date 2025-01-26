@@ -24,10 +24,72 @@ class VSCPortal extends Portal {
     }
 
     async getExamsResults(){
-        const homepageUrl = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
+        const homepageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=0';
         const client = this.createAxiosClient();
 
+        let degree = 'Abschluss BA Bachelor';
+        let course = 'Informatik  (PO-Version 19)';
+        let category = 'Notenspiegel';
+
         try {
+            // navigiere zur richtigen Seite
+            const homepageResponse = await this.getAndParseHTML(client, homepageURL, 'Meine Prüfungen');
+            const categoryResponse = await this.getAndParseHTML(client, homepageResponse.filteredURL, category);
+            let degreeResponse = await this.getAndParseHTML(client, categoryResponse.filteredURL, degree);
+            let courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
+
+            // falls Liste mit Studiengängen aufgeklappt ist, um korekte Funktionsweise zu gewährleisten
+            if(!courseResponse.data.includes(course)){
+                degreeResponse = await getAndParseHTML(client, categoryResponse.filteredURL, degree);
+                courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
+            }
+
+            // Parsen der Zielseite nach Ergebnistabelle
+            let $ = cheerio.load(courseResponse.data);
+
+            const ul = $('ul.treelist').eq( (degree.includes('Master')) ? 2 : 1 );
+            const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
+            const courseNames = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+
+            const response = await client.get(links[courseNames.indexOf(course)], { withCredentials: true });
+            const html = response.data;
+
+            // Parsen der Ergebnistabelle
+            $ = cheerio.load(html);
+            const table = $('table').eq((degree.includes('Master') ? 2 : 1));
+            const rows = $(table).find('tr');
+            const headers = $(table).find('th');
+
+            const tableHeaders = $(headers).map((index, header) => $(header).text().trim()).get();
+            const tableData = [];
+
+            $(rows.slice(1)).each((index, row) => {
+                const cells = $(row).find('td').map((i, cell) => $(cell).text()).get();
+                tableData.push(cells);
+            })
+
+            const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
+
+            let responseCode = 200;
+            let data = clearedTable;
+            let found = true;
+
+            if (clearedTable.length === 0) {
+                responseCode = 200;
+                data = 'Keine Daten gefunden.';
+                found = false;
+            }
+
+            //console.log(responseData);
+
+            return data;
+
+        } catch(error){
+            console.log('Fehler beim Parsen der Abschluss- und Studiengangsdaten');
+            res.status(500).send('Fehler beim Laden der Studiengangsinformationen.');
+        }
+
+        /*try {
             const homepageResponse = await this.getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
             const generalInformationPageResponse = await this.getAndParseHTML(client, homepageResponse.filteredURL, 'Notenspiegel');
             let selectedDegreePageResponse = await this.getAndParseHTML(client, generalInformationPageResponse.filteredURL, 'Abschluss BA Bachelor');
@@ -71,7 +133,7 @@ class VSCPortal extends Portal {
             console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
             //throw new Error(error);
             return null;
-        }
+        }*/
     }
 
     async login(loginPayload){
