@@ -77,15 +77,28 @@
           </IonRow>
           <IonRow v-for="(box, index) in pruefungsplan.infoBoxes" :key="index">
             <IonCol>
-              <template v-if="box.type === 'p'">
-                <p>{{ box.text }}</p>
-              </template>
-              <template v-else-if="box.type === 'div'">
-                <div v-html="box.text"></div>
-              </template>
-              <template v-else-if="box.type === 'a'">
-                <a :href="box.href" target="_blank">{{ box.text }}</a>
-              </template>
+              <!-- Paragraph -->
+              <p v-if="box.type === 'p'">{{ box.text }}</p>
+
+              <!-- Div -->
+              <div v-else-if="box.type === 'div'" v-html="box.text"></div>
+
+              <!-- Unordered List -->
+              <ul v-else-if="box.type === 'ul'">
+                <li v-for="(item, idx) in parseListItems(box.text)" :key="idx">{{ item }}</li>
+              </ul>
+              
+              <!-- Heading Level 3 -->
+              <h3 v-else-if="box.type === 'h3'">{{ box.text }}</h3>
+
+              <!-- Strong Text -->
+              <strong v-else-if="box.type === 'strong'">{{ box.text }}</strong>
+
+              <!-- Anchor Link -->
+              <a v-else-if="box.type === 'a'" :href="box.href" target="_blank">{{ box.text }}</a>
+
+              <!-- Default: Render as plain text if type is unrecognized -->
+              <span v-else>{{ box.text }}</span>
             </IonCol>
           </IonRow>
         </IonGrid>
@@ -221,7 +234,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
+import { IonContent, IonHeader, IonPage, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import CustomToggle from '@vsc/CustomToggle.vue';
 import examCalendar from './ExamCalendar.vue';
 import ToolbarMenu from '../ToolbarMenu.vue';
@@ -287,7 +300,7 @@ const isButtonDisabled = computed(() => {
     if (!selectedStudiengang.value) return true; // Studiengang erforderlich
     if (selectedStudiengang.value?.type === 'praesenz' && !selectedSemester.value) return true; // Semester erforderlich
   }
-  return false; // Aktiv, wenn alle Bedingungen erfüllt sind
+  return false;
 });
 
 /*
@@ -297,6 +310,12 @@ const isButtonDisabled = computed(() => {
 // Spezialfall Iserlohn: Bei Präsenz-Studiengang ist zudem ein Semester erforderlich:
 (selectedStandort === 'iserlohn' && selectedStudiengang && selectedStudiengang.type === 'praesenz' && !selectedSemester)"
 */
+
+// Parsing-Funktion für Listen
+const parseListItems = (text: string): string[] => {
+  // Split by comma and trim whitespace
+  return text.split(',').map(item => item.trim()).filter(item => item.length > 0);
+};
 
 const loadAccessibleSemesters = async () => {
   try {

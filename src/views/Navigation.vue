@@ -68,7 +68,7 @@ import { useRouter } from "vue-router";
 import ToolbarMenu from "./ToolbarMenu.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { addIcons } from 'ionicons';
-import { key, lockClosed, shieldCheckmark, location, restaurant, time, calendar, documentText, person } from 'ionicons/icons';
+import { key, lockClosed, shieldCheckmark, location, restaurant, time, calendar, documentText, person, information } from 'ionicons/icons';
 
 addIcons({
   'key': key,
@@ -80,6 +80,7 @@ addIcons({
   'calendar': calendar,
   'document-text': documentText,
   'person': person,
+  'information': information,
 });
 
 const toolbarTitle = ref("Menü");
@@ -93,13 +94,14 @@ const routes = computed(() => {
   return [
     { id: 0, title: "Mensaplan", icon: 'restaurant', path: "/meals", requiresAuth: false, authType: null },
     { id: 1, title: "Semestertermine", icon: 'time', path: "/semester", requiresAuth: false, authType: null },
-    { id: 2, title: "Fachbereichstermine", icon: 'calendar', path: "/departments", requiresAuth: false, authType: null },
-    { id: 3, title: "Lagepläne", icon: 'location', path: "/locations", requiresAuth: false, authType: null },
-    { id: 4, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
-    { id: 5, title: "Prüfungspläne", icon: 'document-text', path: "/vpisPruefungsplaene", requiresAuth: false, authType: null },
-    { id: 6, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
+    { id: 2, title: "Lagepläne", icon: 'location', path: "/locations", requiresAuth: false, authType: null },
+    { id: 3, title: "Fachbereichstermine", icon: 'calendar', path: "/departments", requiresAuth: false, authType: null },
+    { id: 4, title: "Prüfungspläne", icon: 'calendar', path: "/vpisPruefungsplaene", requiresAuth: false, authType: null },
+    { id: 5, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: false, authType: null },
+    { id: 6, title: "Veranstaltungsplanende", icon: 'information', path: "/vpisPlaner", requiresAuth: false, authType: null },
     { id: 7, title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
-    { id: 8, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: false, authType: null },
+    { id: 8, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
+    { id: 9, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
     // authType: 'VPIS'
   ]
 });
