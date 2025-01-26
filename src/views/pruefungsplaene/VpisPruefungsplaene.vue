@@ -1,9 +1,7 @@
 <template>
   <IonPage>
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>Prüfungspläne</IonTitle>
-      </IonToolbar>
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="calendar" />
     </IonHeader>
     <IonContent>
       <custom-toggle v-model="showSelection" />
@@ -57,8 +55,7 @@
       </ion-item>
 
       <!-- Button zum Laden des Prüfungsplans -->
-      <ion-button
-        :disabled="isButtonDisabled" expand="block" @click="fetchPruefungsplan">
+      <ion-button :disabled="isButtonDisabled" expand="block" @click="fetchPruefungsplan">
         <span v-if="!loading">Prüfungsplan anzeigen</span>
         <ion-spinner v-else name="crescent"></ion-spinner>
       </ion-button>
@@ -227,6 +224,7 @@ import axios from 'axios';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import CustomToggle from '@vsc/CustomToggle.vue';
 import examCalendar from './ExamCalendar.vue';
+import ToolbarMenu from '../ToolbarMenu.vue';
 
 // States
 const selectedStandort = ref<string | null>(null);
@@ -243,6 +241,7 @@ const error = ref<string | null>(null);
 const showSelection = ref(true);
 const calendarChoice = ref<string | null>(null);
 const showCalendar = ref(false);
+const toolbarTitle = "Prüfungspläne"
 
 // Standorte und Fachbereiche
 const locations = ['Hagen', 'Iserlohn', 'Lüdenscheid', 'Meschede', 'Soest'];
