@@ -23,19 +23,19 @@ import PayReport from "../views/HSP/PayReport.vue";
 import PersonalInformation from "../views/HSP/PersonalInformation.vue";
 
 const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-    const authStore = useAuthStore();
-    if (authType === "VSC" && !authStore.isLoggedInVSC) {
-      next({ path: "/navigation" });
-    } else if (authType === "HSP" && !authStore.isLoggedInHSP) {
-      next({ path: "/navigation" });
-    } else if (authType === "VPIS" && !authStore.isLoggedInVSC) {
-      next({ path: "/navigation" });
-    } else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  /* && authStore.isLoggedInVPIS */) {
-      next({ path: "/navigation" });
-    } else {
-      next();
-    }
-  };
+  const authStore = useAuthStore();
+  if (authType === "VSC" && !authStore.isLoggedInVSC) {
+    next({ path: "/navigation" });
+  } else if (authType === "HSP" && !authStore.isLoggedInHSP) {
+    next({ path: "/navigation" });
+  } else if (authType === "VPIS" && !authStore.isLoggedInVSC) {
+    next({ path: "/navigation" });
+  } /*else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  && authStore.isLoggedInVPIS) {
+    next({ path: "/navigation" });
+  } */ else {
+    next();
+  }
+};
 
 const routes: Array<RouteRecordRaw> = [
   {

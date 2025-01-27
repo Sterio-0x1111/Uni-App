@@ -1,9 +1,7 @@
 <template>
   <IonPage>
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>Bezahlen & Rückmelden</IonTitle>
-      </IonToolbar>
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="person" />
     </IonHeader>
 
     <IonContent :fullscreen="true">
@@ -135,10 +133,12 @@ import {
   IonGrid, IonRow, IonCol, IonText, IonLoading 
 } from '@ionic/vue';
 import loadingOverlay from '../LoadingOverlay.vue';
+import toolbarMenu from "../ToolbarMenu.vue";
 
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
 const data = ref<any>(null);
+const toolbarTitle = 'Bezahlen & Rückmelden';
 
 // Methode zum Laden der Zahlungen
 const loadPayments = async () => {

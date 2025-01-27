@@ -1,9 +1,7 @@
 <template>
   <IonPage>
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>Prüfungspläne</IonTitle>
-      </IonToolbar>
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="calendar" />
     </IonHeader>
     <IonContent>
       <custom-toggle v-model="showSelection" />
@@ -57,8 +55,7 @@
       </ion-item>
 
       <!-- Button zum Laden des Prüfungsplans -->
-      <ion-button
-        :disabled="isButtonDisabled" expand="block" @click="fetchPruefungsplan">
+      <ion-button :disabled="isButtonDisabled" expand="block" @click="fetchPruefungsplan">
         <span v-if="!loading">Prüfungsplan anzeigen</span>
         <ion-spinner v-else name="crescent"></ion-spinner>
       </ion-button>
@@ -80,15 +77,28 @@
           </IonRow>
           <IonRow v-for="(box, index) in pruefungsplan.infoBoxes" :key="index">
             <IonCol>
-              <template v-if="box.type === 'p'">
-                <p>{{ box.text }}</p>
-              </template>
-              <template v-else-if="box.type === 'div'">
-                <div v-html="box.text"></div>
-              </template>
-              <template v-else-if="box.type === 'a'">
-                <a :href="box.href" target="_blank">{{ box.text }}</a>
-              </template>
+              <!-- Paragraph -->
+              <p v-if="box.type === 'p'">{{ box.text }}</p>
+
+              <!-- Div -->
+              <div v-else-if="box.type === 'div'" v-html="box.text"></div>
+
+              <!-- Unordered List -->
+              <ul v-else-if="box.type === 'ul'">
+                <li v-for="(item, idx) in parseListItems(box.text)" :key="idx">{{ item }}</li>
+              </ul>
+              
+              <!-- Heading Level 3 -->
+              <h3 v-else-if="box.type === 'h3'">{{ box.text }}</h3>
+
+              <!-- Strong Text -->
+              <strong v-else-if="box.type === 'strong'">{{ box.text }}</strong>
+
+              <!-- Anchor Link -->
+              <a v-else-if="box.type === 'a'" :href="box.href" target="_blank">{{ box.text }}</a>
+
+              <!-- Default: Render as plain text if type is unrecognized -->
+              <span v-else>{{ box.text }}</span>
             </IonCol>
           </IonRow>
         </IonGrid>
@@ -215,15 +225,19 @@
           </IonCol>
         </IonRow>
       </IonGrid>
+
+      <examCalendar v-if="showCalendar" :choice="calendarChoice" />
     </IonContent>
   </IonPage>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
+import { IonContent, IonHeader, IonPage, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import CustomToggle from '@vsc/CustomToggle.vue';
+import examCalendar from './ExamCalendar.vue';
+import ToolbarMenu from '../ToolbarMenu.vue';
 
 // States
 const selectedStandort = ref<string | null>(null);
@@ -238,6 +252,9 @@ const pruefungsplan = ref<any>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const showSelection = ref(true);
+const calendarChoice = ref<string | null>(null);
+const showCalendar = ref(false);
+const toolbarTitle = "Prüfungspläne"
 
 // Standorte und Fachbereiche
 const locations = ['Hagen', 'Iserlohn', 'Lüdenscheid', 'Meschede', 'Soest'];
@@ -283,7 +300,7 @@ const isButtonDisabled = computed(() => {
     if (!selectedStudiengang.value) return true; // Studiengang erforderlich
     if (selectedStudiengang.value?.type === 'praesenz' && !selectedSemester.value) return true; // Semester erforderlich
   }
-  return false; // Aktiv, wenn alle Bedingungen erfüllt sind
+  return false;
 });
 
 /*
@@ -293,6 +310,12 @@ const isButtonDisabled = computed(() => {
 // Spezialfall Iserlohn: Bei Präsenz-Studiengang ist zudem ein Semester erforderlich:
 (selectedStandort === 'iserlohn' && selectedStudiengang && selectedStudiengang.type === 'praesenz' && !selectedSemester)"
 */
+
+// Parsing-Funktion für Listen
+const parseListItems = (text: string): string[] => {
+  // Split by comma and trim whitespace
+  return text.split(',').map(item => item.trim()).filter(item => item.length > 0);
+};
 
 const loadAccessibleSemesters = async () => {
   try {
@@ -338,7 +361,9 @@ const fetchPruefungsplan = async () => {
     loading.value = true;
     error.value = null;
     pruefungsplan.value = null;
+    calendarChoice.value = null;
     showVerbundDetails.value = false;
+    showCalendar.value = false;
 
     // Falls ein Verbundstudiengang ausgewählt wurde, die Verbund-Details anzeigen
     if (selectedStudiengang.value && selectedStudiengang.value.type === 'verbund') {
@@ -356,6 +381,13 @@ const fetchPruefungsplan = async () => {
         { params: { semester, studiengangCode } }
       );
       pruefungsplan.value = response.data;
+    } else if ((selectedStandort.value === 'meschede' && selectedDepartment.value === 'ingenieur-wirtschaftswissenschaften') ||
+    (selectedStandort.value === 'hagen' && selectedDepartment.value === 'technische-betriebswirtschaft')) {
+      showCalendar.value = true;
+      if (selectedDepartment.value === 'ingenieur-wirtschaftswissenschaften')
+        calendarChoice.value = 'ingenieur-wirtschaftswissenschaften';
+      else if (selectedDepartment.value === 'technische-betriebswirtschaft')
+        calendarChoice.value = 'technische-betriebswirtschaft';
     }
   } catch (err) {
     error.value = "Fehler beim Abrufen des Prüfungsplans";
@@ -373,12 +405,14 @@ const resetSelections = () => {
   praesenzStudiengaenge.value = [];
   verbundStudiengaenge.value = [];
   accessibleSemesters.value = [];
+  showCalendar.value = false;
 };
 
 const resetStudiengaenge = () => {
   selectedStudiengang.value = null;
   praesenzStudiengaenge.value = [];
   verbundStudiengaenge.value = [];
+  showCalendar.value = false;
 };
 </script>
 

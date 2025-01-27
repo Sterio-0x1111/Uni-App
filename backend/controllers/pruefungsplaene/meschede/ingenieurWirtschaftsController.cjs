@@ -8,6 +8,163 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
 
     const exams = [];
 
+    $("#myTable tr").each((i, row) => {
+      if (i === 0) return; // Kopfzeile ignorieren
+
+      const $td = $(row).find("td");
+      if ($td.length === 0) return;
+
+      const cellHtml = $td.html() || "";
+      const cellText = $td.text().trim();
+      if (!cellText) return;
+
+      // Hilfsfunktion, um HTML-Tags zu entfernen
+      const stripHtml = (str) => str.replace(/<[^>]+>/g, "").trim();
+
+      // Aufteilen nach <br>-Zeilen
+      const linesRaw = cellHtml
+        .split(/<br\s*\/?>/i)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      // =======================
+      // 1) Erste Zeile parsen: "DD.MM.YYYY HH:MM Uhr Raum: ... Dauer: K-XX(...)"
+      // =======================
+      const firstLine = stripHtml(linesRaw[0] || "");
+
+      // Datum/Uhrzeit rausziehen (z. B. "20.01.2025 08:00 Uhr")
+      const dateTimeMatch = firstLine.match(
+        /(?<date>\d{2}\.\d{2}\.\d{4})\s+(?<time>\d{2}:\d{2})\s*Uhr/i
+      );
+      const date = dateTimeMatch?.groups?.date ?? "";
+      const time = dateTimeMatch?.groups?.time
+        ? dateTimeMatch.groups.time + " Uhr"
+        : "";
+
+      // Räume rausziehen (zwischen "Raum:" und "Dauer:")
+      const roomMatch = firstLine.match(/Raum:\s*(.+?)\s+Dauer:/i);
+      const rooms = roomMatch?.[1]?.trim() || "";
+
+      // Prüfungsform = der "K-XX"-Teil
+      const dauerMatch = firstLine.match(/Dauer:\s*(K-\d+)/i);
+      const pruefungsform = dauerMatch?.[1] || "";
+
+      // Zusätzliche Infos
+      const parenMatches = firstLine.match(/\([^)]*\)/g) || [];
+      const additionalInfosFromLine = parenMatches.map((p) =>
+        p.replace(/^\(|\)$/g, "").trim()
+      );
+
+      // examSessions-Array
+      const examSessions = [
+        {
+          date,
+          time,
+          rooms,
+        },
+      ];
+
+      // =======================
+      // 2) <b>-Block auslesen (enthält Prüfungsnummer(n) und Titel)
+      // =======================
+      const bHtml = $td.find("b").html() || "";
+      // Beispiel: "21701 Automatisierung und IOT<br>17321 Automatisierungstechnik 1"
+      const examLines = bHtml
+        .split(/<br\s*\/?>/i)
+        .map((s) => stripHtml(s))
+        .filter(Boolean);
+
+      // Jede Zeile sieht z. B. so aus: "21701 Automatisierung und IOT"
+      const parsedExams = examLines.map((line) => {
+        const match = line.match(/^(\d+)\s+(.*)$/);
+        if (match) {
+          return {
+            examNumber: match[1].trim(),
+            title: match[2].trim(),
+          };
+        }
+        // Fallback, falls keine Nummer gefunden
+        return {
+          examNumber: "",
+          title: line.trim(),
+        };
+      });
+
+      // =======================
+      // 3) Dozent & Mitarbeiter parsen
+      // =======================
+      const staffLines = linesRaw.slice(2).map(stripHtml);
+
+      let dozent = "";
+      const staffArray = [];
+
+      staffLines.forEach((line) => {
+        const dozentMatch = line.match(/^Dozent:\s*(.*)$/i);
+        if (dozentMatch) {
+          dozent = dozentMatch[1].trim();
+          return;
+        }
+        // 1. Mitarbeiter: …
+        const staffMatch = line.match(/^\d+\.\s+Mitarbeiter:\s*(.*)$/i);
+        if (staffMatch) {
+          staffArray.push(staffMatch[1].trim());
+        }
+      });
+
+      // Für den alten Aufbau:
+      // erstPruefer = staffArray[0] || ""
+      // zweitPruefer = staffArray[1] || ""
+      // Übrige Mitarbeiter ignorieren oder hängen sie an "additionalInfos" an
+      const erstPruefer = staffArray[0] || "";
+      const zweitPruefer = staffArray[1] || "";
+
+      // Optional: restliche Mitarbeiter in additionalInfos
+      const extraStaff = staffArray.slice(2);
+      const allAdditionalInfos = additionalInfosFromLine.concat(extraStaff);
+
+      // =======================
+      // 4) Endgültige Objekte bauen
+      // =======================
+      parsedExams.forEach(({ examNumber, title }) => {
+        exams.push({
+          title,
+          examNumber,
+          dozent,
+          erstPruefer,
+          zweitPruefer,
+          pruefungsform, // z. B. "K-90"
+          zulassung: "",
+          additionalInfos: allAdditionalInfos,
+          examSessions, // [{ date, time, rooms }]
+        });
+      });
+    });
+
+    if (exams.length === 0) {
+      return res.status(404).json({ message: "Keine Prüfungsdaten gefunden." });
+    }
+
+    return res.json(exams);
+  } catch (error) {
+    handleError(
+      res,
+      `Fehler beim Scraping der Prüfungspläne: ${error.message}`
+    );
+  }
+};
+
+module.exports = { scrapeIngenieurWirtschafts };
+
+/* const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
+
+const scrapeIngenieurWirtschafts = async (req, res) => {
+  try {
+    const url =
+      "https://www.fh-swf.de/de/studierende/studienorganisation/pruefungsplaene/meschede/index.php";
+    const $ = await fetchHTML(url);
+
+    const exams = [];
+
     $("#myTable0 tr").each((i, row) => {
       if (i === 0) return; // Kopfzeile überspringen
 
@@ -107,4 +264,4 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
   }
 };
 
-module.exports = { scrapeIngenieurWirtschafts };
+module.exports = { scrapeIngenieurWirtschafts }; */
