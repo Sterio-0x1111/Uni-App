@@ -36,7 +36,7 @@ export default {
     const router = useRouter();
 
     const handleLogin = async () => {
-      const url = 'http://localhost:3000/api/hsp/login';
+      const url = 'http://localhost:3000/api/vpis/login';
       try {
         const response = await axios.post(
           url,

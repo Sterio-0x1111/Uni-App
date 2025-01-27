@@ -1,8 +1,6 @@
 require("dotenv").config();
-const axios = require("axios");
 const cheerio = require("cheerio");
 const { fetchHTML, handleError, checkLink, createAxiosClient } = require("../../utils/helpers.cjs");
-const qs = require("qs");
 const { CookieJar } = require("tough-cookie");
 const VPIS_LOGIN_URL = process.env.VPIS_LOGIN_URL;
 const SEMESTER_ARCHIV = process.env.SEMESTER_ARCHIV;
@@ -67,76 +65,71 @@ const loginToVPIS = async (req, res) => {
 */
 
 const loginToVPIS = async (req, res) => {
-  if (!req.session.loggedInHSP) {
+  if (!req.session.loggedInVPIS) {
     const { username, password } = req.body;
-    const loginPageURL = process.env.HSP_LOGIN_URL;
 
     try {
       const cookieJar = new CookieJar();
       const client = createAxiosClient(cookieJar);
 
-      // Initiale GET-Anfrage
-      const initialResponse = await client.get(loginPageURL);
-      const $ = cheerio.load(initialResponse.data);
-
-      // ViewState und Tokens extrahieren
-      const viewState = $('input[name="javax.faces.ViewState"]').val();
-      const authenticityToken = $('input[name="authenticity_token"]').val(); // Optional
-      const ajaxToken = $('input[name="ajaxToken"]').val();
+      // Initiale GET-Anfrage für aktuelles semester (Redirect)
+      const aktuellResponse = await client.get(VPIS_LOGIN_URL);
+      const $ = cheerio.load(aktuellResponse.data);
+      const baseURL = 'https://vpis.fh-swf.de/' + $('form.vpis-form1').attr('action');
 
       // Login-Daten erstellen
       const loginData = new URLSearchParams();
-      loginData.append("userInfo", "");
-      loginData.append("ajax-token", ajaxToken);
-      loginData.append("javax.faces.ViewState", viewState);
-      loginData.append("asdf", username);
-      loginData.append("fdsa", password);
-      loginData.append("submit", "Anmelden");
+      loginData.append("Template", "2021");
+      loginData.append("availwidth", 1920);
+      loginData.append("screenwidth", 1920);
+      loginData.append("windowouterwidth", 1918);
+      loginData.append("windowinnerwidth", 1200);
+      loginData.append("benutzerkennung", username);
+      loginData.append("passwd", password);
+      loginData.append("submit", "");
 
       // POST-Anfrage zum Login
-      const loginResponse = await client.post(
-        "https://hochschulportal.fh-swf.de/qisserver/rds?state=user&type=1&category=auth.login",
-        loginData.toString(),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "Mozilla/5.0",
-            Accept:
-              "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            Referer: loginPageURL,
-          },
-        }
-      );
-
+      const loginResponse = await client.post(baseURL, loginData.toString(), {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": "Mozilla/5.0",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          Referer: baseURL,
+        },
+      });
+      const parts = loginResponse.request.res.responseUrl.split('/');
+      const semester = parts[3];
+      const token = parts[5];
       const html = loginResponse.data;
 
       // Prüfen, ob der Login erfolgreich war
-      if (html.includes("Chiporello-Bild-Upload")) {
+      if (html.includes("<th>Datum / Uhrzeit</th>")) {
         // Session-Daten speichern
-        req.session.loggedInHSP = true;
+        req.session.loggedInVPIS = true;
         req.session.user = { username };
-        req.session.hspCookies = cookieJar;
-        req.session.authenticityToken = authenticityToken;
-        req.session.viewState = viewState;
+        req.session.vpisCookies = cookieJar;
+        req.session.vpisToken = token;
+        req.session.vpisSemester = semester;
         req.session.save();
         res.json({ message: "SUCCESS" });
       } else {
         res.status(401).json({ message: "FAILURE" });
       }
     } catch (error) {
-      console.error("Failed to login to HSP:", error);
+      console.error("Failed to login to VPIS:", error);
       res.status(500).json({ message: "Login failed", error: error.message });
     }
   } else {
-    res.json({ message: "HSP: Bereits eingeloggt." });
+    res.json({ message: "VPIS: Bereits eingeloggt." });
   }
 };
 
 const logoutFromVPIS = async (req, res) => {
-  if (req.session.loggedInHSP) {
-    const client = createAxiosClient(req.session.hspCookies);
+  if (req.session.loggedInVPIS) {
+    const client = createAxiosClient(req.session.vpisCookies);
 
-    const url = process.env.HSP_LOGIN_URL;
+    const url = process.env.VPIS_LOGIN_URL;
     const response = await client.get(url);
     const initialData = response.data;
     const $ = cheerio.load(response.data);
@@ -144,30 +137,28 @@ const logoutFromVPIS = async (req, res) => {
     const filteredLinks = $("a").filter(function () {
       return $(this).text().includes("bmelden");
     });
-
-    const logoutURL =
-      "https://hochschulportal.fh-swf.de" + filteredLinks.first().attr("href");
+    const logoutURL = "https://vpis.fh-swf.de/" + req.session.vpisSemester + "/student.php3/" + req.session.vpisToken + "/logout?Template=2021";
 
     try {
       const response = await client.get(logoutURL);
       const data = response.data;
 
-      if (data.includes("sukzessive")) {
-        console.log("HSP: Erfolgreich ausgeloggt.");
-        req.session.loggedInHSP = false;
-        req.session.hspCookies = undefined;
+      if (data.includes("erfolgreich")) {
+        console.log("VPIS: Erfolgreich ausgeloggt.");
+        req.session.loggedInVPIS = false;
+        req.session.vpisCookies = undefined;
 
         res.status(200).json({ data });
       } else {
         console.log("Logout fehlgeschlagen.");
-        res.status(500).json({ message: "HSP Logout fehlgeschlagen." });
+        res.status(500).json({ message: "VPIS Logout fehlgeschlagen." });
       }
     } catch (error) {
-      console.log("HSP: Fehler beim Ausloggen.\n", error);
+      console.log("VPIS: Fehler beim Ausloggen.\n", error);
       res.status(500).json({ data: initialData });
     }
   } else {
-    res.status(200).json({ message: "HSP bereits ausgeloggt." });
+    res.status(200).json({ message: "VPIS bereits ausgeloggt." });
   }
 };
 
