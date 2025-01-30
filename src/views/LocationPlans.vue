@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbar-menu :menuTitle="toolbarTitle" />
+            <toolbar-menu menuTitle="Gebäudepläne" />
         </ion-header>
 
         <ion-content>
@@ -31,8 +31,7 @@ import { ref, onMounted, computed, onBeforeMount } from 'vue';
 import ToolbarMenu from './ToolbarMenu.vue';
 import { useLocationStore } from '@/stores/locationStore';
 
-const toolbarTitle = 'Lagepläne';
-const images = ref([]);
+/*const images = ref([]);
 const locations = [ 'Hagen', 'Iserlohn', 'Meschede', 'Soest', 'Lüdenscheid' ];
 const selectedLocation = ref(locations[1]);
 const nextLocation = ref(null);
@@ -77,6 +76,14 @@ onMounted(async () => {
         { location: 'Lüdenscheid',  path: '/assets/locations/luedenscheid/luedenscheid_1.png' }
     ]
 });
+*/
+
+
+// Composable Logik
+import { useLocation } from '@/composables/useLocation';
+
+const { locations, selectedLocation, nextLocation, nextDistance, loading, filteredImages } = useLocation();
+
 </script>
 
 <style scoped>
