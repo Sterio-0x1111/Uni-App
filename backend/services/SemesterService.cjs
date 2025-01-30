@@ -1,21 +1,25 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 
 class SemesterService {
-    static #instance;
+    //static #instance;
+    //#url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
+    //$ = null;
 
     constructor(){
-        if(SemesterService.#instance){
-            throw new Error('Singleton Klasse kann nicht erneut instanziiert werden. Verwenden Sie die .instance!', error);
-        }
-    }
-
-    get instance(){
-        if(!SemesterService.#instance){
+        /*if(SemesterService.#instance){
             return SemesterService.#instance;
         }
-
-        SemesterService.#instance = new SemesterService();
+        $ = async () => await fetchHTML(this.#url);
+        SemesterService.#instance = this;
+        console.log('constructed');*/
     }
+
+    /*get instance(){
+        if(!SemesterService.#instance){
+            SemesterService.#instance = this;
+        }
+        return SemesterService.#instance;
+    }*/
 
     static async getSemesterDates(){
         try{

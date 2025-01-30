@@ -35,7 +35,9 @@ class VSCPortalService extends Portal {
         const client = this.createAxiosClient();
 
         try {
-            const response = await client.post(loginPageURL, loginPayload.toString(), {
+            console.log('Payload');
+            console.log(loginPayload);
+            const response = await client.post(loginPageURL, loginPayload, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'User-Agent': 'Mozilla/5.0',
