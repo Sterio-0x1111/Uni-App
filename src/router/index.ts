@@ -21,6 +21,8 @@ import Departments from "../views/Departments.vue";
 import LoginHSP from "../views/test.vue";
 import PayReport from "../views/HSP/PayReport.vue";
 import PersonalInformation from "../views/HSP/PersonalInformation.vue";
+import NewsList from "../views/VPIS/NewsList.vue";
+import MessageDetail from "../views/VPIS/MessageDetail.vue";
 
 const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const authStore = useAuthStore();
@@ -28,9 +30,9 @@ const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: Rout
     next({ path: "/navigation" });
   } else if (authType === "HSP" && !authStore.isLoggedInHSP) {
     next({ path: "/navigation" });
-  } else if (authType === "VPIS" && !authStore.isLoggedInVSC) {
+  } else if (authType === "VPIS" && !authStore.isLoggedInVPIS) {
     next({ path: "/navigation" });
-  } /*else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  && authStore.isLoggedInVPIS) {
+  } /* else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  && authStore.isLoggedInVPIS) {
     next({ path: "/navigation" });
   } */ else {
     next();
@@ -94,6 +96,19 @@ const routes: Array<RouteRecordRaw> = [
     path: "/vpisLogin",
     name: "VpisLogin",
     component: VpisLogin,
+  },
+  {
+    path: "/news",
+    name: "NewsList",
+    component: NewsList,
+    beforeEnter: requireAuth("VPIS"),
+  },
+  {
+    path: "/news/message/:msgID",
+    name: "MessageDetail",
+    component: MessageDetail,
+    props: true,
+    beforeEnter: requireAuth("VPIS"),
   },
   {
     path: "/test",

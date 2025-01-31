@@ -88,7 +88,7 @@ const toolbarTitle = ref("Menü");
 const authStore = useAuthStore();
 const loginStateHSP = computed(() => authStore.isLoggedInHSP);
 const loginStateVSC = computed(() => authStore.isLoggedInVSC);
-const loginStateVPIS = computed(() => authStore.isLoggedInVPIS); // Stellen Sie sicher, dass dieser Zustand definiert ist
+const loginStateVPIS = computed(() => authStore.isLoggedInVPIS);
 
 const routes = computed(() => {
   return [
@@ -102,7 +102,7 @@ const routes = computed(() => {
     { id: 7, title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
     { id: 8, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
     { id: 9, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
-    // authType: 'VPIS'
+    { id: 10, title: "Nachrichten", icon: 'document-text', path: "/news", requiresAuth: true, authType: 'VPIS' },
   ]
 });
 
