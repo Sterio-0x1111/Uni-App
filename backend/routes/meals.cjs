@@ -6,4 +6,7 @@ const router = express.Router();
 router.get('/:loc', getDates);
 router.get("/:mensa/:date", getMeals);
 
+//router.get('/dates', getDates);
+//router.get("/", getMeals);
+
 module.exports = router;

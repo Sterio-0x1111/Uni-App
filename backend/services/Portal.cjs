@@ -41,8 +41,8 @@ class Portal {
         throw new Error('Die abstrakte Methode loginToPortal muss in einer Subklasse implementiert werden.');
     }
 
-    logoutFromPortal(){
-        throw new Error('Die abstrakte Methode logoutFromPortal muss in einer Subklasse implementiert werden.');
+    async logout(){
+        throw new Error('Die abstrakte Methode logout muss in einer Subklasse implementiert werden.');
     }
 }
 

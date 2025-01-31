@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbar-menu :menuTitle="menuTitle" />
+            <toolbar-menu menuTitle="XMensaplan" />
         </ion-header>
 
         <ion-content>
@@ -66,35 +66,14 @@ import * as cheerio from 'cheerio'
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonItemDivider, IonLoading } from '@ionic/vue';
 import ToolbarMenu from "./ToolbarMenu.vue";
 import { useLocationStore } from '@/stores/locationStore';
+import { useMensaStore } from '@/stores/mensaStore';
 //import CustomToggle from '@/views/CustomToggle.vue';
 
-const menuTitle = ref('Mensaplan');
-
 // Liste der Mensas mit ihren jeweiligen URLs
-const mensas = [
-    { id: 1, name: "Hagen", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/hagen" },
-    { id: 2, name: "Iserlohn", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/iserlohn" },
-    { id: 3, name: "Meschede", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/meschede" },
-    { id: 4, name: "Soest", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/soest" }
-]
+const mensaStore = useMensaStore();
+const { mensas, categoryIcons } = mensaStore;
 
-const iconBaseURL = '/assets/icons'
-const categoryIcons = { 
-    'Tagesgericht':                     iconBaseURL + '/icon-tagesgericht.png',
-    'Aktionsteller':                     iconBaseURL + '/icon-aktionsteller.png',
-    'Menü 1':                           iconBaseURL + '/icon-menue-1.png',
-    'Menü 2':                           iconBaseURL + '/icon-menue-2.png',
-    'Klimateller':                      iconBaseURL + '/icon-bite.png',
-    'Vegetarisches Menü':               iconBaseURL + '/icon-veggie-menue.png',
-    'Ohne Fleisch':                     iconBaseURL + '/icon-vegetarisch.png',
-    'Vegane Speise':                    iconBaseURL + '/icon-vegan.png',
-    'Mit Fisch bzw. Meeresfrüchten':    iconBaseURL + '/icon-fisch.png',
-    'Mit Rindfleisch':                  iconBaseURL + '/icon-rind.png',
-    'Mit Geflügel':                     iconBaseURL + '/icon-gefluegel.png',
-    'Mit Schweinefleisch':              iconBaseURL + '/icon-schwein.png',
-    'Beilagen':                         iconBaseURL + '/icon-beilagen.png', 
-    'Fleisch aus artgerechter Haltung': iconBaseURL + 'icon-artgerechte-haltung.png'
-}
+
 
 
 // Reaktive Variablen
@@ -150,6 +129,7 @@ const loadMensaPlan = async () => {
         try {
             console.log('Lade Mensaplan für', mensa.name);
             const response = await axios.get(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
+            //const response = await axios.get(`http://localhost:3000/api/meals?mensa=${mensa.name}&date=${selectedDate.value}`);
             const meals = response.data;
             console.log(meals.value);
             mensaPlan.value = (meals && response.status === 200) ? meals.table : null;
@@ -170,6 +150,7 @@ const loadSelectionOptions = async () => {
 
     try {
         const response = await axios.get(`http://localhost:3000/api/mensa/options/${mensaName}`);
+        //const response = await axios.get(`http://localhost:3000/api/meals/dates?loc=${mensaName}`);
         const data = await response.data;
         
         // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
