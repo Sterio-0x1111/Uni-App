@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <ToolbarMenu :menuTitle="menuTitle" />
+            <ToolbarMenu menuTitle="Semesterzeiten" />
         </ion-header>
 
         <ion-content>
@@ -34,17 +34,23 @@ import { onMounted, ref } from 'vue';
 import { IonPage, IonHeader, IonContent, IonToolbar, IonTitle, IonGrid, IonRow, IonCol, IonItemDivider, IonIcon } from '@ionic/vue';
 import ToolbarMenu from './ToolbarMenu.vue';
 import axios from 'axios';
+import { useSemesterStore } from '@/stores/semesterStore';
+import { useSemester } from '@/composables/useSemester';
 
-const menuTitle = "Semesterzeiten";
+const { semesterPeriods, feedbackDates } = useSemester();
+
+/*const semesterStore = useSemesterStore();
 const semesterPeriods = ref(null);
 const feedbackDates = ref(null);
+*/
 
-onMounted(async () => {
+
+/*onMounted(async () => {
     getSemesterDates();
     getFeedbackInformation();
-})
+})*/
 
-const getSemesterDates = async () => {
+/*const getSemesterDates = async () => {
     try {
         //const response = await fetch('http://localhost:3000/api/semester/dates');
         //const data = await response.json();
@@ -55,9 +61,9 @@ const getSemesterDates = async () => {
     } catch(error){
         console.error('Fehler beim Laden der Semesterdaten.', error);
     }
-}
+}*/
 
-const getFeedbackInformation = async () => {
+/*const getFeedbackInformation = async () => {
     try {
         const response = await fetch('http://localhost:3000/api/semester/feedback');
         const data =await response.json();
@@ -66,7 +72,7 @@ const getFeedbackInformation = async () => {
     } catch(error){
         console.log('Fehler beim Laden der Rückmeldedaten.', error);
     }
-}
+}*/
 
 import { addIcons } from 'ionicons'; 
 import { lockOpen, lockClosed, school, library, time, alarm, hourglass, calendar, clipboard, document, bulb, restaurant, cafe, fastFood, checkmarkCircle, trophy, statsChart, location, map, compass, medal } from 'ionicons/icons'; 

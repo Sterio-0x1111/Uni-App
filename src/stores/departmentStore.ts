@@ -6,9 +6,8 @@ export const useDepartmentStore = defineStore('department', {
         departments: [] as String[]
     }), 
     actions: {
-        async getDepartments(){
+        async getDepartments() : Promise<String[] | undefined>{
             try {
-
                 if(this.departments.length < 1){
                     const url = 'http://localhost:3000/api/departments';
                     const response = await axios.get(url);

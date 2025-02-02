@@ -4,7 +4,6 @@ import { useAuthStore } from './authStore';
 import { parse } from 'dotenv';
 
 export const useCourseStore = defineStore('courseStore', {
-
     state: () => ({
         examsPage: null as any,
         degrees: [] as string[],
@@ -48,14 +47,30 @@ export const useCourseStore = defineStore('courseStore', {
                 return [];
             }
         },
-        async fetchCourses() {
+        async fetchCourses() : Promise<void> {
             const authStore = useAuthStore();
-            if (!authStore.isLoggedInVSC) {
-                console.log('Studiengänge können nicht geladen werden. Nicht angemeldet.');
-                return;
-            }
 
-            if (this.bachelorCourses.length < 1) {
+            try {
+                if(!authStore.isLoggedInVPIS){
+                    throw new Error('Sie sind nicht eingeloggt.');
+                }
+
+                if(this.bachelorCourses.length < 1){
+                    const response = await axios.get('http://localhost:3000/api/vsc/exams/reg', { withCredentials: true });
+                    this.bachelorCourses = this.parseCourses(response.data.bachelorPage);
+                    this.degrees = response.data.degrees;
+                    this.masterCourses = (response.data.masterPage) ? this.parseCourses(response.data.masterPage) : [];
+                }
+            } catch(error: unknown){
+                if(axios.isAxiosError(error)){
+                    console.log('Fehler beim Laden der Studiengänge im Store.', error);
+                } else {
+                    console.log('Nicht eingeloggt.');
+                    alert('Ihre Studiengänge konnten nicht geladen werden. Sie müssen sich zuerst anmelden.');
+                }
+                
+            }
+            /*if (this.bachelorCourses.length < 1) {
                 try {
                     const response = await axios.get('http://localhost:3000/api/vsc/exams/reg', { withCredentials: true });
                     console.log(response.data);
@@ -66,7 +81,7 @@ export const useCourseStore = defineStore('courseStore', {
                 } catch (error) {
                     console.log('Fehler beim Laden von Studiengängen.', error);
                 }
-            }
+            }*/
         }
     },
     persist: {

@@ -1,6 +1,7 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
+const DepartmentService = require('../services/DepartmentService.cjs');
 
 /**
  * Funktion zum Laden von auswählbaren Fachbereichen.
@@ -10,7 +11,17 @@ const cheerio = require('cheerio');
  * um sie später besser verarbeiten zu können.
  */
 const getDepartments = async (req, res) => {
-    try {
+    const departments = await DepartmentService.getDepartments();
+    console.log('DEPARTMENTS');
+    console.log(departments);
+
+    if(departments.length > 0){
+        res.status(200).json({ departments: departments });
+    } else {
+        res.status(204).json({ departments: departments });
+    }
+    
+    /*try {
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const response = await axios.get(url);
 
@@ -44,7 +55,7 @@ const getDepartments = async (req, res) => {
     } catch(error){
         console.log(error);
         res.status(500).json({ message: 'Fehler beim Laden der verfügbaren Fachbereiche. ' + error });
-    }
+    }*/
 }
 
 /**
@@ -59,6 +70,10 @@ const getDepartments = async (req, res) => {
  */
 const getDepartmentDatesAsTable = async (req, res) => {
     const { department } = req.body;
+    const tableData = await DepartmentService.getDepartmentDatesAsTable(department);
+    res.status(200).json({ tableData });
+    
+    /*const { department } = req.body;
     try {
         const getDepartmentsURL = 'http://localhost:3000/api/departments';
         const getDepartmentsResponse = await axios.get(getDepartmentsURL);
@@ -84,16 +99,6 @@ const getDepartmentDatesAsTable = async (req, res) => {
         const response = await axios.get(url);
         const $ = cheerio.load(response.data);
 
-        // JSON für dynamische Bestimmung der Filter Methode
-        /*const departments = {
-            'FB Elektrotechnik und Informationstechnik':    filterDepartmentTables,
-            'FB Technische Betriebswirtschaft':             filterDepartmentTables,
-            'FB Informatik und Naturwissenschaften':        filterDepartmentTablesWithLinks,
-            'FB Maschinenbau: Präsenzstudium':              filterDepartmentTablesWithLinks,
-            'FB Maschinenbau: Verbundstudium ':             filterExternalDepartmentTables,
-            'FB Ingenieur- und Wirtschaftswissenschaften':  filterDepartmentTables
-        }*/
-
         const filterMethod = departments[department].method;
         if(filterMethod){
             const tableData = await filterMethod($, department);
@@ -105,7 +110,7 @@ const getDepartmentDatesAsTable = async (req, res) => {
     } catch(error){
         console.log(`Fehler beim Laden der Termine für den Fachbereich ${department}.`, error);
         res.status(500).json({ message: `Fehler beim Laden der Termine für den Fachbereich ${department}. ` + error });
-    }
+    }*/
 }
 
 /**
@@ -223,7 +228,7 @@ const filterDepartmentTables = ($, department) => {
  *  gefilterte Termintabelle als Array
  */
 const filterDepartmentTablesWithLinks = ($, department) => {
-    try {
+    /*try {
         const dates = $('table').has(`tr[data-filter="${department}"]`).html();
         const baseURL = 'https://www.fh-swf.de'; // zum Vervollständigen von relativen Pfaden
         const tableData = [];
@@ -248,7 +253,7 @@ const filterDepartmentTablesWithLinks = ($, department) => {
 
     } catch(error){
         console.log('Fehler beim Filtern der Tabellen mit Links.', error);
-    }
+    }*/
 }
 
 /**
@@ -264,7 +269,12 @@ const filterDepartmentTablesWithLinks = ($, department) => {
  *  Antwort
  */
 const filterDepartmentTablesByLink = async (req, res) => {
-    try {
+    const { url } = req.body;
+    const { tables, dates } = await DepartmentService.filterDepartmentTablesByLink(url);
+
+    res.status(200).json({ tables, dates });
+    
+    /*try {
         console.log('By Link');
         const { url } = req.body;
         const response = await axios.get(url);
@@ -311,7 +321,7 @@ const filterDepartmentTablesByLink = async (req, res) => {
         
     } catch(error){
         console.log(error);
-    }
+    }*/
 }
 
 /**

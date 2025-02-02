@@ -95,7 +95,6 @@ export const useLocationStore = defineStore('loc', {
     },*/
     actions: {
         async locateClient() : Promise<boolean> {
-          console.log('Entered locateClient()');
           try {
             const position = await getGeolocation(); // wartet auf das Ergebnis der Geolokalisierung
       
@@ -130,7 +129,6 @@ export const useLocationStore = defineStore('loc', {
               nextLocation: '',
               nextLocationDistance: -1
             });
-            return false;
           }
         }, 
         locateClient2() : boolean {

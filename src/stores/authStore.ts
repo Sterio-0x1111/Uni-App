@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', {
 
             }
         }, 
-        async logout(){
+        async logout() : Promise<void>{
             try {
                 const vscURL = 'http://localhost:3000/api/vsc/logout';
                 const vscResponse = await axios.get(vscURL, { withCredentials: true });
@@ -98,7 +98,7 @@ export const useAuthStore = defineStore('auth', {
                 console.log('Fehler beim Laden der Login Status.', error);
             }
         },
-        cancelLogoutTimer() {
+        cancelLogoutTimer() : void {
             if (this.logoutTimeoutId !== null) {
                 clearTimeout(this.logoutTimeoutId);  // Timeout abbrechen
                 this.timer = null;  // Timeout-ID zurücksetzen
