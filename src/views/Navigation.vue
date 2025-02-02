@@ -26,29 +26,23 @@ import { useAuthStore } from "@/stores/authStore";
 
 const authStore = useAuthStore();
 const loginState = computed(() => authStore.isLoggedIn);
-//const loginStateVSC = computed(() => authStore.isLoggedInVSC);
+const loginStateHSP = computed(() => authStore.isLoggedInHSP);
 const loginStateVSC = computed(() => authStore.isLoggedInVSC);
-console.log(loginStateVSC.value)
-
-/*const routes: Route[] = [
-  { id: 0, title: "Mensaplan",            icon: 'restaurant',     path: "/meals",       requiresAuth: false, login: false },
-  { id: 1, title: "Semestertermine",      icon: 'time',           path: "/semester",    requiresAuth: false, login: false },
-  { id: 2, title: "Fachbereichstermine",  icon: 'calendar',       path: "/departments", requiresAuth: false, login: false },
-  { id: 3, title: "Lagepläne",            icon: 'location',       path: "/locations",   requiresAuth: false, login: false },
-  { id: 4, title: "Meine Prüfungen",      icon: 'document-text',  path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
-//{ id: 2, title: "Login", path: "/login", requiresAuth: false },
-];*/
+const loginStateVPIS = computed(() => authStore.isLoggedInVPIS);
 
 const routes = computed(() => {
   return [
-    { id: 0, title: "Mensaplan",            icon: 'restaurant',     path: "/meals",       requiresAuth: false, login: false },
-    { id: 1, title: "Semestertermine",      icon: 'time',           path: "/semester",    requiresAuth: false, login: false },
-    { id: 2, title: "Fachbereichstermine",  icon: 'calendar',       path: "/departments", requiresAuth: false, login: false },
-    { id: 3, title: "Lagepläne",            icon: 'location',       path: "/locations",   requiresAuth: false, login: false },
-    { id: 4, title: "Meine Prüfungen",      icon: 'document-text',  path: "/exams",       requiresAuth: true,  login: loginStateVSC.value },
-    { id: 5, title: "Prüfungspläne",        icon: 'document-text',  path: "/vpisPruefungsplaene",       requiresAuth: false,  login: false },
-    { id: 6, title: "Wochenplan",           icon: 'calendar',  path: "/calendar",       requiresAuth: false,  login: false },
-    { id: 7, title: "Prüfungsform",         icon: 'calendar',  path: "/pruefungsForm",       requiresAuth: false,  login: false }, // ggf. requiresAuth und Login anpassen
+    { id: 0, title: "Mensaplan", icon: 'restaurant', path: "/meals", requiresAuth: false, authType: null },
+    { id: 1, title: "Semestertermine", icon: 'time', path: "/semester", requiresAuth: false, authType: null },
+    { id: 2, title: "Lagepläne", icon: 'location', path: "/locations", requiresAuth: false, authType: null },
+    { id: 3, title: "Fachbereichstermine", icon: 'calendar', path: "/departments", requiresAuth: false, authType: null },
+    { id: 4, title: "Prüfungspläne", icon: 'calendar', path: "/vpisPruefungsplaene", requiresAuth: false, authType: null },
+    { id: 5, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: false, authType: null },
+    { id: 6, title: "Veranstaltungsplanende", icon: 'information', path: "/vpisPlaner", requiresAuth: false, authType: null },
+    { id: 7, title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
+    { id: 8, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
+    { id: 9, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
+    { id: 10, title: "Nachrichten", icon: 'document-text', path: "/news", requiresAuth: true, authType: 'VPIS' },
   ]
 });
 
@@ -80,6 +74,37 @@ addIcons({
   'calendar': calendar,
   'document-text': documentText,
 });
+
+const toolbarTitle = ref("Menü");
+
+const publicRoutes = computed(() => {
+  return routes.value.filter(route => !route.requiresAuth);
+});
+
+const hspRoutes = computed(() => {
+  return routes.value.filter(route => route.requiresAuth && route.authType === 'HSP' && loginStateHSP.value);
+});
+
+const vscRoutes = computed(() => {
+  return routes.value.filter(route => route.requiresAuth && route.authType === 'VSC' && loginStateVSC.value);
+});
+
+const vpisRoutes = computed(() => {
+  return routes.value.filter(route => route.requiresAuth && route.authType === 'VPIS' && loginStateVPIS.value);
+});
+
+const getAuthIcon = (authType: string | null) => {
+  switch (authType) {
+    case 'HSP':
+      return 'shield-checkmark'; // Beispiel-Icon für HSP
+    case 'VSC':
+      return 'lock-closed';      // Beispiel-Icon für VSC
+    case 'VPIS':
+      return 'key';              // Beispiel-Icon für VPIS
+    default:
+      return '';
+  }
+};
 
 const router = useRouter();
 const navigateTo = (path: string) => {
