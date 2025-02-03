@@ -65,7 +65,7 @@ interface Route {
 }
 
 import { addIcons } from 'ionicons'; 
-import { key, location, restaurant, time, calendar, documentText} from 'ionicons/icons'; 
+import { key, location, restaurant, time, calendar, documentText, information } from 'ionicons/icons'; 
 addIcons({ 
   'key': key,
   'location': location,
@@ -73,6 +73,7 @@ addIcons({
   'time': time,
   'calendar': calendar,
   'document-text': documentText,
+  'information': information,
 });
 
 const toolbarTitle = ref("Menü");

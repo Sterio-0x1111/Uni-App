@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-        <toolbar-menu :menuTitle="toolbarTitle" />
+        <toolbar-menu menuTitle="Fachbereiche" />
     </ion-header>
 
     <ion-content>
@@ -121,9 +121,24 @@ import { ref, onMounted, computed } from 'vue';
 import ToolbarMenu from './ToolbarMenu.vue';
 import axios from 'axios';
 import { useDepartmentStore } from '@/stores/departmentStore';
+import { useDepartments } from '@/composables/useDepartments';
 
+const {
+        selectedDepartment, 
+        selectedCourse,
+        departments, 
+        dates, 
+        tables,
+        lists,
+        tableHeaders,
+        courseOptions,
+        loadCourseData,
+        loadData,
+        resetStatus,
+    } = useDepartments();
+
+/*
 const departmentStore = useDepartmentStore();
-const toolbarTitle = 'Fachbereiche'
 const selectedDepartment = ref({ department: '', type: '' });
 const departments = ref([]);
 
@@ -199,7 +214,7 @@ const resetStatus = () => {
     dates.value = null;
     tables.value = null;
     courseOptions.value = null;
-}
+}*/
 </script>
 
 <style scoped>

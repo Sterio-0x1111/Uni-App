@@ -1,11 +1,12 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbar-menu menuTitle="XMensaplan" />
+            <toolbar-menu menuTitle="Mensaplan" />
         </ion-header>
 
         <ion-content>
-            
+            <CustomToggle v-model="showSelection" />
+            <span v-if="showSelection">
             <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
             <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
             <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
@@ -26,6 +27,7 @@
                     </ion-select-option>
                 </ion-select>
             </ion-item>
+            </span>
 
             <div class="grid-container" v-if="mensaPlan">
                 <h2>Menü</h2>
@@ -67,17 +69,34 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelec
 import ToolbarMenu from "./ToolbarMenu.vue";
 import { useLocationStore } from '@/stores/locationStore';
 import { useMensaStore } from '@/stores/mensaStore';
-//import CustomToggle from '@/views/CustomToggle.vue';
+import { useMensaPlan } from '@/composables/useMensaPlan';
+import CustomToggle from '@/views/VSC/CustomToggle.vue';
 
 // Liste der Mensas mit ihren jeweiligen URLs
-const mensaStore = useMensaStore();
-const { mensas, categoryIcons } = mensaStore;
+//const mensaStore = useMensaStore();
+//const { mensas, categoryIcons } = mensaStore;
 
 
+const {
+    showSelection,
+    selectedMensa,
+    mensaPlan,
+    selectedDate,
+    dateSelection,
+    nextLocation,
+    nextDistance,
+    loading,
+    loadingMessage,
+    mensas,
+    categoryIcons,
+    loadSelectionOptions,
+    loadMensaPlan
+} = useMensaPlan();
 
 
 // Reaktive Variablen
-const selectedMensa = ref(null);
+
+/*const selectedMensa = ref(null);
 const mensaPlan = ref(null);
 const selectedDate = ref(null);
 const dateSelection = ref([]);
@@ -161,7 +180,8 @@ const loadSelectionOptions = async () => {
         console.log('Fehler beim Laden der Optionen:', error);
         dateSelection.value = [];
     }
-}
+}*/
+
 </script>
 
 <style scoped>

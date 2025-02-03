@@ -4,84 +4,123 @@ import { useLocationStore } from '@/stores/locationStore'
 import { useMensaStore } from '@/stores/mensaStore'
 
 export function useMensaPlan() {
-    const mensaStore = useMensaStore()
-    const { mensas, categoryIcons } = mensaStore
+    //const mensaStore = useMensaStore()
+    //const { mensas, categoryIcons } = mensaStore
 
-    const selectedMensa = ref<string | null>(null)
-    const mensaPlan = ref<any | null>(null)
-    const selectedDate = ref<string | null>(null)
-    const dateSelection = ref<Array<{ optionValue: string, optionText: string }>>([])
-    const nextLocation = ref<string | null>(null)
-    const nextDistance = ref<number>(-1)
-    const loading = ref<boolean>(false)
-    const loadingMessage = ref<string>('')
+    const showSelection = ref(true);
+    const mensas = [
+        { id: 1, name: "Hagen", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/hagen" },
+        { id: 2, name: "Iserlohn", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/iserlohn" },
+        { id: 3, name: "Meschede", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/meschede" },
+        { id: 4, name: "Soest", url: "https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/soest" }
+    ]
 
+    const iconBaseURL = '/assets/icons';
+    const categoryIcons = {
+        'Tagesgericht': iconBaseURL + '/icon-tagesgericht.png',
+        'Aktionsteller': iconBaseURL + '/icon-aktionsteller.png',
+        'Menü 1': iconBaseURL + '/icon-menue-1.png',
+        'Menü 2': iconBaseURL + '/icon-menue-2.png',
+        'Klimateller': iconBaseURL + '/icon-bite.png',
+        'Vegetarisches Menü': iconBaseURL + '/icon-veggie-menue.png',
+        'Ohne Fleisch': iconBaseURL + '/icon-vegetarisch.png',
+        'Vegane Speise': iconBaseURL + '/icon-vegan.png',
+        'Mit Fisch bzw. Meeresfrüchten': iconBaseURL + '/icon-fisch.png',
+        'Mit Rindfleisch': iconBaseURL + '/icon-rind.png',
+        'Mit Geflügel': iconBaseURL + '/icon-gefluegel.png',
+        'Mit Schweinefleisch': iconBaseURL + '/icon-schwein.png',
+        'Beilagen': iconBaseURL + '/icon-beilagen.png',
+        'Fleisch aus artgerechter Haltung': iconBaseURL + 'icon-artgerechte-haltung.png'
+    }
+
+    const selectedMensa = ref(null);
+    const mensaPlan = ref(null);
+    const selectedDate = ref(null);
+    const dateSelection = ref([]);
+
+    // Berechne den Namen der ausgewählten Mensa
     const selectedMensaName = computed(() => {
         const mensa = mensas.find(m => m.name === selectedMensa.value)
         return mensa ? mensa.name : ''
     })
 
+    const nextLocation = ref('');
+    const nextDistance = ref(-1);
+    const loading = ref(false);
+    const loadingMessage = ref('');
+
+    // Lade den Mensaplan basierend auf der ausgewählten Mensa
     const loadMensaPlan = async () => {
-        if (!selectedMensa.value || !selectedDate.value) return
+        loadingMessage.value = 'Lade Mensaplan...';
+        const mensa = mensas.find(m => m.name === selectedMensa.value);
+        //const mensa = selectedMensa.value.toLowerCase();
 
-        loadingMessage.value = 'Lade Mensaplan...'
-        loading.value = true
-
-        try {
-            console.log('Lade Mensaplan für', selectedMensa.value)
-            const response = await axios.get(`http://localhost:3000/api/meals/${encodeURIComponent(selectedMensa.value)}/${selectedDate.value}`)
-            mensaPlan.value = (response.data && response.status === 200) ? response.data.table : null
-        } catch (error) {
-            console.error('Fehler beim Laden des Mensaplans:', error)
-            mensaPlan.value = null
-        } finally {
-            loading.value = false
+        if (mensa) {
+            try {
+                console.log('Lade Mensaplan für', mensa.name);
+                const response = await axios.get(`http://localhost:3000/api/meals/${encodeURIComponent(mensa.name)}/${selectedDate.value}`);
+                //const response = await axios.get(`http://localhost:3000/api/meals?mensa=${mensa.name}&date=${selectedDate.value}`);
+                const meals = response.data;
+                console.log(meals.value);
+                mensaPlan.value = (meals && response.status === 200) ? meals.table : null;
+            } catch (error) {
+                console.log('Fehler beim Laden des Mensaplan:', error);
+                mensaPlan.value = null;
+            } finally {
+                loading.value = false;
+            }
         }
+        loading.value = false;
     }
 
     const loadSelectionOptions = async () => {
-        if (!selectedMensa.value) return
-
-        loadingMessage.value = 'Lade verfügbare Daten...'
-        loading.value = true
+        loadingMessage.value = 'Lade verfügbare Daten...';
+        //const mensaName = selectedMensaName.value.toLowerCase();
+        const mensaName = selectedMensa.value.toLowerCase();
 
         try {
-            const response = await axios.get(`http://localhost:3000/api/mensa/options/${selectedMensa.value.toLowerCase()}`)
-            dateSelection.value = response.data.options || []
-            selectedDate.value = dateSelection.value.length > 0 ? dateSelection.value[0].optionValue : null
-            await loadMensaPlan()
+            const response = await axios.get(`http://localhost:3000/api/mensa/options/${mensaName}`);
+            //const response = await axios.get(`http://localhost:3000/api/meals/dates?loc=${mensaName}`);
+            const data = await response.data;
+
+            // Speichere die Datumsauswahl-Optionen in der reaktiven Liste
+            dateSelection.value = data.options;
+            selectedDate.value = data.options[0].optionValue;
+            await loadMensaPlan();
         } catch (error) {
-            console.error('Fehler beim Laden der Optionen:', error)
-            dateSelection.value = []
-        } finally {
-            loading.value = false
+            console.log('Fehler beim Laden der Optionen:', error);
+            dateSelection.value = [];
         }
     }
 
     onMounted(async () => {
-        const locationStore = useLocationStore()
+        const locationStore = useLocationStore();
 
         if (!locationStore.nextLocation) {
-            loadingMessage.value = 'Warten auf Standortermittlung...'
-            loading.value = true
-            const success = await locationStore.locateClient()
+            loadingMessage.value = 'Warten auf Standortermittlung...';
+            loading.value = true;
+            const success = await locationStore.locateClient();
 
             if (success) {
-                selectedMensa.value = locationStore.nextLocation
-                nextLocation.value = locationStore.nextLocation
-                nextDistance.value = Math.round((locationStore.nextLocationDistance / 1000) * 100) / 100
+                selectedMensa.value = locationStore.nextLocation;
+                nextLocation.value = locationStore.nextLocation;
+                nextDistance.value = Math.round((locationStore.nextLocationDistance / 1000) * 100) / 100; // Umrechnung in km
+                loading.value = false;
+                await loadSelectionOptions();
+                //loading.value = false;
+            } else {
+                loading.value = false;
             }
-            loading.value = false
         } else {
-            selectedMensa.value = locationStore.nextLocation
-            nextLocation.value = locationStore.nextLocation
-            nextDistance.value = Math.round((locationStore.nextLocationDistance / 1000) * 100) / 100
+            selectedMensa.value = locationStore.nextLocation;
+            nextLocation.value = locationStore.nextLocation;
+            nextDistance.value = Math.round((locationStore.nextLocationDistance / 1000) * 100) / 100; // Umrechnung in km
+            await loadSelectionOptions();
         }
-
-        await loadSelectionOptions()
     })
 
     return {
+        showSelection,
         selectedMensa,
         mensaPlan,
         selectedDate,
@@ -90,6 +129,7 @@ export function useMensaPlan() {
         nextDistance,
         loading,
         loadingMessage,
+        mensas,
         categoryIcons,
         loadSelectionOptions,
         loadMensaPlan

@@ -1,5 +1,10 @@
 import { useSemesterStore } from '@/stores/semesterStore';
 import { ref, onMounted } from 'vue';
+import { useAuthStore } from "@/stores/authStore";
+import { useCourseStore } from "@/stores/courseStore";
+import { useExamStore } from "@/stores/examStore";
+import { useRouter } from 'vue-router';
+
 
 export function useSemester(){
     const semesterStore = useSemesterStore();
