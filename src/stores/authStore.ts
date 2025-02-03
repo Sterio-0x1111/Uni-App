@@ -7,7 +7,7 @@ export const useAuthStore = defineStore('auth', {
         isLoggedInVSC:  false as boolean,
         isLoggedInHSP:  false as boolean,
         isLoggedInVPIS: false as boolean,
-        timer: null as number | null,
+        logoutTimer: null as ReturnType<typeof setTimeout> | null,
     }), 
     actions: {
         async centralLogin(username: string, password: string) : Promise<boolean> {
@@ -20,20 +20,12 @@ export const useAuthStore = defineStore('auth', {
             const vpsiURL = "http://localhost:3000/api/vpis/login";
             const vpisResponse = await axios.post(vpsiURL, { username: username, password: password }, { withCredentials: true });
 
-            if(vscResponse.status === 200){
-                this.isLoggedInVSC = true;
-            }
-
-            if(hspResponse.status === 200){
-                this.isLoggedInHSP = true;
-            }
-
-            if (vpisResponse.status === 200) {
-                this.isLoggedInVPIS = true;
-            }
+            this.isLoggedInVSC = vscResponse.status === 200;
+            this.isLoggedInHSP = hspResponse.status === 200;
+            this.isLoggedInVPIS = vpisResponse.status === 200;
 
             if(this.isLoggedInHSP && this.isLoggedInVSC && this.isLoggedInVPIS){
-                setTimeout(this.logout, 1000 * 60 * 25);
+                this.setLogoutTimer();
                 return true;
             }
             
@@ -70,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
                     this.isLoggedInHSP = false;
                     this.isLoggedInVPIS = false;
                     this.cancelLogoutTimer();
-                    alert('Sie wurden vom VSC, HSP, VPIS ausgeloggt.');
+                    alert('Sie wurden vom VSC, HSP und VPIS ausgeloggt.');
                     window.location.reload();
                 }
             } catch(error){
@@ -79,8 +71,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async getStates(){
             try {
-                const url = 'http://localhost:3000/api/states';
-                const response = await axios.get(url, { withCredentials: true });
+                const response = await axios.get('http://localhost:3000/api/states', { withCredentials: true });
                 if(response.status === 200){
                     const data = response.data;
                     this.isLoggedInVSC = data.stateVSC;
@@ -89,20 +80,31 @@ export const useAuthStore = defineStore('auth', {
                 }
 
                 return {
-                    vsc:    this.isLoggedInVSC,
-                    hsp:    this.isLoggedInHSP,
-                    vpis:   this.isLoggedInVPIS
+                    vsc:  this.isLoggedInVSC,
+                    hsp:  this.isLoggedInHSP,
+                    vpis: this.isLoggedInVPIS
                 }
 
             } catch(error){
-                console.log('Fehler beim Laden der Login Status.', error);
+                console.log('Fehler beim Laden der Login-Status:', error);
             }
         },
-        cancelLogoutTimer() : void {
-            if (this.logoutTimeoutId !== null) {
-                clearTimeout(this.logoutTimeoutId);  // Timeout abbrechen
-                this.timer = null;  // Timeout-ID zurücksetzen
-                console.log('Timer cleared');
+        setLogoutTimer() {
+            // Vorherigen Timer abbrechen, falls vorhanden
+            if (this.logoutTimer) {
+                clearTimeout(this.logoutTimer);
+            }
+            this.logoutTimer = setTimeout(() => {
+                this.logout();
+            }, 1000 * 60 * 25); // 25 Minuten
+            console.log('Logout-Timer gesetzt.');
+        },
+      
+        cancelLogoutTimer(): void {
+            if (this.logoutTimer !== null) {
+                clearTimeout(this.logoutTimer); // Timeout abbrechen
+                this.logoutTimer = null; // Timeout-ID zurücksetzen
+                console.log('Logout-Timer wurde abgebrochen.');
             }
         }
     },

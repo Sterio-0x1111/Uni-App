@@ -1,20 +1,64 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <toolbar-menu menuTitle="Menü" iconName="compass" />
-    </ion-header>
+  <IonPage>
+    <IonHeader>
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="compass" />
+    </IonHeader>
 
-    <ion-content>
-      <ion-list>
-        <ion-button class="custom-button" v-for="route in filteredRoutes" :key="route.id"  @click="navigateTo(route.path)">
-          <span><ion-icon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon"></ion-icon></span>
+    <IonContent>
+      <IonList class="light-list">
+        <!-- Öffentliche Routen -->
+        <h3>Öffentliche Seiten</h3>
+        <IonButton class="custom-button" v-for="route in publicRoutes" :key="route.id" @click="navigateTo(route.path)">
+          <span>
+            <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
+          </span>
           <span class="button-text">{{ route.title }}</span>
-          <ion-icon name="key" v-if="route.requiresAuth" slot="end">
-          </ion-icon>
-        </ion-button>
-      </ion-list>
-    </ion-content>
-  </ion-page>
+        </IonButton>
+
+        <!-- HSP-geschützte Routen -->
+        <div v-if="loginStateHSP">
+          <h3>HSP-Bereich</h3>
+          <IonButton class="custom-button" v-for="route in hspRoutes" :key="route.id" @click="navigateTo(route.path)">
+            <span>
+              <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
+            </span>
+            <span class="button-text">{{ route.title }}</span>
+            <span class="auth-type-label">
+            </span>
+            <IonIcon name="key" slot="end" />
+          </IonButton>
+        </div>
+
+        <!-- VSC-geschützte Routen -->
+        <div v-if="loginStateVSC">
+          <h3>VSC-Bereich</h3>
+          <IonButton class="custom-button" v-for="route in vscRoutes" :key="route.id" @click="navigateTo(route.path)">
+            <span>
+              <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
+            </span>
+            <span class="button-text">{{ route.title }}</span>
+            <span class="auth-type-label">
+            </span>
+            <IonIcon name="key" slot="end" />
+          </IonButton>
+        </div>
+
+        <!-- VPIS-geschützte Routen -->
+        <div v-if="loginStateVPIS">
+          <h3>VPIS-Bereich</h3>
+          <IonButton class="custom-button" v-for="route in vpisRoutes" :key="route.id" @click="navigateTo(route.path)">
+            <span>
+              <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
+            </span>
+            <span class="button-text">{{ route.title }}</span>
+            <span class="auth-type-label">
+            </span>
+            <IonIcon name="key" slot="end" />
+          </IonButton>
+        </div>
+      </IonList>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup lang="ts">
@@ -46,26 +90,8 @@ const routes = computed(() => {
   ]
 });
 
-const filteredRoutes = computed(() => {
-  return routes.value.filter((route) => {
-    if(route.requiresAuth){
-      return route.login;
-    }
-    return true;
-  })
-});
-
-
-interface Route {
-  id: number;
-  title: string;
-  path: string;
-  requiresAuth: boolean;
-  login: boolean;
-}
-
 import { addIcons } from 'ionicons'; 
-import { key, location, restaurant, time, calendar, documentText} from 'ionicons/icons'; 
+import { key, location, restaurant, time, calendar, documentText, information} from 'ionicons/icons'; 
 addIcons({ 
   'key': key,
   'location': location,
@@ -73,6 +99,7 @@ addIcons({
   'time': time,
   'calendar': calendar,
   'document-text': documentText,
+  'information': information,
 });
 
 const toolbarTitle = ref("Menü");
@@ -115,15 +142,19 @@ const navigateTo = (path: string) => {
     console.log('Navigation error: ', error);
   }
 };
-
-
-/*
-import { useNavigation }  from '@/composables/useNavigation';
- */
 </script>
 
 <style scoped>
+h3 {
+  margin-left: 16px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 1.2em;
+  color: #333;
+}
+
 .custom-button {
+  text-align: center;
   justify-content: flex start;
   text-align: center;
   position: relative;
@@ -133,7 +164,7 @@ import { useNavigation }  from '@/composables/useNavigation';
   position: relative;
   left: 16px;
   font-size: 200px;
-  
+
 }
 
 .button-text {
@@ -141,8 +172,11 @@ import { useNavigation }  from '@/composables/useNavigation';
 }
 
 .light-list {
-  --background: #ffffff; /* Heller Hintergrund */
-  --ion-item-background: #ffffff; /* Heller Hintergrund für Items */
-  --ion-item-color: #000000; /* Schwarzer Text */
+  --background: #ffffff;
+  /* Heller Hintergrund */
+  --ion-item-background: #ffffff;
+  /* Heller Hintergrund für Items */
+  --ion-item-color: #000000;
+  /* Schwarzer Text */
 }
 </style>
