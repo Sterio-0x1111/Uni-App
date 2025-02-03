@@ -83,7 +83,7 @@ export default defineComponent({
       loading.value = true;
       error.value = '';
       try {
-          const response = await axios.get(`http://localhost:3000/api/vpis/news/message/${msgID}`);
+        const response = await axios.get(`http://localhost:3000/api/vpis/news/message/${msgID}`, { withCredentials: true });
         messageDetail.value = response.data;
       } catch (err) {
         console.error('Fehler beim Laden der Nachricht:', err);

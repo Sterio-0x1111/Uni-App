@@ -79,7 +79,7 @@ export default defineComponent({
       loading.value = true;
       error.value = '';
       try {
-        const response = await axios.get(`http://localhost:3000/api/vpis/news`);
+        const response = await axios.get(`http://localhost:3000/api/vpis/news`, { withCredentials: true });
         messages.value = response.data.messages;
       } catch (err) {
         console.error('Fehler beim Laden der Nachrichten:', err);
