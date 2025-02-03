@@ -65,9 +65,7 @@ const loginToVPIS = async (req, res) => {
 */
 
 const loginToVPIS = async (req, res) => {
-  console.log("Test 1:", req.session.loggedInVPIS);
   if (!req.session.loggedInVPIS) {
-    console.log("Test 2:", req.session.loggedInVPIS)
     const { username, password } = req.body;
 
     try {
@@ -114,7 +112,6 @@ const loginToVPIS = async (req, res) => {
         req.session.vpisToken = token;
         req.session.vpisSemester = semester;
         req.session.save();
-        console.log("Test 3:", req.session.loggedInVPIS);
         res.json({ message: "SUCCESS" });
       } else {
         res.status(401).json({ message: "FAILURE" });
