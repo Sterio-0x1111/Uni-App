@@ -35,7 +35,6 @@ const scrapeMyNews = async (req, res) => {
     res.json({ messages });
 
   } catch (error) {
-    console.error("Fehler beim Abrufen der Nachrichten:", error);
     res.status(500).json({ message: "Fehler beim Laden der Nachrichten", error: error.message });
   }
 };
@@ -91,7 +90,6 @@ const scrapeMyMessage = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Fehler beim Abrufen der Nachricht:", error);
     res.status(500).json({ message: "Fehler beim Laden der Nachricht", error: error.message });
   }
 };

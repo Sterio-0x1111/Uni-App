@@ -86,12 +86,12 @@ const routes = computed(() => {
     { id: 7, title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
     { id: 8, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
     { id: 9, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
-    { id: 10, title: "Nachrichten", icon: 'document-text', path: "/news", requiresAuth: true, authType: 'VPIS' },
+    { id: 10, title: "Nachrichten", icon: 'newspaper', path: "/news", requiresAuth: true, authType: 'VPIS' },
   ]
 });
 
 import { addIcons } from 'ionicons'; 
-import { key, location, restaurant, time, calendar, documentText, information } from 'ionicons/icons'; 
+import { key, location, restaurant, time, calendar, documentText, information, newspaper } from 'ionicons/icons'; 
 addIcons({ 
   'key': key,
   'location': location,
@@ -100,6 +100,7 @@ addIcons({
   'calendar': calendar,
   'document-text': documentText,
   'information': information,
+  'newspaper': newspaper,
 });
 
 const toolbarTitle = ref("Menü");
