@@ -47,7 +47,7 @@ const props = defineProps({
 });
 
 import { addIcons } from 'ionicons'; 
-import { home, menu, logIn, list, person, logOut, compass, calendar } from 'ionicons/icons'; 
+import { home, menu, logIn, list, person, logOut, compass, calendar, newspaper } from 'ionicons/icons'; 
 addIcons({ 
   'home': home,
   'menu': menu,
@@ -57,6 +57,7 @@ addIcons({
   'person': person,
   'compass': compass,
   'calendar': calendar,
+  'newspaper': newspaper,
 });
 
 const logout = async () => {
