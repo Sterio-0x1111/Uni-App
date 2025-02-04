@@ -7,26 +7,26 @@
         <ion-content>
             <CustomToggle v-model="showSelection" />
             <span v-if="showSelection">
-            <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
-            <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
-            <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
-            
+                <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
+                <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
+                <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
+                
 
-            <ion-item>
-                <ion-select class="selection" v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
-                    <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.name">
-                        {{ mensa.name }}
-                    </ion-select-option>
-                </ion-select>
-            </ion-item>
+                <ion-item>
+                    <ion-select class="selection" v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
+                        <ion-select-option v-for="mensa in mensas" :key="mensa.id" :value="mensa.name">
+                            {{ mensa.name }}
+                        </ion-select-option>
+                    </ion-select>
+                </ion-item>
 
-            <ion-item v-if="dateSelection && dateSelection.length > 0">
-                <ion-select class="selection" v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Datum auswählen">
-                    <ion-select-option v-for="date in dateSelection" :key="date.optionValue" :value="date.optionValue">
-                        {{ date.optionText }}
-                    </ion-select-option>
-                </ion-select>
-            </ion-item>
+                <ion-item v-if="dateSelection && dateSelection.length > 0">
+                    <ion-select class="selection" v-model="selectedDate" @ionChange="loadMensaPlan" placeholder="Datum auswählen">
+                        <ion-select-option v-for="date in dateSelection" :key="date.optionValue" :value="date.optionValue">
+                            {{ date.optionText }}
+                        </ion-select-option>
+                    </ion-select>
+                </ion-item>
             </span>
 
             <div class="grid-container" v-if="mensaPlan">

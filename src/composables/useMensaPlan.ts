@@ -44,6 +44,7 @@ export function useMensaPlan() {
         return mensa ? mensa.name : ''
     })
 
+    const locationStore = useLocationStore();
     const nextLocation = ref('');
     const nextDistance = ref(-1);
     const loading = ref(false);
@@ -93,8 +94,31 @@ export function useMensaPlan() {
         }
     }
 
+    const fetchLocation = async () => {
+        try {
+            loading.value = true;
+            const locationWrapper = await locationStore.getLocation();
+            if(locationWrapper.location !== 'Hagen'){
+                selectedMensa.value = locationWrapper.location;
+                nextLocation.value = locationWrapper.location;
+                nextDistance.value = locationWrapper.distance;
+            } else {
+                selectedMensa.value = locationStore.alternateLocation;
+                nextLocation.value = locationStore.alternateLocation;
+                nextDistance.value = locationStore.alternateLocationDistance;
+            }
+            
+        } catch (error) {
+            console.error('Fehler bei Standortermittlung', error);
+        } finally {
+            loading.value = false;
+        }
+    };
+
     onMounted(async () => {
-        const locationStore = useLocationStore();
+        await fetchLocation();
+        await loadSelectionOptions();
+        /*const locationStore = useLocationStore();
 
         if (!locationStore.nextLocation) {
             loadingMessage.value = 'Warten auf Standortermittlung...';
@@ -116,7 +140,7 @@ export function useMensaPlan() {
             nextLocation.value = locationStore.nextLocation;
             nextDistance.value = Math.round((locationStore.nextLocationDistance / 1000) * 100) / 100; // Umrechnung in km
             await loadSelectionOptions();
-        }
+        }*/
     })
 
     return {

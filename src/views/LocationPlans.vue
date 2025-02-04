@@ -5,7 +5,7 @@
         </ion-header>
 
         <ion-content>
-            <ion-select v-model="selectedLocation" :disabled="loading">
+            <ion-select v-model="selectedLocation" :disabled="loading" placeholder="Studienstandort auswählen">
                 <ion-select-option v-for="location in locations" :key="location">
                     {{ location }}
                 </ion-select-option>
@@ -13,7 +13,7 @@
 
             <ion-loading :is-open="loading" message="Warten auf Standortermittlung..."></ion-loading>
             
-            <div v-if="nextDistance">
+            <div v-if="nextDistance > -1">
                 <p>Nächster Studienstandort: {{ nextLocation }}</p>
                 <p>Entfernung: {{ nextDistance }} km</p>
             </div>

@@ -35,8 +35,6 @@ class VSCPortalService extends Portal {
         const client = this.createAxiosClient();
 
         try {
-            console.log('Payload');
-            console.log(loginPayload);
             const response = await client.post(loginPageURL, loginPayload, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -114,6 +112,8 @@ class VSCPortalService extends Portal {
             }
 
             const data = examsPage.data;
+
+            
             return { degrees: availableDegrees, bachelorPage: data, m: masterData };
             //res.status(200).json({ degrees: avaibleDegrees, bachelorPage: data });
 

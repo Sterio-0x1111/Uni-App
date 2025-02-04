@@ -10,7 +10,8 @@ export const useCourseStore = defineStore('courseStore', {
         bachelorCourses: [] as string[],
         masterCourses: [] as string[],
         selectedDegree: null as string | null,
-        selectedCourse: null as string | null
+        selectedCourse: null as string | null,
+        authStore: useAuthStore()
     }),
     actions: {
         parseCourses(data: any, master: boolean = false): string[] {
@@ -48,10 +49,8 @@ export const useCourseStore = defineStore('courseStore', {
             }
         },
         async fetchCourses() : Promise<void> {
-            const authStore = useAuthStore();
-
             try {
-                if(!authStore.isLoggedInVPIS){
+                if(!this.authStore.isLoggedInVSC){
                     throw new Error('Sie sind nicht eingeloggt.');
                 }
 

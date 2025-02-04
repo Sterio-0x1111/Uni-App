@@ -4,10 +4,15 @@ import { useLocationStore } from '@/stores/locationStore';
 export function useLocation() {
     const locationStore = useLocationStore();
     const locations = [ 'Hagen', 'Iserlohn', 'Meschede', 'Soest', 'Lüdenscheid' ];
-    const selectedLocation = ref(locations[1]);
-    const nextLocation = ref<string | null>(null);
-    const nextDistance = ref<number | null>(null);
+    const selectedLocation = ref(null);
+    const nextLocation = ref('');
+    const nextDistance = ref(-1);
     const loading = ref(false);
+
+    interface image {
+        location: string,
+        path: string,
+    }
 
     const images = ref([
         { location: 'Hagen', path: '/assets/locations/hagen/hagen_1.png' },
@@ -20,12 +25,18 @@ export function useLocation() {
     ]);
 
     const filteredImages = computed(() => {
-        return images.value.filter(image => image.location === selectedLocation.value);
+        return images.value.filter((image : image) => image.location === selectedLocation.value);
     });
 
     const fetchLocation = async () => {
         try {
-            if (!locationStore.nextLocation) {
+            loading.value = true;
+            const location = await locationStore.getLocation();
+            selectedLocation.value = location.location;
+            nextLocation.value = location.location;
+            nextDistance.value = location.distance;
+
+            /*if (!locationStore.nextLocation) {
                 loading.value = true;
                 const success = await locationStore.locateClient();
 
@@ -39,13 +50,15 @@ export function useLocation() {
                 selectedLocation.value = locationStore.nextLocation;
                 nextLocation.value = locationStore.nextLocation;
                 nextDistance.value = Math.round((locationStore.nextLocationDistance / 1000) * 100) / 100;
-            }
+            }*/
         } catch (error) {
             console.error('Fehler bei Standortermittlung', error);
+        } finally {
+            loading.value = false;
         }
     };
 
-    onMounted(fetchLocation);
+    onMounted(async () => await fetchLocation());
 
     return {
         locations,

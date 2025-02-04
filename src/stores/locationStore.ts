@@ -12,10 +12,10 @@ interface Location {
 }
 
 const universityLocations: { [key: string]: Location } = {
-  "Hagen":        { latitude: 51.36652513985188, longitude: 7.497639741477852 },
   "Iserlohn":     { latitude: 51.36833327365097, longitude: 7.687424370598792 },
-  "Meschede":     { latitude: 51.36216487349944, longitude: 8.295251412925401 },
   "Soest":        { latitude: 51.56199805254962, longitude: 8.113431427758739 },
+  "Hagen":        { latitude: 51.36652513985188, longitude: 7.497639741477852 },
+  "Meschede":     { latitude: 51.36216487349944, longitude: 8.295251412925401 },
   "Lüdenscheid":  { latitude: 51.221819170670535, longitude: 7.630204529517563 }
 };
 
@@ -33,6 +33,8 @@ export const useLocationStore = defineStore('loc', {
     state: () => ({
         nextLocation: '' as string,
         nextLocationDistance: -1 as number,
+        alternateLocation: '' as string,
+        alternateLocationDistance: -1 as number, 
         latitude: 0.0 as number,
         longtitude: 0.0 as number
         
@@ -110,17 +112,21 @@ export const useLocationStore = defineStore('loc', {
                 location: key,
                 distance: geolib.getDistance(currentPosition, university)
               });
+
             });
       
-            const minimalDistance: DistanceWrapper = distances.reduce((min, loc) => loc.distance < min.distance ? loc : min);
+            //const minimalDistance: DistanceWrapper = distances.reduce((min, loc) => loc.distance < min.distance ? loc : min);
+            distances.sort((a, b) => a.distance - b.distance);
             
             // Aktualisiere den Zustand
             this.$patch({
-              nextLocation: minimalDistance.location,
-              nextLocationDistance: minimalDistance.distance
+              nextLocation: distances[0].location,//minimalDistance.location,
+              nextLocationDistance: Math.round(distances[0].distance / 10) / 100, // Umwandlung von m in km und runden auf 2 Nachkommastellen
+              alternateLocation: distances[1].location,
+              alternateLocationDistance: Math.round(distances[1].distance / 10) / 100,
             });
       
-            console.log(this.nextLocation, this.nextLocationDistance);
+            console.log(this.nextLocation, this.nextLocationDistance, this.alternateLocation);
             return true;
             
           } catch (error) {
@@ -129,9 +135,26 @@ export const useLocationStore = defineStore('loc', {
               nextLocation: '',
               nextLocationDistance: -1
             });
+            return false;
           }
         }, 
-        locateClient2() : boolean {
+        async getLocation() {
+          try {
+            if(this.nextLocation.length === 0 && this.nextLocationDistance === -1){
+              await this.locateClient();
+            }
+
+            const result : DistanceWrapper = {
+              location: this.nextLocation,
+              distance: this.nextLocationDistance,
+            }
+
+            return result;
+          } catch(error){
+
+          }
+        },
+        /*locateClient2() : boolean {
           try {
             const success = (position: GeolocationPosition) => {
               const currentPosition: Location = {
@@ -169,7 +192,7 @@ export const useLocationStore = defineStore('loc', {
           } catch(error){
             return false;
           }
-        }
+        }*/
       },
     
     persist: {
