@@ -51,8 +51,6 @@ class DepartmentService {
 
     static async getDepartmentDatesAsTable(department) {
         try {
-            console.log('SERVICE');
-            console.log(department);
             const availableDepartments = await DepartmentService.getDepartments();
 
             // für dynamische Bestimmung der Filterfunktion
@@ -235,6 +233,12 @@ class DepartmentService {
             const parseTableData = (table = 'table') => {
                 const cols1 = [];
                 const cols2 = [];
+                const headers = [];
+
+                $(table).find('thead th').each((index, element) => {
+                    console.log('HEADERS: ', $(element).text().trim());
+                    headers.push($(element).text().trim());
+                })
 
                 $(table).find('td').each((index, element) => {
                     if (index % 2 === 0) {
