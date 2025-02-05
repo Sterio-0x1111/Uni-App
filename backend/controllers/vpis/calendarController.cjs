@@ -224,7 +224,6 @@ const scrapeTermineWithDays = ($) => {
   };
 };
 
-
 /**
  * Baut die URL für die gewünschte Kalenderwoche dynamisch zusammen, lädt das entsprechende HTML
  * und extrahiert anschließend mittels der Funktion scrapeTermineWithDays die Termine-Tabelle.
