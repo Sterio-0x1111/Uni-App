@@ -103,8 +103,8 @@ const loginToVPIS = async (req, res) => {
       const token = parts[5];
       const html = loginResponse.data;
 
-      // Prüfen, ob der Login erfolgreich war
-      if (html.includes("<th>Datum / Uhrzeit</th>")) {
+      // Prüfen, ob der Login erfolgreich war (2 unterschiedliche Seiten)
+      if (html.includes("<th>Datum / Uhrzeit</th>") || html.includes("H&ouml;rer-<br/>status")) {
         // Session-Daten speichern
         req.session.loggedInVPIS = true;
         req.session.user = { username };

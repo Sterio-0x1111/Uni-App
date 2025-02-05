@@ -14,7 +14,7 @@ import Data from "../views/Data.vue";
 import VpisLogin from "../views/vpisLogin.vue";
 import VpisPlaner from "../views/Planer.vue";
 import PruefungsForm from "../views/PruefungsForm.vue";
-import ExamCalendar from "../views/pruefungsplaene/ExamCalendar.vue";
+import ExamCalendar from "../views/VPIS/Calendar.vue";
 import VpisPruefungsplaene from "../views/pruefungsplaene/VpisPruefungsplaene.vue";
 import LocationPlans from "../views/LocationPlans.vue";
 import Departments from "../views/Departments.vue";
@@ -134,6 +134,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/calendar",
     name: "Calendar",
     component: ExamCalendar,
+    beforeEnter: requireAuth("VPIS"),
   },
   {
     path: "/PayReport",
