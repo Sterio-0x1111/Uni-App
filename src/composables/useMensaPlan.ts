@@ -52,7 +52,7 @@ export function useMensaPlan() {
 
     // Lade den Mensaplan basierend auf der ausgewählten Mensa
     const loadMensaPlan = async () => {
-        loadingMessage.value = 'Lade Mensaplan...';
+        loadingMessage.value = 'Mensaplan wird geladen...';
         const mensa = mensas.find(m => m.name === selectedMensa.value);
         //const mensa = selectedMensa.value.toLowerCase();
 
@@ -71,11 +71,10 @@ export function useMensaPlan() {
                 loading.value = false;
             }
         }
-        loading.value = false;
+        //loading.value = false;
     }
 
     const loadSelectionOptions = async () => {
-        loadingMessage.value = 'Lade verfügbare Daten...';
         //const mensaName = selectedMensaName.value.toLowerCase();
         const mensaName = selectedMensa.value.toLowerCase();
 
@@ -91,14 +90,17 @@ export function useMensaPlan() {
         } catch (error) {
             console.log('Fehler beim Laden der Optionen:', error);
             dateSelection.value = [];
+        } finally {
+            loading.value = false;
         }
     }
 
     const fetchLocation = async () => {
         try {
             loading.value = true;
+            loadingMessage.value = 'Warten auf Standortermittlung...';
             const locationWrapper = await locationStore.getLocation();
-            if(locationWrapper.location !== 'Hagen'){
+            if(locationWrapper.location !== 'Lüdenscheid'){
                 selectedMensa.value = locationWrapper.location;
                 nextLocation.value = locationWrapper.location;
                 nextDistance.value = locationWrapper.distance;
