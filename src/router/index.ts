@@ -1,18 +1,43 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { RouteRecordRaw } from 'vue-router';
-import HomePage from '../views/HomePage.vue'
-import Navigation from '../views/Navigation.vue';
-import Exams from '../views/VSC/Exams.vue'
-import Scores from '../views/VSC/Scores.vue'
-import RegisteredExams from '../views/VSC/RegisteredExams.vue';
-import Login from '../views/VSC/Login.vue';
-import Semester from '../views/Semester.vue';
-import Meals from '../views/Meals.vue';
-import Data from '../views/Data.vue';
-import VpisLogin from '../views/vpisLogin.vue';
-import VpisPlaner from '../views/Planer.vue';
-import PruefungsForm from '../views/PruefungsForm.vue';
-import VpisIserlohnPruefungsEinsicht from '../views/pruefungsplaene/iserlohn/vpisIserlohnPruefungsEinsicht.vue';
+import { createRouter, createWebHistory } from "@ionic/vue-router";
+import { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
+import { RouteRecordRaw } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
+import HomePage from "../views/HomePage.vue";
+import Navigation from "../views/Navigation.vue";
+import Exams from "../views/VSC/Exams.vue";
+import Scores from "../views/VSC/Scores.vue";
+import RegisteredExams from "../views/VSC/RegisteredExams.vue";
+import Login from "../views/Login.vue";
+import Semester from "../views/Semester.vue";
+import Meals from "../views/Meals.vue";
+import Data from "../views/Data.vue";
+import VpisLogin from "../views/vpisLogin.vue";
+import VpisPlaner from "../views/Planer.vue";
+import PruefungsForm from "../views/PruefungsForm.vue";
+import ExamCalendar from "../views/VPIS/Calendar.vue";
+import VpisPruefungsplaene from "../views/pruefungsplaene/VpisPruefungsplaene.vue";
+import LocationPlans from "../views/LocationPlans.vue";
+import Departments from "../views/Departments.vue";
+import LoginHSP from "../views/test.vue";
+import PayReport from "../views/HSP/PayReport.vue";
+import PersonalInformation from "../views/HSP/PersonalInformation.vue";
+import NewsList from "../views/VPIS/NewsList.vue";
+import MessageDetail from "../views/VPIS/MessageDetail.vue";
+
+const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  const authStore = useAuthStore();
+  if (authType === "VSC" && !authStore.isLoggedInVSC) {
+    next({ path: "/navigation" });
+  } else if (authType === "HSP" && !authStore.isLoggedInHSP) {
+    next({ path: "/navigation" });
+  } else if (authType === "VPIS" && !authStore.isLoggedInVPIS) {
+    next({ path: "/navigation" });
+  } /* else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  && authStore.isLoggedInVPIS) {
+    next({ path: "/navigation" });
+  } */ else {
+    next();
+  }
+};
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -53,21 +78,42 @@ const routes: Array<RouteRecordRaw> = [
     path: "/exams/results",
     name: "Scores",
     component: Scores,
+    beforeEnter: requireAuth("VSC"),
   },
   {
     path: "/exams/registered",
     name: "Registered exams",
     component: RegisteredExams,
+    beforeEnter: requireAuth("VSC"),
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: Login
+    path: "/login",
+    name: "Login",
+    component: Login,
+    beforeEnter: requireAuth("isLogged"),
   },
   {
     path: "/vpisLogin",
     name: "VpisLogin",
     component: VpisLogin,
+  },
+  {
+    path: "/news",
+    name: "NewsList",
+    component: NewsList,
+    beforeEnter: requireAuth("VPIS"),
+  },
+  {
+    path: "/news/message/:msgID",
+    name: "MessageDetail",
+    component: MessageDetail,
+    props: true,
+    beforeEnter: requireAuth("VPIS"),
+  },
+  {
+    path: "/test",
+    name: "LoginHSP",
+    component: LoginHSP,
   },
   {
     path: "/vpisPlaner",
@@ -80,9 +126,37 @@ const routes: Array<RouteRecordRaw> = [
     component: PruefungsForm,
   },
   {
-    path: "/vpisIserlohnPruefungsEinsicht",
-    name: "VpisIserlohnPruefungsEinsicht",
-    component: VpisIserlohnPruefungsEinsicht,
+    path: "/vpisPruefungsplaene",
+    name: "VpisPruefungsplaene",
+    component: VpisPruefungsplaene,
+  },
+  {
+    path: "/calendar",
+    name: "Calendar",
+    component: ExamCalendar,
+    beforeEnter: requireAuth("VPIS"),
+  },
+  {
+    path: "/PayReport",
+    name: "PayReport",
+    component: PayReport,
+    beforeEnter: requireAuth("HSP"),
+  },
+  {
+    path: "/PersonalInformation",
+    name: "PersonalInformation",
+    component: PersonalInformation,
+    beforeEnter: requireAuth("HSP"),
+  },
+  {
+    path: "/locations",
+    name: "Locations",
+    component: LocationPlans,
+  },
+  {
+    path: "/departments",
+    name: "Departments",
+    component: Departments,
   },
 ];
 
@@ -91,4 +165,4 @@ const router = createRouter({
   routes,
 });
 
-export default router
+export default router;

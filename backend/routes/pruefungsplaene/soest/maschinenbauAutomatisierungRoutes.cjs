@@ -6,6 +6,6 @@ const {
 const router = express.Router();
 
 // Route für Maschinenbau-Automatisierungstechnik Prüfungspläne in Soest
-router.get("/maschinenbau-automatisierung", scrapeMaschinenbauAutomatisierung);
+router.get("/maschinenbau-automatisierungstechnik", scrapeMaschinenbauAutomatisierung);
 
 module.exports = router;

@@ -1,15 +1,23 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
-const axios = require('axios');
-const cheerio = require('cheerio');
+const SemesterService = require('../services/SemesterService.cjs');
+
+const semesterService = SemesterService.instance;
 
 /**
  * Funktion zum Laden der Semesterzeiträume.
+ * 
+ * Die Funktion filtert die Tabelle der Semesterzeiträume, 
+ * indem sie diese zeilenweise durchläuft 
+ * und die nötigen Daten extrahiert.
  * 
  * @param req 
  * @param res 
  */ 
 const getSemesterDates = async (req, res) => {
-    try{
+    const semesterDates = await SemesterService.getSemesterDates();
+    
+    res.status(200).json({ table: semesterDates });
+    /*try{
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const $ = await fetchHTML(url);
 
@@ -37,12 +45,30 @@ const getSemesterDates = async (req, res) => {
         }
     } catch(err){
         console.log('Fehler beim Laden der Semesterdaten.', err);
-    }
+    }*/
 }
 
+/**
+ * Endpunkt zum Laden der Rückmeldedaten.
+ * 
+ * Die Funktion greift auf die Informationen zu, 
+ * indem die jeweils spezifischen HTML Elemente 
+ * individuell geparst werden.
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 const getFeedbackDates = async (req, res) => {
-    try{
+    const feedbackDates = await SemesterService.getFeedbackDates();
+    res.status(200).json({ 
+        targetArticle: feedbackDates.targetArticle, 
+        headline: feedbackDates.headline,
+        nextSemester: feedbackDates.nextSemester, 
+        nextDate: feedbackDates.nextDate,
+        infoText: feedbackDates.infoText
+     });
 
+    /*try{
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
         const $ = await fetchHTML(url);
 
@@ -62,7 +88,6 @@ const getFeedbackDates = async (req, res) => {
 
     } catch(error){
         console.log('Fehler beim Laden der Rückmeldeinformationen.', error);
-    }
+    }*/
 }
-
 module.exports = { getSemesterDates, getFeedbackDates }

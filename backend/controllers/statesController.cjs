@@ -3,7 +3,9 @@ const getLoginStates = (req, res) => {
     const stateHSP = req.session.loggedInHSP || false;
     const stateVPIS = req.session.loggedInVPIS || false;
 
-    res.json({
+    console.log('States: ', req.session.loggedInVSC);
+
+    res.status(200).json({
         stateVSC,
         stateHSP,
         stateVPIS

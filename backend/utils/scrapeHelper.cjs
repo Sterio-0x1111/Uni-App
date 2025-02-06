@@ -1,23 +1,22 @@
 const { fetchHTML } = require("./helpers.cjs");
 
 // Funktion zum Extrahieren von Infobox-Daten
-const extractInfoBoxText = ($, selector) => {
-  return $(selector).map((i, element) => $(element).text().trim()).get();
-};
+const extractInfoBoxText = ($, selector) => 
+  $(selector).map((_, element) => $(element).text().trim()).get();
 
 // Funktion zum Extrahieren von Prüfungsplänen
 const extractPlans = ($, selector) => {
   const plans = [];
-  $(selector).each((i, item) => {
-    const title = $(item).find(".accordion__head-content h3").text().trim();
+  $(selector).each((_, item) => {
+    const $item = $(item);
+    const title = $item.find(".accordion__head-content h3").text().trim();
     const planLinks = [];
-    $(item)
-      .find(".accordion__body-inner a")
-      .each((j, link) => {
-        const planTitle = $(link).text().trim();
-        const planUrl = `https://www.fh-swf.de${$(link).attr("href")}`;
-        planLinks.push({ title: planTitle, url: planUrl });
-      });
+    $item.find(".accordion__body-inner a").each((_, link) => {
+      const $link = $(link);
+      const planTitle = $link.text().trim();
+      const planUrl = `https://www.fh-swf.de${$link.attr("href")}`;
+      planLinks.push({ title: planTitle, url: planUrl });
+    });
     if (title && planLinks.length > 0) {
       plans.push({ title, plans: planLinks });
     }
@@ -28,17 +27,16 @@ const extractPlans = ($, selector) => {
 // Funktion zum Extrahieren von Prüfungsplänen (praesenzStudiengaenge, verbundStudiengaenge)
 const scrapeCourses = async (url) => {
   const $ = await fetchHTML(url);
-
   const praesenzStudiengaenge = [];
   const verbundStudiengaenge = [];
   const courseNamesSet = new Set();
 
   // Präsenz- und Verbundstudiengänge in der Standardliste
-  $(".bubble-box__wrapper .list-wrapper__item").each((i, element) => {
-    const name = $(element).find(".link__text").first().text().trim();
-    const link = $(element).find("a").attr("href");
+  $(".bubble-box__wrapper .list-wrapper__item").each((_, element) => {
+    const $el = $(element);
+    const name = $el.find(".link__text").first().text().trim();
+    const link = $el.find("a").attr("href");
 
-    // Erkennen, ob der Kurs ein Verbundstudiengang ist
     const isVerbund =
       name.toLowerCase().includes("berufsbegleitendes verbundstudium") ||
       name.toLowerCase().includes("verbund");
@@ -54,44 +52,40 @@ const scrapeCourses = async (url) => {
         additionalLinks: [],
       };
 
-      // Zusätzliche Links für LSE-Prüfungspläne
-      $(element)
-        .find("ul.list-wrapper--dots .list-wrapper__item a")
-        .each((j, subElement) => {
-          const subLink = $(subElement).attr("href");
-          const subName = $(subElement).text().trim();
-          course.additionalLinks.push({
-            name: subName,
-            link: subLink.startsWith("http")
-              ? subLink
-              : `https://www.fh-swf.de${subLink}`,
-          });
-        });
+      $el.find("ul.list-wrapper--dots .list-wrapper__item a")
+         .each((_, subElement) => {
+           const $subEl = $(subElement);
+           const subLink = $subEl.attr("href");
+           const subName = $subEl.text().trim();
+           course.additionalLinks.push({
+             name: subName,
+             link: subLink.startsWith("http")
+               ? subLink
+               : `https://www.fh-swf.de${subLink}`,
+           });
+         });
 
       verbundStudiengaenge.push(course);
       courseNamesSet.add("Life Science Engineering M.Sc.");
     } else if (!isLSE && !courseNamesSet.has(name)) {
-      // Standardkurs für Präsenz oder Verbund einfügen
       const course = {
         name,
         link: link.startsWith("http") ? link : `https://www.fh-swf.de${link}`,
       };
-
       if (isVerbund) {
         verbundStudiengaenge.push(course);
       } else {
         praesenzStudiengaenge.push(course);
       }
-
       courseNamesSet.add(name);
     }
   });
 
   // Verbundstudiengänge in der Accordion-Komponente (Maschinenbau)
-  $(".accordion__item").each((i, element) => {
-    const name = $(element).find(".headline--3").first().text().trim();
-    const link = $(element).find(".wysiwyg a").attr("href");
-
+  $(".accordion__item").each((_, element) => {
+    const $el = $(element);
+    const name = $el.find(".headline--3").first().text().trim();
+    const link = $el.find(".wysiwyg a").attr("href");
     if (!courseNamesSet.has(name)) {
       const course = {
         name,
@@ -103,7 +97,6 @@ const scrapeCourses = async (url) => {
         additionalInfo: "Anmeldung auf Moodle erforderlich",
         additionalLinks: [],
       };
-
       verbundStudiengaenge.push(course);
       courseNamesSet.add(name);
     }

@@ -1,5 +1,5 @@
 <template>
-    <ion-modal :is-open="isOpen">
+    <ion-modal :is-open="isOpen" :backdrop-dismiss="true" @didDismiss="closeModal">
         <ion-header>
             <ion-toolbar>
                 <ion-title>Details</ion-title>
@@ -22,14 +22,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount, isMemoSame } from 'vue';
 import { IonHeader, IonToolbar, IonTitle, IonModal, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
-
-console.log('MODAL');
+import { onBeforeRouteLeave } from 'vue-router';
 
 const props = defineProps({
     isOpen: Boolean, 
-    data: Object
+    data: Object,
+    backdropDismiss: Boolean // Dynamisch übergeben
 })
 
 const emit = defineEmits(['close']);
@@ -37,6 +37,28 @@ const emit = defineEmits(['close']);
 const closeModal = () => {
     emit('close');
 }
+
+const handleKeyDown = (event) => {
+    if (event.key === 'Escape' || event.key === 'Backspace') {
+        closeModal(); // Schließt das Modal
+    }
+};
+
+// Globale Event-Listener hinzufügen, wenn das Modal geöffnet wird
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown);
+});
+
+// Event-Listener entfernen, wenn das Modal geschlossen wird
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+});
+
+onBeforeRouteLeave(() => {
+    if(props.isOpen){
+        closeModal();
+    }
+})
 </script>
 
 <style scoped>

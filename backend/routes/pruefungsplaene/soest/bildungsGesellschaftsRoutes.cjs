@@ -6,6 +6,6 @@ const {
 const router = express.Router();
 
 // Route für Bildungs- und Gesellschaftswissenschaften Prüfungspläne in Soest
-router.get("/bildungs-gesellschafts", scrapeBildungsGesellschafts);
+router.get("/bildungs-gesellschaftswissenschaften", scrapeBildungsGesellschafts);
 
 module.exports = router;

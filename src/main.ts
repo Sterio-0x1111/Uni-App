@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
+import { createPinia } from 'pinia';
 
 import { IonicVue } from '@ionic/vue';
 
@@ -34,9 +35,14 @@ import '@ionic/vue/css/palettes/dark.system.css';
 /* Theme variables */
 import './theme/variables.css';
 
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+
 const app = createApp(App)
   .use(IonicVue)
-  .use(router);
+  .use(router)
+  .use(pinia);
 
 router.isReady().then(() => {
   app.mount('#app');
