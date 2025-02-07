@@ -28,12 +28,15 @@
                 <ExamTables :headers="limitedHeaders" :tableIndices="tableIndices" :data="exams" :popup="showModal"/>
             </div>
             <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" @close="isModalOpen = false"/>
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content pulling-text="Zum Aktualisieren herunterziehen" refreshing-spinner="circles" refreshing-text="Aktualisieren..."></ion-refresher-content>
+            </ion-refresher>
         </ion-content>
     </ion-page>
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption, IonItemDivider } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonSelect, IonSelectOption, IonItemDivider, IonRefresher, IonRefresherContent } from '@ionic/vue';
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useCourseStore } from '@/stores/courseStore';
@@ -59,6 +62,7 @@ const {
     isModalOpen,
     showSelection,
     showModal,
+    handleRefresh,
 } = useRegisteredExams();
 
 </script>

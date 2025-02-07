@@ -13,16 +13,21 @@ class DepartmentService {
 
             // Kategorisierung der Fachbereiche zur späteren Unterscheidung und Verarbeitung
             const linkCases = ['FB Informatik und Naturwissenschaften', 'FB Maschinenbau: Präsenzstudium'];
-            const textCases = ['FB Agrarwirtschaft', 'FB Bildungs- und Gesellschaftswissenschaften', 'FB Elektrische Energietechnik'];
+            const textCases = ['FB Agrarwirtschaft', 'FB Bildungs- und Gesellschaftswissenschaften', 'FB Elektrische Energietechnik', 'FB Maschinenbau-Automatisierungstechnik'];
+            const moodleCases = ['FB Maschinenbau: Verbundstudium '];
 
-            const cases = [
-                { departmentName: 'FB Informatik und Naturwissenschaften', type: 'link' },
-                { departmentName: 'FB Maschinenbau: Präsenzstudium', type: 'link' },
-                { departmentName: 'FB Agrarwirtschaft', type: 'text' },
-                { departmentName: 'FB Bildungs- und Gesellschaftswissenschaften', type: 'text' },
-                { departmentName: 'FB Elektrische Energietechnik', type: 'text' },
-
-            ]
+            const cases = {
+                'FB Elektrotechnik und Informationstechnik'     : 'simple',
+                'FB Technische Betriebswirtschaft'              : 'simple',
+                'FB Ingenieur- und Wirtschaftswissenschaften'   : 'simple',
+                'FB Maschinenbau: Verbundstudium '              : 'moodle',
+                'FB Informatik und Naturwissenschaften'         : 'link',
+                'FB Maschinenbau: Präsenzstudium'               : 'link',
+                'FB Agrarwirtschaft'                            : 'text',
+                'FB Bildungs- und Gesellschaftswissenschaften'  : 'text',
+                'FB Elektrische Energietechnik'                 : 'text',
+                'FB Maschinenbau-Automatisierungstechnik'       : 'text',
+            }
 
             const departments = [];
             const $ = cheerio.load(response.data);
@@ -32,10 +37,10 @@ class DepartmentService {
                 let type = 'simple'; // regulärer Fall, einfache Tabelle
                 if (linkCases.includes(departmentValue)) {
                     type = 'link'; // Sonderfall 1: für Tabellen, die auf andere Tabellen verlinken
-                }
-
-                if (textCases.includes(departmentValue)) {
+                } else if (textCases.includes(departmentValue)) {
                     type = 'text'; // Sonderfall 2: für nicht tabellarische Listendarstellung
+                } else if(moodleCases.includes(departmentValue)){
+                    type = 'moodle';
                 }
                 departments.push({ department: departmentValue, type });
             });
@@ -57,7 +62,8 @@ class DepartmentService {
             const methodByType = {
                 simple: DepartmentService.filterDepartmentTables,
                 link: DepartmentService.filterDepartmentTablesWithLinks,
-                text: DepartmentService.filterDepartmentDatesAsList
+                text: DepartmentService.filterDepartmentDatesAsList,
+                moodle: DepartmentService.filterDepartmentDatesAsMoodleLink,
             }
 
             // Zuordnung der zu verwendenden Filterfunktion
@@ -163,7 +169,7 @@ class DepartmentService {
         }
     }
 
-    /**
+/**
 * Funktion zum Filtern von fachbereichsspezifischen Tabellen mit Links auf weitere Seiten.
 * 
 * Die Funktion verwendet ein präpariertes Cherio Objekt 
@@ -235,17 +241,19 @@ class DepartmentService {
                 const cols2 = [];
                 const headers = [];
 
-                $(table).find('thead th').each((index, element) => {
-                    console.log('HEADERS: ', $(element).text().trim());
-                    headers.push($(element).text().trim());
-                })
+                $(table).find('thead th').each((index, element) => headers.push($(element).text().trim()));
+
+                cols1.push(headers[0]);
+                cols2.push(headers[1]);
 
                 $(table).find('td').each((index, element) => {
-                    if (index % 2 === 0) {
+                    const data = $(element).text().trim();
+                    (index % 2 === 0) ? cols1.push(data) : cols2.push(data);
+                    /*if (index % 2 === 0) {
                         cols1.push($(element).text().trim());
                     } else {
                         cols2.push($(element).text().trim());
-                    }
+                    }*/
                 });
 
                 const rows = cols1.map((col1, index) => {
@@ -348,6 +356,47 @@ class DepartmentService {
         }
     }
 
+    static filterDepartmentDatesAsMoodleLink($, department) {
+        try {
+            const dates = $('table').has(`tr[data-filter="${department}"]`).html();
+            const baseURL = 'https://www.fh-swf.de'; // zum Vervollständigen von relativen Pfaden
+            const tableData = [];
+
+            $(dates).find('tr').each((index, element) => {
+                const link = $(element).find('a').text().trim();
+                const url = $(element).find('a').attr('href');
+                const text = $(element).find('strong').text().trim();
+
+                tableData.push({
+                    text,
+                    link,
+                    url
+                })
+            });
+
+            /*$(dates).find('tr').each((index, row) => {
+                let name = $(row).text().trim();
+                const sliceIndex = name.indexOf('\n'); // entferne den Standard "Terminplan finden sie hier"
+
+                if (sliceIndex !== -1) {
+                    name = name.slice(0, sliceIndex);
+                }
+
+                const link = $(row).find('a').map((index, a) => {
+                    return {
+                        name,
+                        url: baseURL + $(a).attr('href') // baue URL, da Quellseite relative Pfade verwendet
+                    }
+                }).get(0);
+                tableData.push(link);
+            })*/
+            console.log(tableData);
+            return tableData;
+
+        } catch (error) {
+            console.log('Fehler beim Filtern der Tabellen mit Links.', error);
+        }
+    }
 
 }
 

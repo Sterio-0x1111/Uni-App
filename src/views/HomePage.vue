@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header :translucent="true">
-      <toolbar-menu :menuTitle="menuTitle" iconName="home" />
+      <toolbar-menu menuTitle="Startseite" iconName="home" />
     </ion-header>
 
     <ion-content :fullscreen="true">
@@ -23,7 +23,6 @@ import { ref } from 'vue';
 import { IonContent, IonHeader, IonPage, IonTitle, IonButton, IonImg } from '@ionic/vue';
 import ToolbarMenu from './ToolbarMenu.vue';
 
-const menuTitle = ref('Startseite');
 </script>
 
 <style scoped>

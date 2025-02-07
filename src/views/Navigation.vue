@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <IonHeader>
-      <toolbar-menu :menuTitle="toolbarTitle" iconName="compass" />
+      <toolbar-menu menuTitle="Menü" iconName="compass" />
     </IonHeader>
 
     <IonContent>
@@ -89,21 +89,6 @@ const routes = computed(() => {
     { id: 10, title: "Nachrichten", icon: 'newspaper', path: "/news", requiresAuth: true, authType: 'VPIS' },
   ]
 });
-
-import { addIcons } from 'ionicons'; 
-import { key, location, restaurant, time, calendar, documentText, information, newspaper } from 'ionicons/icons'; 
-addIcons({ 
-  'key': key,
-  'location': location,
-  'restaurant': restaurant,
-  'time': time,
-  'calendar': calendar,
-  'document-text': documentText,
-  'information': information,
-  'newspaper': newspaper,
-});
-
-const toolbarTitle = ref("Menü");
 
 const publicRoutes = computed(() => {
   return routes.value.filter(route => !route.requiresAuth);

@@ -39,6 +39,10 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
+// zentrale Icon Registerierung
+import { registerIcons } from '@/icons';
+registerIcons();
+
 const app = createApp(App)
   .use(IonicVue)
   .use(router)

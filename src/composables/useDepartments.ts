@@ -10,8 +10,9 @@ export function useDepartments() {
     const dates = ref(null);
     const tables = ref(null);
     const lists = ref(null);
+    const moodle = ref(null);
 
-    const tableHeaders = ['Ereignis', 'Termin'];
+    const tableHeaders = ['Termin', 'Datum'];
     const courseOptions = ref(null);
     const selectedCourse = ref(null);
 
@@ -45,6 +46,11 @@ export function useDepartments() {
                     console.log(data.tableData);
                     break;
 
+                case 'moodle':
+                    resetStatus();
+                    moodle.value = data.tableData;
+                    break;
+
                 default: // simple
                     resetStatus();
                     dates.value = data.tableData;
@@ -76,8 +82,10 @@ export function useDepartments() {
     }
 
     const resetStatus = () => {
-        dates.value = null;
-        tables.value = null;
+        dates.value         = null;
+        tables.value        = null;
+        lists.value         = null;
+        moodle.value        = null;
         courseOptions.value = null;
     }
     
@@ -88,6 +96,7 @@ export function useDepartments() {
         dates, 
         tables,
         lists,
+        moodle,
         tableHeaders,
         courseOptions,
         loadCourseData,

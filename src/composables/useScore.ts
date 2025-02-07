@@ -1,6 +1,12 @@
 import { ref, computed, onMounted, filter } from 'vue';
+import { useCourseStore } from '@/stores/courseStore';
+import { useExamStore } from '@/stores/examStore';
+import axios from 'axios';
+import { handLeft, logoAndroid } from 'ionicons/icons';
+import { handleError } from 'vue';
 
-export function useSocre() {
+export function useScore() {
+    const examStore = useExamStore();
     const showSelection = ref(true);
 
     const degrees = ref([]);
@@ -21,7 +27,6 @@ export function useSocre() {
     })
     // TODO: Kurs Selektion aus RegisteredExams einbauen und Backend entsprechend anpassen
 
-    const toolbarTitle = "Notenspiegel";
     const scores = ref([]);
     const mpScores = ref([]);
     const slScores = ref([]);
@@ -66,32 +71,9 @@ export function useSocre() {
         isModalOpen.value = true;
     };
 
-    onMounted(async () => {
-        try {
-            const courseStore = useCourseStore();
-            const examStore = useExamStore();
-
-            degrees.value = courseStore.degrees;
-            selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
-
-            courses.value = courseStore.bachelorCourses;
-            selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
-
-            //await loadData();
-            scores.value = await examStore.loadData(category, selectedDegree.value, selectedCourse.value);
-            mpScores.value = examStore.mpScores;
-            slScores.value = examStore.slScores;
-            pkScores.value = examStore.pkScores;
-
-        } catch (error) {
-            console.log(error);
-        }
-    });
-
-    const loadData = async () => {
+    /*const loadData = async () => {
         try {
             const url = `http://localhost:3000/api/vsc/exams/${category}/${selectedDegree.value}/${selectedCourse.value}`;
-            console.log(url);
             const response = await axios.get(url, { withCredentials: true });
             if (response.status !== 200) {
                 throw new Error(`${response.status}`);
@@ -106,7 +88,7 @@ export function useSocre() {
         } catch (error) {
             console.log(error);
         }
-    }
+    }*/
 
     const tableHeaders = [
         { id: 0, text: "PrfArt" },
@@ -196,6 +178,47 @@ export function useSocre() {
         }
     });
 
+    const loadData = async () => {
+        try {
+            scores.value = await examStore.loadScores(category, selectedDegree.value, selectedCourse.value);
+            mpScores.value = examStore.mpScores;
+            slScores.value = examStore.slScores;
+            pkScores.value = examStore.pkScores;
+        } catch(error){
+            console.log('Fehler beim Laden der Prüfungsergebnisse.');
+        }
+    }
+
+    onMounted(async () => {
+        try {
+            const courseStore = useCourseStore();
+
+            degrees.value = courseStore.degrees;
+            selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
+
+            // TODO: master ergänzen
+            courses.value = courseStore.bachelorCourses;
+            selectedCourse.value = (courses.value.length > 0) ? courses.value[0] : null;
+
+            await loadData();
+            
+
+        } catch (error) {
+            console.log(error);
+        }
+    });
+
+    const handleRefresh = async (event : any) => {
+        setTimeout(async () => {
+            console.log('REFERSH');
+            examStore.clearState();
+            scores.value = [];
+            mpScores.value = [];
+            await loadData();
+            event.target.complete();
+        }, 1000);
+    }
+
     return {
         degrees,
         selectedDegree,
@@ -204,6 +227,7 @@ export function useSocre() {
         showSelection,
         scores,
         selectedOption,
+        selectOptions,
         limitedHeaders,
         headerIndices,
         showModal,
@@ -211,5 +235,6 @@ export function useSocre() {
         isModalOpen,
         selectedRowData,
         backdropDismiss,
+        handleRefresh,
     }
 }

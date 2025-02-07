@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <toolbar-menu :menuTitle="toolbarTitle" />
+      <toolbar-menu menuTitle="Notenspiegel" iconName="stats-chart" />
     </ion-header>
 
     <ion-content>
@@ -15,7 +15,7 @@
         </ion-select>
 
         <h6>Studiengang</h6>
-        <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="loadData" :disabled="currentCourses.length <= 1">
+        <ion-select v-if="currentCourses" v-model="selectedCourse" @ionChange="handleRefresh" :disabled="currentCourses.length <= 1">
           <ion-select-option v-for="course in currentCourses" :key="course">
             {{ course }}
           </ion-select-option>
@@ -86,13 +86,17 @@
       </div>
 
       <ScoreDetails :isOpen="isModalOpen" :data="selectedRowData" :backdropDismiss="backdropDismiss" @close="isModalOpen = false"/>
+      <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+        <ion-refresher-content pulling-text="Zum Aktualisieren herunterziehen" refreshing-spinner="circles" refreshing-text="Aktualisieren...">
+        </ion-refresher-content>
+      </ion-refresher>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onBeforeMount } from "vue";
-import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonToggle } from "@ionic/vue";
+import { IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonSelect, IonSelectOption, IonGrid, IonCol, IonRow, IonItemDivider, IonToggle, IonRefresher, IonRefresherContent } from "@ionic/vue";
 import axios from "axios";
 import CustomToggle from "./CustomToggle.vue";
 import ExamTables from "./ExamTables.vue";
@@ -102,8 +106,29 @@ import { useAuthStore } from "@/stores/authStore";
 import { useCourseStore } from "@/stores/courseStore";
 import { useExamStore } from "@/stores/examStore";
 import { useRouter } from 'vue-router';
+import { useScore } from '@/composables/useScore';
 
-const showSelection = ref(true);
+const {
+  degrees,
+  selectedDegree,
+  currentCourses,
+  selectedCourse,
+  showSelection,
+  scores,
+  selectedOption,
+  selectOptions,
+  limitedHeaders,
+  headerIndices,
+  showModal,
+  filteredScores,
+  isModalOpen,
+  selectedRowData,
+  backdropDismiss,
+  loadData,
+  handleRefresh,
+} = useScore();
+
+/*const showSelection = ref(true);
 
 const degrees = ref([]);
 const courses = ref([]);
@@ -296,7 +321,7 @@ const limitedScores = computed(() => {
     default:
       return [];
   }
-});
+});*/
 </script>
 
 <style scoped>
