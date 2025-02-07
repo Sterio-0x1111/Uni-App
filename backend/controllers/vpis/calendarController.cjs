@@ -11,8 +11,6 @@ const { verifySession } = require("./vpisHelpers.cjs");
  */
 const scrapeMyCalendar = async (req, res) => {
   if (!verifySession(req, res)) return;
-
-  // URL der Kalenderübersicht (Wochenplan)
   const calendarDataURL = `https://vpis.fh-swf.de/${req.session.vpisSemester}/student.php3/${req.session.vpisToken}/view_meinplan`;
 
   try {
@@ -27,6 +25,7 @@ const scrapeMyCalendar = async (req, res) => {
 
     // Bestimme die gewünschte Woche: per Query-Parameter "week" oder Standard: aktuelle Woche
     const week = req.query.week || calendarData.currentWeek;
+
     // Lade die Termine-Seite (z. B. Stundenplan mit Veranstaltungen) für die gewählte Woche
     const termineData = await scrapeTermineForWeek(week, req.session);
 
@@ -43,14 +42,12 @@ const scrapeMyCalendar = async (req, res) => {
  * in der Tabelle gefundenen KW-Links.
  */
 const scrapeCalendarData = async ($) => {
-  // Annahme: Der h2-Tag besitzt die Klassen "headline--3 pb--24 lg-pb--64"
   const headlineText = $("h2.headline--3.pb--24.lg-pb--64").text().trim();
-  // Mit Regex wird aus dem Header der KW-Code (z. B. "2025W06") extrahiert
   const headlineMatch = headlineText.match(/Wochenplan\s+([0-9]{4}W[0-9]{2})/);
   const currentWeek = headlineMatch ? headlineMatch[1] : null;
 
   const weeks = [];
-  // Selektiere alle <a>-Tags innerhalb der Tabelle (Klasse "vpis-table12"), die einen "KW="-Parameter haben
+  // Selektiert alle <a>-Tags innerhalb der Tabelle (Klasse "vpis-table12"), die einen "KW="-Parameter haben
   $("table.vpis-table12 a").each((i, el) => {
     const href = $(el).attr("href");
     if (href && href.includes("KW=")) {
@@ -84,9 +81,14 @@ const scrapeTableStructure = ($) => {
       .children("th, td")
       .each((cellIndex, cell) => {
         const $cell = $(cell);
+        let cellText = $cell.text().trim();
+
+        const $b = $cell.find("a");
+        if (!cellText && $b.length === 0) cellText = "<->";
+
         const cellData = {
           tag: $cell[0].tagName.toLowerCase(),
-          text: $cell.text().trim(),
+          text: cellText,
           colspan: parseInt($cell.attr("colspan"), 10) || 1,
           title: $cell.attr("title") || null,
           class: $cell.attr("class") || null,
@@ -102,6 +104,11 @@ const scrapeTableStructure = ($) => {
         }
         rowData.push(cellData);
       });
+    
+    if (rowData[0] && rowData[0].text === "Std." || rowData.length >= 2 && rowData[1].text.includes("Studiengang hinzufügen")) {
+      return;
+    }
+    
     tableStructure.push(rowData);
   });
   return tableStructure;
@@ -114,7 +121,7 @@ const scrapeTableStructure = ($) => {
  * Hier wird ein Matrix-Ansatz verwendet, um mit row- und colspan umzugehen.
  */
 const scrapeTermineWithDays = ($) => {
-  // Finde die Tabelle, deren erste <th> den Text "Std." enthält.
+  // Findet die Tabelle, deren erste <th> den Text "Std." enthält.
   const $table = $('table').filter((i, el) => {
     return $(el).find('th').first().text().trim() === 'Std.';
   }).first();
@@ -123,7 +130,7 @@ const scrapeTermineWithDays = ($) => {
     return null;
   }
 
-  // Extrahiere die Header-Zeile (z. B. ["Std.", "Montag,20.01.2025", ...])
+  // Extrahiert die Header-Zeile (z. B. ["Std.", "Montag,20.01.2025", ...])
   const headerCells = $table.find('tr').first().find('th');
   const days = [];
   headerCells.each((i, cell) => {
@@ -131,18 +138,14 @@ const scrapeTermineWithDays = ($) => {
     days.push($(cell).text().trim());
   });
 
-  // Gesamtzahl der Spalten (entspricht der Anzahl der Header-Zellen)
   const totalCols = headerCells.length;
-
-  // Erstelle die Matrix (grid) mit fixer Spaltenanzahl
   const grid = [];
-  // Objekt zum Speichern von Zellen, die über mehrere Zeilen hinweg gelten (rowspan)
   const spanningCells = {};
 
-  // Hole alle Zeilen außer der Header-Zeile.
+  // Holt alle Zeilen außer der Header-Zeile.
   const $rows = $table.find('tr').slice(1);
   $rows.each((rowIndex, row) => {
-    // Erstelle eine Zeile mit totalCols-Spalten (anfangs alle auf null)
+    // Erstellt eine Zeile mit totalCols-Spalten (anfangs alle auf null)
     grid[rowIndex] = new Array(totalCols).fill(null);
     let cellIndex = 0;
 
@@ -153,9 +156,9 @@ const scrapeTermineWithDays = ($) => {
       });
     }
 
-    // Gehe durch alle neuen Zellen (td, th) der aktuellen Zeile.
+    // Geht durch alle neuen Zellen (td, th) der aktuellen Zeile.
     $(row).children('td, th').each((i, cell) => {
-      // Finde den nächsten freien Spaltenindex in der Zeile.
+      // Findet den nächsten freien Spaltenindex in der Zeile.
       while (cellIndex < totalCols && grid[rowIndex][cellIndex] !== null) {
         cellIndex++;
       }
@@ -164,13 +167,13 @@ const scrapeTermineWithDays = ($) => {
       const $cell = $(cell);
       const colspan = parseInt($cell.attr("colspan"), 10) || 1;
       const rowspan = parseInt($cell.attr("rowspan"), 10) || 1;
-      // Speichere zusätzlich, in welcher Zeile die Zelle ursprünglich eingefügt wurde
+      // Speichert zusätzlich, in welcher Zeile die Zelle ursprünglich eingefügt wurde
       const cellData = {
         tag: $cell[0].tagName.toLowerCase(),
         text: $cell.text().trim(),
         colspan,
         rowspan,
-        originRow: rowIndex // Hier speichern wir den Ursprungszeilenindex
+        originRow: rowIndex
       };
 
       const $link = $cell.find("a");
@@ -182,10 +185,10 @@ const scrapeTermineWithDays = ($) => {
         };
       }
 
-      // Fülle in der aktuellen Zeile die Spalten von cellIndex bis cellIndex+colspan-1
+      // Füllt in der aktuellen Zeile die Spalten von cellIndex bis cellIndex+colspan-1
       for (let j = 0; j < colspan; j++) {
         grid[rowIndex][cellIndex + j] = cellData;
-        // Falls rowspan > 1, trage diese Zelle für die folgenden Zeilen ein.
+        // Falls rowspan > 1
         if (rowspan > 1) {
           for (let r = rowIndex + 1; r < rowIndex + rowspan; r++) {
             spanningCells[r] = spanningCells[r] || {};
@@ -197,19 +200,18 @@ const scrapeTermineWithDays = ($) => {
     });
   });
 
-  // Extrahiere die Ereignisse aus der Matrix.
+  // Extrahiert die Ereignisse aus der Matrix.
   // Dabei wird nur der Termin in der Ursprungszeile (originRow) übernommen, um Duplikate zu vermeiden.
   const events = [];
   grid.forEach((row, rIndex) => {
     const time = row[0] ? row[0].text : null;
     row.forEach((cell, colIndex) => {
-      if (colIndex === 0) return; // Überspringe die Zeit-Spalte
+      if (colIndex === 0) return;
       if (cell && cell.text && cell.text.trim() !== '' && cell.text.trim() !== '\u00a0') {
-        // Füge den Termin nur hinzu, wenn wir in der Zeile sind, in der die Zelle ursprünglich eingefügt wurde.
+        // Fügt den Termin nur hinzu, wenn wir in der Zeile sind, in der die Zelle ursprünglich eingefügt wurde.
         if (cell.originRow === rIndex) {
           events.push({
             time,
-            // Da days[0] zur zweiten Spalte gehört, verwenden wir colIndex-1
             day: days[colIndex - 1] || null,
             details: cell
           });
@@ -220,7 +222,7 @@ const scrapeTermineWithDays = ($) => {
 
   return {
     headers: headerCells.map((i, th) => $(th).text().trim()).get(),
-    events, // Termine mit zugeordnetem Tag und Uhrzeit
+    events,
   };
 };
 
