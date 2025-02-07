@@ -193,7 +193,7 @@ const scrapeTermineWithDays = ($) => {
 
         // Wenn im href "Uebersicht" vorkommt, setze den Text auf "Uebersicht"
         if (linkHref && linkHref.includes("Uebersicht")) {
-          linkText = "Uebersicht";
+          linkText = "Übersicht";
         }
 
         cellData.link = {
