@@ -17,16 +17,16 @@ const scrapeMyCalendar = async (req, res) => {
     const client = createAxiosClient(req.session.vpisCookies);
     const $ = await fetchHTML(calendarDataURL, client);
 
-    // Extrahiere Kalenderüberschrift und alle KW-Links
+    // Extrahiert Kalenderüberschrift und alle KW-Links
     const calendarData = await scrapeCalendarData($);
 
-    // Extrahiere die komplette Tabellenstruktur (z. B. für den Kalenderbereich)
+    // Extrahiert die komplette Tabellenstruktur (z. B. für den Kalenderbereich)
     const tableStructure = scrapeTableStructure($);
 
-    // Bestimme die gewünschte Woche: per Query-Parameter "week" oder Standard: aktuelle Woche
+    // Bestimmt die gewünschte Woche: per Query-Parameter "week" oder Standard: aktuelle Woche
     const week = req.query.week || calendarData.currentWeek;
 
-    // Lade die Termine-Seite (z. B. Stundenplan mit Veranstaltungen) für die gewählte Woche
+    // Lädt die Termine-Seite (z. B. Stundenplan mit Veranstaltungen) für die gewählte Woche
     const termineData = await scrapeTermineForWeek(week, req.session);
 
     res.status(200).json({
@@ -96,11 +96,19 @@ const scrapeTableStructure = ($) => {
 
         const $a = $cell.find("a");
         if ($a.length > 0) {
-          cellData.link = {
-            href: $a.attr("href"),
-            text: $a.text().trim(),
-            title: $a.attr("title") || null,
-          };
+          // Holt den Title des Links
+          const linkTitle = $a.attr("title") || "";
+          const linkHref = $a.attr("href");
+
+          // Prüft, ob im title (oder auch in der URL) das Stichwort "teilnehmer" vorkommt.
+          if (!linkTitle.toLowerCase().includes("teilnehmer")) {
+            cellData.link = {
+              href: "https://vpis.fh-swf.de" + linkHref,
+              text: $a.text().trim(),
+              title: linkTitle || null,
+            };
+          }
+          // Falls "teilnehmer" im Title vorkommt, wird kein Link hinzugefügt
         }
         rowData.push(cellData);
       });
@@ -178,9 +186,19 @@ const scrapeTermineWithDays = ($) => {
 
       const $link = $cell.find("a");
       if ($link.length > 0) {
+        // Holt den href und den text
+        const linkHref = "https://vpis.fh-swf.de" + $link.attr("href");
+
+        let linkText = $link.text().trim();
+
+        // Wenn im href "Uebersicht" vorkommt, setze den Text auf "Uebersicht"
+        if (linkHref && linkHref.includes("Uebersicht")) {
+          linkText = "Uebersicht";
+        }
+
         cellData.link = {
-          href: $link.attr("href"),
-          text: $link.text().trim(),
+          href: linkHref,
+          text: linkText,
           title: $link.attr("title") || null,
         };
       }

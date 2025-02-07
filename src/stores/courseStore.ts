@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import { useAuthStore } from './authStore';
-import { parse } from 'dotenv';
 
 export const useCourseStore = defineStore('courseStore', {
     state: () => ({

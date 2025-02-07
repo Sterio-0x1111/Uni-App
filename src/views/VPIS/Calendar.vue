@@ -1,25 +1,14 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbarMenu :menuTitle="'Wochenplan ' + selectedWeek" iconName="newspaper" />
+            <toolbarMenu :menuTitle="'Wochenplan'" iconName="newspaper" />
         </ion-header>
 
         <ion-content>
             <loadingOverlay :isLoading="loading" />
-            <custom-toggle v-model="showSelection" />
-
-            <!-- Wochenplan-Select -->
-            <ion-item v-if="showSelection">
-                <ion-label>Wähle einen Wochenplan</ion-label>
-                <ion-select v-model="selectedWeek" @ionChange="fetchData" placeholder="Wochenplan wählen">
-                    <ion-select-option v-for="week in calendarData.availableWeeks" :key="week" :value="week">
-                        {{ week }}
-                    </ion-select-option>
-                </ion-select>
-            </ion-item>
 
             <!-- Studiendaten / Info -->
-            <ion-card v-if="tableTop.length && showSelection">
+            <ion-card v-if="tableTop.length">
                 <ion-card-header>
                     <ion-card-title>Studiendaten / Info</ion-card-title>
                 </ion-card-header>
@@ -47,6 +36,18 @@
                     </div>
                 </ion-card-content>
             </ion-card>
+
+            <custom-toggle v-model="showSelection" />
+
+            <!-- Wochenplan-Select -->
+            <ion-item v-if="showSelection">
+                <ion-label>Wähle einen Wochenplan</ion-label>
+                <ion-select v-model="selectedWeek" @ionChange="fetchData" placeholder="Wochenplan wählen">
+                    <ion-select-option v-for="week in calendarData.availableWeeks" :key="week" :value="week">
+                        {{ week }}
+                    </ion-select-option>
+                </ion-select>
+            </ion-item>
 
             <!-- Kalender -->
             <ion-card v-if="tableBottom.length">
@@ -118,7 +119,7 @@ const calendarData = ref({ headline: '', availableWeeks: [] });
 const tableStructure = ref([]);
 const termineData = ref(null);
 const loading = ref(false);
-const showSelection = ref(false);
+const showSelection = ref(true);
 
 const tableTop = ref([]);
 const tableBottom = ref([]);

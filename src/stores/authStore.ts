@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', {
 
             const vpsiURL = "http://localhost:3000/api/vpis/login";
             const vpisResponse = await axios.post(vpsiURL, { username: username, password: password }, { withCredentials: true });
-
+            
             this.isLoggedInVSC = vscResponse.status === 200;
             this.isLoggedInHSP = hspResponse.status === 200;
             this.isLoggedInVPIS = vpisResponse.status === 200;
