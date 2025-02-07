@@ -22,6 +22,7 @@ import {
     checkmarkCircle, 
     statsChart,
     helpCircle,
+    cash,
 } from 'ionicons/icons';
 
 export function registerIcons() {
@@ -43,10 +44,11 @@ export function registerIcons() {
         'newspaper': newspaper,
         'lock-open': lockOpen,
         'lock-closed': lockClosed,
-        'trophy' : trophy, 
+        'trophy': trophy, 
         'stats-chart': statsChart,
-        'podium' : podium,
-        'checkmark-circle' : checkmarkCircle,
-        'help-circle' : helpCircle,
+        'podium': podium,
+        'checkmark-circle': checkmarkCircle,
+        'help-circle': helpCircle,
+        'cash': cash,
     });
 }
