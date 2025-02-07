@@ -1,9 +1,12 @@
 const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
 
-const scrapeIngenieurWirtschafts = async (req, res) => {
+/**
+ * Methode 1 (bei unordnung)
+ */
+
+/* const scrapeIngenieurWirtschafts = async (req, res) => {
   try {
-    const url =
-      "https://www.fh-swf.de/de/studierende/studienorganisation/pruefungsplaene/meschede/index.php";
+    const url = "https://www.fh-swf.de/de/studierende/studienorganisation/pruefungsplaene/meschede/index.php";
     const $ = await fetchHTML(url);
 
     const exams = [];
@@ -153,9 +156,11 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
   }
 };
 
-module.exports = { scrapeIngenieurWirtschafts };
+module.exports = { scrapeIngenieurWirtschafts }; */
 
-/* const { fetchHTML, handleError } = require("../../../utils/helpers.cjs");
+/**
+ * Methode 2 (bei ordnung)
+ */
 
 const scrapeIngenieurWirtschafts = async (req, res) => {
   try {
@@ -176,19 +181,27 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
       const examNumber = cell.find("a").first().text().trim();
 
       // Suche nach Dozent/in und Prüfern anhand einfacher Regex
-      const dozent = (html.match(/Dozent\*in:\s*([^<]+)<br>/)?.[1] || "").trim().replace(/&amp;/g, "&");
+      const dozent = (html.match(/Dozent\*in:\s*([^<]+)<br>/)?.[1] || "")
+        .trim()
+        .replace(/&amp;/g, "&");
 
       const erstPrueferMatch = html.match(/Erstprüfer:\s*([^<]+)<br>/);
       const erstPruefer = erstPrueferMatch ? erstPrueferMatch[1].trim() : "";
 
-      const zweitPrueferMatch = html.match(/Zweitprüfer(?:\s*(?:und Beisitzer)?)?:\s*([^<]+)<br>/);
+      const zweitPrueferMatch = html.match(
+        /Zweitprüfer(?:\s*(?:und Beisitzer)?)?:\s*([^<]+)<br>/
+      );
       const zweitPruefer = zweitPrueferMatch ? zweitPrueferMatch[1].trim() : "";
 
       const pruefungsformMatch = html.match(/Prüfungsform:\s*<b>(.*?)<\/b>/);
-      const pruefungsform = pruefungsformMatch ? pruefungsformMatch[1].trim() : "";
+      const pruefungsform = pruefungsformMatch
+        ? pruefungsformMatch[1].trim()
+        : "";
 
       // Zulassungsinfo extrahieren (z. B. falls vorhanden: "Zulassung nur mit Prüfungsvorleistung Nr.: …")
-      const zulassungMatch = html.match(/<sup[^>]*>[\s\S]*?Zulassung\s+nur\s+mit\s+Prüfungsvorleistung\s+Nr\.?:\s*([^<]+)<\/sup>/i);
+      const zulassungMatch = html.match(
+        /<sup[^>]*>[\s\S]*?Zulassung\s+nur\s+mit\s+Prüfungsvorleistung\s+Nr\.?:\s*([^<]+)<\/sup>/i
+      );
       const zulassung = zulassungMatch ? zulassungMatch[1].trim() : "";
 
       // Zusätzliche <sup>-Infos sammeln, beispielsweise zur Prüfungsdurchführung etc.
@@ -208,7 +221,8 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
       // Wir suchen alle Vorkommnisse des Musters "Datum: <b>TT.MM.JJJJ</b> &nbsp; Zeit<br>"
       // und gehen davon aus, dass direkt im Anschluss "Raum/Räume: ..." folgen.
       const examSessions = [];
-      const datumRegex = /Datum:\s*<b>(\d{2}\.\d{2}\.\d{4})<\/b>\s*&nbsp;\s*([^<]+)<br>/g;
+      const datumRegex =
+        /Datum:\s*<b>(\d{2}\.\d{2}\.\d{4})<\/b>\s*&nbsp;\s*([^<]+)<br>/g;
       let datumMatch;
       // Alle Datumseinträge in einem Durchlauf sammeln
       while ((datumMatch = datumRegex.exec(html)) !== null) {
@@ -248,9 +262,9 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
         erstPruefer,
         zweitPruefer,
         pruefungsform,
-        zulassung,        // Zulassungshinweis (falls vorhanden)
-        additionalInfos,  // Array mit zusätzlichen Informationen aus <sup> (z.B. Zul. Hilfsmittel, Planung, etc.)
-        examSessions,     // Array mit Datum-/Zeit- und Raum-/Räume‑Informationen (falls mehrfach vorhanden)
+        zulassung, // Zulassungshinweis (falls vorhanden)
+        additionalInfos, // Array mit zusätzlichen Informationen aus <sup> (z.B. Zul. Hilfsmittel, Planung, etc.)
+        examSessions, // Array mit Datum-/Zeit- und Raum-/Räume‑Informationen (falls mehrfach vorhanden)
       });
     });
 
@@ -260,8 +274,11 @@ const scrapeIngenieurWirtschafts = async (req, res) => {
 
     res.json(exams);
   } catch (error) {
-    handleError(res, `Fehler beim Scraping der Prüfungspläne: ${error.message}`);
+    handleError(
+      res,
+      `Fehler beim Scraping der Prüfungspläne: ${error.message}`
+    );
   }
 };
 
-module.exports = { scrapeIngenieurWirtschafts }; */
+module.exports = { scrapeIngenieurWirtschafts };

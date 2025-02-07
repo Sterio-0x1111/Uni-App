@@ -1,10 +1,10 @@
 require('dotenv').config();
-const { fetchHTML, handleError, createAxiosClient, deserializeCookieJar, getAndParseHTML } = require("../utils/helpers.cjs");
+const { createAxiosClient, getAndParseHTML } = require("../../utils/helpers.cjs");
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { wrapper } = require('axios-cookiejar-support');
 const { CookieJar } = require('tough-cookie');
-const VSCPortalService = require('../services/VSCPortalService.cjs');
+const VSCPortalService = require('../../services/VSCPortalService.cjs');
 
 const loginToVSC2 = async (req, res) => {
     console.log('LOGIN');
@@ -24,6 +24,7 @@ const loginToVSC2 = async (req, res) => {
             console.log(state);
             if (state) {
                 req.session.vsc = vscPortal.cookies;
+                req.session.loggedInVSC = true;
                 req.session.save();
                 res.status(200).json({ message: 'VSC: Erfolgreich eingeloggt!' });
             } else {

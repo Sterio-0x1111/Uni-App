@@ -105,7 +105,7 @@ const data = ref<any>({
   personendaten: {},
   infoData: { kontaktinformationen: [] }
 });
-const toolbarTitle = "Studieninformationen";
+const toolbarTitle = "Informationen";
 
 const loadData = async () => {
     try {

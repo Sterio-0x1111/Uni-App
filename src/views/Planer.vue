@@ -89,7 +89,7 @@ interface Department {
 const departments = ref<Department[]>([]);
 const loading = ref(false);
 const errorMessage = ref('');
-const toolbarTitle = 'Fachbereiche und Kontakte';
+const toolbarTitle = 'Kontakte';
 
 const fetchDepartments = async () => {
     loading.value = true;

@@ -92,10 +92,10 @@ ion-item {
 /* Hervorhebung für ungelesene (neue) Nachrichten */
 .new-message {
   font-weight: bold;
-  font-size: 1.1em;              /* Erhöhte Schriftgröße */
-  background-color: #e0f7fa;      /* Heller, auffälliger Hintergrund */
-  border-left: 4px solid #00796b; /* Markanter Farbstreifen links */
-  padding-left: 12px;             /* Etwas mehr Abstand zum linken Rand */
+  font-size: 1.1em;
+  background-color: #e0f7fa;
+  border-left: 4px solid #00796b;
+  padding-left: 12px;
 }
 
 /* Styling für das Datum und Neu-Label im Note-Bereich */
@@ -107,11 +107,11 @@ ion-item {
 /* Neu-Label unter dem Datum, visuell hervorgehoben */
 .new-label {
   display: inline-block;
-  background-color: #ffcc00; /* Auffälliger Hintergrund */
-  color: #000;               /* Schwarzer Text */
+  background-color: #ffcc00;
+  color: #000;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.75em;
-  margin-top: 4px;           /* Abstand zum Datum */
+  margin-top: 4px; /* Abstand zum Datum */
 }
 </style>

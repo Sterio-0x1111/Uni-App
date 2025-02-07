@@ -1,11 +1,14 @@
 <template>
-  <ion-toggle class="custom-toggle" :checked="modelValue" @ionChange="$emit('update:modelValue', $event.detail.checked)">
-    {{ toggleText }}
-  </ion-toggle>
+  <ion-item lines="none">
+    <ion-toggle class="custom-toggle" :checked="modelValue"
+      @ionChange="$emit('update:modelValue', $event.detail.checked)">
+      {{ toggleText }}
+    </ion-toggle>
+  </ion-item>
 </template>
 
 <script setup lang="ts">
-import { IonToggle } from '@ionic/vue';
+import { IonToggle, IonItem } from '@ionic/vue';
 import { computed } from 'vue';
 
 const props = defineProps({
