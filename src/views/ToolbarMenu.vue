@@ -46,27 +46,12 @@ const props = defineProps({
   }
 });
 
-import { addIcons } from 'ionicons'; 
-import { home, menu, logIn, list, person, logOut, compass, calendar, newspaper } from 'ionicons/icons'; 
-addIcons({ 
-  'home': home,
-  'menu': menu,
-  'login': logIn,
-  'logout': logOut,
-  'list': list,
-  'person': person,
-  'compass': compass,
-  'calendar': calendar,
-  'newspaper': newspaper,
-});
-
 const logout = async () => {
   try {
    authStore.logout();
   } catch(error){
     console.log('Fehler beim Abmelden.', error);
   }
-  // echten auch serverseitig durchführen
 }
 </script>
 

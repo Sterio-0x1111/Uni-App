@@ -57,7 +57,7 @@ export const useCourseStore = defineStore('courseStore', {
                     const response = await axios.get('http://localhost:3000/api/vsc/exams/reg', { withCredentials: true });
                     this.bachelorCourses = this.parseCourses(response.data.bachelorPage);
                     this.degrees = response.data.degrees;
-                    this.masterCourses = (response.data.masterPage) ? this.parseCourses(response.data.masterPage) : [];
+                    this.masterCourses = (response.data.masterPage) ? this.parseCourses(response.data.masterPage, true) : [];
                 }
             } catch(error: unknown){
                 if(axios.isAxiosError(error)){

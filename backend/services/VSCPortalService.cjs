@@ -114,7 +114,7 @@ class VSCPortalService extends Portal {
             const data = examsPage.data;
 
             
-            return { degrees: availableDegrees, bachelorPage: data, m: masterData };
+            return { degrees: availableDegrees, bachelorPage: data, masterPage: masterData };
             //res.status(200).json({ degrees: avaibleDegrees, bachelorPage: data });
 
 

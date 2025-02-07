@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbar-menu menuTitle="Gebäudepläne" />
+            <toolbar-menu menuTitle="Gebäudepläne" iconName="location" />
         </ion-header>
 
         <ion-content>
