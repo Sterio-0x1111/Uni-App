@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <IonHeader>
-      <toolbar-menu :menuTitle="toolbarTitle" iconName="person" />
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="cash" />
     </IonHeader>
 
     <IonContent :fullscreen="true">
@@ -138,7 +138,7 @@ import toolbarMenu from "../ToolbarMenu.vue";
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
 const data = ref<any>(null);
-const toolbarTitle = 'Bezahlen & Rückmelden';
+const toolbarTitle = 'Rückmeldung';
 
 // Methode zum Laden der Zahlungen
 const loadPayments = async () => {

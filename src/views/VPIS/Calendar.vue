@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbarMenu :menuTitle="'Wochenplan'" iconName="newspaper" />
+            <toolbarMenu :menuTitle="'Wochenplan'" iconName="calendar" />
         </ion-header>
 
         <ion-content>
