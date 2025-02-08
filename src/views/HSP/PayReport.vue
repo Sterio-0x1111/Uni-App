@@ -125,13 +125,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from '@vue/reactivity';
+import { onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
-import { 
-  IonPage, IonSpinner, IonHeader, IonToolbar, IonTitle, IonContent, 
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-  IonGrid, IonRow, IonCol, IonText, IonLoading 
-} from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonText } from '@ionic/vue';
 import loadingOverlay from '../LoadingOverlay.vue';
 import toolbarMenu from "../ToolbarMenu.vue";
 

@@ -83,8 +83,9 @@ const scrapeMyS = async (req, res) => {
 
 const scrapeMyInfo = async (req, res) => {
   if (!verifySession(req, res)) return;
-
-  const contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e2s1";
+  
+  if (!req.session.isPostRequestDone) contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e1s1";
+  else contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e2s1";
 
   try {
     const client = createAxiosClient(req.session.hspCookies);
