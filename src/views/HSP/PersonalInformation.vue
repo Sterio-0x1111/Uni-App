@@ -59,7 +59,7 @@
                                 <IonItem slot="header">
                                     <IonLabel>{{ contact.section }}</IonLabel>
                                 </IonItem>
-                                <div slot="content" class="ion-padding">
+                                <div slot="content">
                                     <IonList>
                                         <IonItem v-if="contact.emails && contact.emails.length">
                                             <IonLabel>
@@ -110,9 +110,7 @@ const toolbarTitle = "Informationen";
 const loadData = async () => {
     try {
         loading.value = true;
-        const response = await axios.get('http://localhost:3000/api/hsp/scrapeMyS', {
-            withCredentials: true
-        });
+        const response = await axios.get('http://localhost:3000/api/hsp/scrapeMyS', { withCredentials: true });
         const rawData = response.data;
 
         // Studienfächer extrahieren

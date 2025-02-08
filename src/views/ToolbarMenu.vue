@@ -1,38 +1,38 @@
 <template>
   <ion-toolbar class="custom-toolbar">
     <ion-title class="menu-title"><ion-icon :name="iconName"></ion-icon> {{ menuTitle }}</ion-title>
-    <!--
-    <div class="logo-container">
-      <img class="logo" src="/assets/logos/logo_with_text.png" />
-    </div>
-    -->
+
     <ion-buttons slot="start">
       <ion-button router-link="/navigation">
-        <ion-icon color="primary" name="menu" aria-label="Navigation"></ion-icon> 
+        <ion-icon color="primary" name="menu" aria-label="Navigation"></ion-icon>
       </ion-button>
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button v-if="!loginStateVSC && router.currentRoute._value.fullPath !== '/login'" router-link="/login">
-        <ion-icon color="primary" name="person" aria-label="Login"></ion-icon> 
+      <ion-button v-if="!loginStateVSC && !loginStateVPIS && !loginStateHSP && router.currentRoute._value.fullPath !== '/login'" router-link="/login">
+        <ion-icon color="primary" name="person" aria-label="Login"></ion-icon>
       </ion-button>
 
-      <ion-button v-if="loginStateVSC" @click="logout">
-        <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon> 
+      <ion-button v-if="loginStateVSC && loginStateVPIS && loginStateHSP" @click="logout">
+        <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon>
       </ion-button>
     </ion-buttons>
+
+    <!-- <loadingOverlay :isLoading="loading" :message="'Logout...'" /> -->
   </ion-toolbar>
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
-import { ref, computed, onMounted } from 'vue';
+import { computed } from '@vue/reactivity';
+import { IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
+// import loadingOverlay from "./LoadingOverlay.vue";
 
-import axios from 'axios';
 const authStore = useAuthStore();
 const loginStateVSC = computed(() => authStore.isLoggedInVSC);
+const loginStateVPIS = computed(() => authStore.isLoggedInVPIS);
+const loginStateHSP = computed(() => authStore.isLoggedInHSP);
 const router = useRouter();
 
 const props = defineProps({
@@ -48,7 +48,7 @@ const props = defineProps({
 
 const logout = async () => {
   try {
-   authStore.logout();
+    authStore.logout();
   } catch(error){
     console.log('Fehler beim Abmelden.', error);
   }

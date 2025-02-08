@@ -197,6 +197,7 @@ onMounted(async () => {
 .table-wrapper {
   overflow-x: auto;
   margin-bottom: 1rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 .my-table {
@@ -204,7 +205,7 @@ onMounted(async () => {
   border-collapse: collapse;
   background-color: #1e1e1e;
   color: #fff;
-  margin-top: 1rem;
+  table-layout: auto;
 }
 
 .my-table th,
@@ -230,5 +231,12 @@ onMounted(async () => {
 .link-button:hover,
 .event-link:hover {
   text-decoration: underline;
+}
+
+/* Für kleinere Bildschirme */
+@media (max-width: 350px) {
+    .my-table {
+        font-size: 12px;
+    }
 }
 </style>
