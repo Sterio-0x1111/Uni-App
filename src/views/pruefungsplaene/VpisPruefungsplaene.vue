@@ -72,7 +72,7 @@
         <IonGrid>
           <IonRow>
             <IonCol>
-              <h2>Informationen</h2>
+              <h2 v-if="pruefungsplan.infoBoxes">Informationen</h2>
             </IonCol>
           </IonRow>
           <IonRow v-for="(box, index) in pruefungsplan.infoBoxes" :key="index">
@@ -87,7 +87,7 @@
               <ul v-else-if="box.type === 'ul'">
                 <li v-for="(item, idx) in parseListItems(box.text)" :key="idx">{{ item }}</li>
               </ul>
-              
+
               <!-- Heading Level 3 -->
               <h3 v-else-if="box.type === 'h3'">{{ box.text }}</h3>
 
@@ -138,14 +138,14 @@
       <IonGrid v-if="pruefungsplan?.teilzeitraeume && !loading && selectedStudiengang?.type === 'praesenz'">
         <h3>Prüfungsteilzeiträume (gesamter Standort)</h3>
         <IonRow class="header">
-          <IonCol>Datum</IonCol>
-          <IonCol>Fachbereich</IonCol>
-          <IonCol>Extras</IonCol>
+          <IonCol size="4" size-md="3" size-lg="2">Datum</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">Fachbereich</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">Extras</IonCol>
         </IonRow>
         <IonRow v-for="item in pruefungsplan.teilzeitraeume" :key="item.dateRange">
-          <IonCol>{{ item.dateRange || 'N/A' }}</IonCol>
-          <IonCol>{{ item.fachbereich || 'N/A' }}</IonCol>
-          <IonCol>{{ item.details || 'N/A' }}</IonCol>
+          <IonCol size="4" size-md="3" size-lg="2">{{ item.dateRange || 'N/A' }}</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">{{ item.fachbereich || 'N/A' }}</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">{{ item.details || 'N/A' }}</IonCol>
         </IonRow>
       </IonGrid>
 
@@ -153,20 +153,21 @@
       <IonGrid v-if="pruefungsplan?.teilzeitraeume && !loading && selectedStudiengang?.type === 'praesenz'">
         <h3>Fristen zur Anmeldung (Antrag auf Zulassung) zu den Modulprüfungen</h3>
         <IonRow class="header">
-          <IonCol>Anmeldezeitraum</IonCol>
-          <IonCol>Links</IonCol>
-          <IonCol>Info URL</IonCol>
+          <IonCol size="4" size-md="3" size-lg="2">Anmeldezeitraum</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">Links</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">Info URL</IonCol>
         </IonRow>
         <IonRow v-for="item in pruefungsplan.anmeldungsfristen" :key="item.zeitraum">
-          <IonCol>{{ item.zeitraum || 'N/A' }}</IonCol>
-          <IonCol>
+          <IonCol size="4" size-md="3" size-lg="2">{{ item.zeitraum || 'N/A' }}</IonCol>
+          <IonCol size="4" size-md="3" size-lg="3">
             <ul>
               <li v-for="anmeldung in item.anmeldungen" :key="anmeldung.name">
                 <a :href="anmeldung.url" target="_blank">{{ anmeldung.name }}</a>
               </li>
             </ul>
           </IonCol>
-          <IonCol><a :href="item.infoUrl" target="_blank">{{ item.infoUrl }}</a></IonCol>
+          <IonCol size="4" size-md="3" size-lg="3"><a :href="item.infoUrl" target="_blank">{{ item.infoUrl }}</a>
+          </IonCol>
         </IonRow>
       </IonGrid>
 
@@ -174,20 +175,18 @@
       <IonGrid v-if="pruefungsplan?.teilzeitraeume && !loading && selectedStudiengang?.type === 'praesenz'">
         <h3>Prüfungstermine nach Prüfungsordnung</h3>
         <IonRow class="header">
-          <IonCol>Abschluss</IonCol>
-          <IonCol>Version</IonCol>
-          <IonCol>Auslaufdatum</IonCol>
-          <IonCol>Studienverlaufsplan</IonCol>
-          <IonCol>Kalenderansicht</IonCol>
-          <IonCol>Internet Kalender</IonCol>
+          <IonCol size="2" size-md="3" size-lg="2">Abschluss</IonCol>
+          <IonCol size="2" size-md="3" size-lg="2">Version</IonCol>
+          <IonCol size="2" size-md="3" size-lg="2">Auslaufdatum</IonCol>
+          <IonCol size="3" size-md="3" size-lg="3">Studienverlaufsplan</IonCol>
+          <IonCol size="3" size-md="3" size-lg="3">Kalenderansicht</IonCol>
         </IonRow>
         <IonRow v-for="item in pruefungsplan.pruefungstermine" :key="item.abschluss">
-          <IonCol>{{ item.abschluss || 'N/A' }}</IonCol>
-          <IonCol>{{ item.version || 'N/A' }}</IonCol>
-          <IonCol>{{ item.auslaufdatum || 'N/A' }}</IonCol>
-          <IonCol><a :href="item.studienverlaufsplan" target="_blank">Link</a></IonCol>
-          <IonCol><a :href="item.kalenderansicht" target="_blank">Link</a></IonCol>
-          <IonCol><a :href="item.internetKalender" target="_blank">Link</a></IonCol>
+          <IonCol size="2" size-md="3" size-lg="2">{{ item.abschluss || 'N/A' }}</IonCol>
+          <IonCol size="2" size-md="3" size-lg="2">{{ item.version || 'N/A' }}</IonCol>
+          <IonCol size="2" size-md="3" size-lg="2">{{ item.auslaufdatum || 'N/A' }}</IonCol>
+          <IonCol size="3" size-md="3" size-lg="3"><a :href="item.studienverlaufsplan" target="_blank">Link</a></IonCol>
+          <IonCol size="3" size-md="3" size-lg="3"><a :href="item.kalenderansicht" target="_blank">Link</a></IonCol>
         </IonRow>
       </IonGrid>
 
@@ -232,7 +231,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from '@vue/reactivity';
+import { computed } from 'vue';
 import axios from 'axios';
 import { IonContent, IonHeader, IonPage, IonLabel, IonItem, IonSelect, IonSelectOption, IonButton, IonSpinner, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import CustomToggle from '@vsc/CustomToggle.vue';
@@ -334,8 +334,8 @@ const loadStudiengaenge = async () => {
     loading.value = true;
     const response = await axios.get(`http://localhost:3000/api/pruefungsplaene/iserlohn/${selectedDepartment.value}`);
     const { praesenzStudiengaenge: pStudien, verbundStudiengaenge: vStudien } = response.data;
-    praesenzStudiengaenge.value = pStudien.map(sg => ({ ...sg, type: 'praesenz' })); // präsenz
-    verbundStudiengaenge.value = vStudien.map(sg => ({ ...sg, type: 'verbund' })); // verbund
+    praesenzStudiengaenge.value = pStudien.map((sg: any) => ({ ...sg, type: 'praesenz' })); // präsenz
+    verbundStudiengaenge.value = vStudien.map((sg: any) => ({ ...sg, type: 'verbund' })); // verbund
   } catch (err) {
     error.value = 'Fehler beim Laden der Studiengänge';
   } finally {
@@ -446,5 +446,17 @@ IonGrid, IonRow, IonCol {
 
 .plans-table th {
   background-color: #f5f5f5;
+}
+
+/* Für kleinere Bildschirme */
+@media (max-width: 767px) {
+  IonCol {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .header {
+    font-size: 16px;
+  }
 }
 </style>
