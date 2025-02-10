@@ -17,8 +17,7 @@ const app = express();
 // Middlewars
 app.use(
   cors({
-    origin: "http://localhost:5173", 
-    //origin: "http://localhost:8100", // Frontend-URL
+    origin: "http://localhost:5173",
     credentials: true, // Cookies und andere Anmeldeinformationen zulassen
   })
 );
@@ -32,8 +31,9 @@ app.use(
     saveUninitialized: false, // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
     cookie: {
       secure: false,
+      sameSite: 'none',
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 20,
     },
     store: new session.MemoryStore(),
   })
