@@ -59,7 +59,7 @@
                                 <IonItem slot="header">
                                     <IonLabel>{{ contact.section }}</IonLabel>
                                 </IonItem>
-                                <div slot="content" class="ion-padding">
+                                <div slot="content">
                                     <IonList>
                                         <IonItem v-if="contact.emails && contact.emails.length">
                                             <IonLabel>
@@ -91,10 +91,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from '@vue/reactivity';
+import { onMounted } from 'vue';
 import axios from 'axios';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonList, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonText, IonLoading, IonAccordionGroup, IonAccordion } from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+  IonList, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonText, IonAccordionGroup, IonAccordion } from '@ionic/vue';
 import toolbarMenu from "../ToolbarMenu.vue";
 import loadingOverlay from '../LoadingOverlay.vue';
 
@@ -110,13 +111,11 @@ const toolbarTitle = "Informationen";
 const loadData = async () => {
     try {
         loading.value = true;
-        const response = await axios.get('http://localhost:3000/api/hsp/scrapeMyS', {
-            withCredentials: true
-        });
+        const response = await axios.get('http://localhost:3000/api/hsp/scrapeMyS', { withCredentials: true });
         const rawData = response.data;
 
         // Studienfächer extrahieren
-        data.value.studienfaecher = rawData.filter(item => item.Fach).map(item => ({
+        data.value.studienfaecher = rawData.filter((item: { Fach: any; }) => item.Fach).map((item: { Fach: any; Fachsemester: any; Fachkennzeichen: any; Prüfungsordnungsversion: any; }) => ({
             Fach: item.Fach,
             Fachsemester: item.Fachsemester,
             Fachkennzeichen: item.Fachkennzeichen,
@@ -124,13 +123,13 @@ const loadData = async () => {
         }));
 
         // Personendaten extrahieren
-        const personendatenObj = rawData.find(item => item.personendaten);
+        const personendatenObj = rawData.find((item: { personendaten: any; }) => item.personendaten);
         if (personendatenObj) {
             data.value.personendaten = personendatenObj.personendaten;
         }
 
         // Kontaktinformationen extrahieren
-        const infoDataObj = rawData.find(item => item.infoData);
+        const infoDataObj = rawData.find((item: { infoData: any; }) => item.infoData);
         if (infoDataObj) {
             data.value.infoData = infoDataObj.infoData;
         }

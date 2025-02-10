@@ -5,7 +5,7 @@
     </ion-header>
 
     <ion-content>
-      <loadingOverlay id="loading" :isLoading="loading" />
+      <loadingOverlay id="loading" :isLoading="loading" message="Login..." />
 
       <ion-card>
         <ion-card-header>

@@ -17,18 +17,22 @@
         <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
+
+    <!-- <loadingOverlay :isLoading="loading" :message="'Logout...'" /> -->
   </ion-toolbar>
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
-import { ref, computed, onMounted } from 'vue';
+import { computed } from '@vue/reactivity';
+import { IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
+// import loadingOverlay from "./LoadingOverlay.vue";
 
-import axios from 'axios';
 const authStore = useAuthStore();
 const loginStateVSC = computed(() => authStore.isLoggedInVSC);
+const loginStateVPIS = computed(() => authStore.isLoggedInVPIS);
+const loginStateHSP = computed(() => authStore.isLoggedInHSP);
 const router = useRouter();
 
 const props = defineProps({
@@ -44,7 +48,7 @@ const props = defineProps({
 
 const logout = async () => {
   try {
-   authStore.logout();
+    authStore.logout();
   } catch(error){
     console.log('Fehler beim Abmelden.', error);
   }

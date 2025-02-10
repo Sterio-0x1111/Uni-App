@@ -7,6 +7,28 @@
 
     <!-- Content -->
     <IonContent>
+      <custom-toggle v-model="showSelection" />
+
+      <!-- Sender-Select -->
+      <ion-item v-if="showSelection">
+        <ion-label>Wähle einen Sender</ion-label>
+        <ion-select v-model="selectedSender" @ionChange="filterMessages" placeholder="Sender wählen">
+          <ion-select-option value="all">Alle</ion-select-option>
+          <ion-select-option v-for="sender in uniqueSenders" :key="sender" :value="sender">
+            {{ sender }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Alle oder ungelesene Nachrichten -->
+      <ion-item v-if="showSelection">
+        <ion-label>Nur ungelesene Nachrichten</ion-label>
+        <ion-select v-model="onlyUnread" @ionChange="filterMessages" placeholder="Alle oder nur ungelesene">
+          <ion-select-option value="all">Alle</ion-select-option>
+          <ion-select-option value="unread">Nur ungelesene</ion-select-option>
+        </ion-select>
+      </ion-item>
+
       <!-- Pull-to-refresh -->
       <IonRefresher slot="fixed" @ionRefresh="doRefresh">
         <IonRefresherContent />
@@ -16,17 +38,15 @@
 
       <!-- Liste der Nachrichten -->
       <IonList>
-        <IonItem v-for="message in messages" :key="message.msgID" :class="{ 'new-message': message.isUnread }" button
-          detail @click="openMessage(message)">
+        <IonItem v-for="message in filteredMessages" :key="message.msgID" :class="{ 'new-message': message.isUnread }"
+          button detail @click="openMessage(message)">
           <IonLabel class="message-label">
             <h2>{{ message.subject }}</h2>
             <p>{{ message.preview }}</p>
-            <!-- Anzeige der Dateigröße -->
             <p class="message-size">Größe: {{ message.size }}</p>
           </IonLabel>
           <IonNote slot="end" class="note-info">
             <div>{{ message.dateTime }}</div>
-            <!-- Neu-Label unter dem Datum, falls die Nachricht ungelesen ist -->
             <div v-if="message.isUnread" class="new-label">Neu</div>
           </IonNote>
         </IonItem>
@@ -35,29 +55,48 @@
   </IonPage>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { IonContent, IonPage, IonHeader, IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonNote } from '@ionic/vue'
+import { IonContent, IonPage, IonHeader, IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonNote, IonSelect, IonSelectOption,  } from '@ionic/vue'
 import toolbarMenu from '../ToolbarMenu.vue'
 import loadingOverlay from '../LoadingOverlay.vue'
+import customToggle from '../VSC/CustomToggle.vue'
 import axios from 'axios'
 
 const toolbarTitle = 'Nachrichten'
 const messages = ref([])
+const filteredMessages = ref([])
+const uniqueSenders = ref([])
+const selectedSender = ref('all')
+const onlyUnread = ref('all')
 const router = useRouter()
 const loading = ref(false)
+const showSelection = ref(true)
 
 const loadMessages = async () => {
   try {
     loading.value = true
     const response = await axios.get('http://localhost:3000/api/vpis/news', { withCredentials: true })
     messages.value = response.data.messages
+    // Extrahiert alle einzigartigen Sender
+    uniqueSenders.value = [...new Set(messages.value.map(message => message.sender))]
+    filterMessages() // Filtert Nachrichten nach dem initialen Laden
   } catch (error) {
     console.error('Fehler beim Laden der Nachrichten:', error)
   } finally {
     loading.value = false
   }
+}
+
+const filterMessages = () => {
+  // Filtert Nachrichten basierend auf dem ausgewählten Sender und dem ungelesen-Status
+  filteredMessages.value = messages.value.filter(message => {
+    const senderMatch = selectedSender.value === 'all' || message.sender === selectedSender.value
+    const unreadMatch = onlyUnread.value === 'all' || (onlyUnread.value === 'unread' && message.isUnread)
+    return senderMatch && unreadMatch
+  })
 }
 
 onMounted(() => {
@@ -112,6 +151,6 @@ ion-item {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.75em;
-  margin-top: 4px; /* Abstand zum Datum */
+  margin-top: 4px;
 }
 </style>

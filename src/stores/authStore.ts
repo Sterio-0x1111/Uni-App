@@ -96,7 +96,7 @@ export const useAuthStore = defineStore('auth', {
             }
             this.logoutTimer = setTimeout(() => {
                 this.logout();
-            }, 1000 * 60 * 25); // 25 Minuten
+            }, 1000 * 60 * 20); // 20 Minuten
             console.log('Logout-Timer gesetzt.');
         },
       
