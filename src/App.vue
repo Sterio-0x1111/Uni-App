@@ -6,12 +6,21 @@
 
 <script setup lang="ts">
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+
+/*const handleBeforeUnload = async (event) => {
+  const authStore = useAuthStore();
+  await authStore.logout();
+  event.preventDefault();
+  //event.returnValue = ""; // Zeigt Warnung im Browser an
+};
 
 onMounted(() => {
-  // Setze das Theme manuell auf Light Mode
-  //document.documentElement.setAttribute('color-scheme', 'light');
-  //document.body.classList.remove('dark');  // Entfernt den Dark Mode, falls er aktiv ist
-  //document.body.classList.add('light');    // Fügt den Light Mode hinzu
-})
+  window.addEventListener("beforeunload", handleBeforeUnload);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+});*/
 </script>

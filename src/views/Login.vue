@@ -5,7 +5,7 @@
     </ion-header>
 
     <ion-content>
-      <loadingOverlay :isLoading="loading" />
+      <loadingOverlay id="loading" :isLoading="loading" />
 
       <ion-card>
         <ion-card-header>
@@ -19,15 +19,15 @@
 
           <ion-item>
             <ion-label position="stacked">Username</ion-label>
-            <ion-input v-model="username" type="text" required></ion-input>
+            <ion-input v-model="username" type="text" id="username" required></ion-input>
           </ion-item>
 
           <ion-item>
             <ion-label position="stacked">Password</ion-label>
-            <ion-input v-model="password" type="password" required></ion-input>
+            <ion-input v-model="password" type="password" id="password" required></ion-input>
           </ion-item>
 
-          <ion-button class="custom-button" expand="block" @click="handleLogin">
+          <ion-button class="custom-button" id="login" expand="block" @click="handleLogin">
             Anmelden
           </ion-button>
         </ion-card-content>
