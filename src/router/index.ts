@@ -73,6 +73,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/exams",
     name: "Exams",
     component: Exams,
+    beforeEnter: requireAuth("VSC"),
   },
   {
     path: "/exams/results",

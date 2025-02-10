@@ -6,10 +6,10 @@
 
       <ion-content>
           <ion-list>
-              <ion-button class="custom-button" router-link="/exams/results">Notenspiegel</ion-button>
-              <ion-button class="custom-button" router-link="/exams/registered">Angemeldete Prüfungen</ion-button>
-              <ion-button class="custom-button" href="/assets/Ruecktritt-Info-2023.pdf" download="RegelungenRuecktritt.pdf">Prüfungsrücktrittsregelung (PDF)</ion-button>
-              <ion-button class="custom-button" href="https://www.fh-swf.de/cms/faq/" target="_blank">Hilfe und Hinweise (FH Seite)</ion-button>
+              <ion-button id="results" class="custom-button" router-link="/exams/results">Notenspiegel</ion-button>
+              <ion-button id="registered" class="custom-button" router-link="/exams/registered">Angemeldete Prüfungen</ion-button>
+              <ion-button id="download" class="custom-button" href="/assets/Ruecktritt-Info-2023.pdf" download="RegelungenRuecktritt.pdf">Prüfungsrücktrittsregelung (PDF)</ion-button>
+              <ion-button id="" class="custom-button" href="https://www.fh-swf.de/cms/faq/" target="_blank">Hilfe und Hinweise (FH Seite)</ion-button>
           </ion-list>
       </ion-content>
   </ion-page>

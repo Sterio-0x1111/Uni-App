@@ -10,7 +10,7 @@
         <h2>Willkommen!</h2>
         <p>Dies ist das neue Informationssystem für Studierende der FH SWF!</p>
         <p>Hier können Sie auf verschiedene Seiten zugreifen, wie zum Beispiel Speisepläne, Prüfungsergebnisse oder Terminübersichten.</p>
-        <ion-button :size="12" :size-md="6" :size-lg="4" class="custom-button" router-link="/navigation">
+        <ion-button id="overview-button" :size="12" :size-md="6" :size-lg="4" class="custom-button" router-link="/navigation">
             Zur Seitenübersicht!
         </ion-button>
       </div>

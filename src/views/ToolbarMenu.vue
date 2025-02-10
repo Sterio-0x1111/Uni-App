@@ -3,18 +3,18 @@
     <ion-title class="menu-title"><ion-icon :name="iconName"></ion-icon> {{ menuTitle }}</ion-title>
 
     <ion-buttons slot="start">
-      <ion-button router-link="/navigation">
-        <ion-icon color="primary" name="menu" aria-label="Navigation"></ion-icon>
+      <ion-button id="navigation-button" router-link="/navigation">
+        <ion-icon color="primary" name="menu" aria-label="Navigation"></ion-icon> 
       </ion-button>
     </ion-buttons>
 
     <ion-buttons slot="end">
-      <ion-button v-if="!loginStateVSC && !loginStateVPIS && !loginStateHSP && router.currentRoute._value.fullPath !== '/login'" router-link="/login">
-        <ion-icon color="primary" name="person" aria-label="Login"></ion-icon>
+      <ion-button id="login-button" v-if="!loginStateVSC && router.currentRoute._value.fullPath !== '/login'" router-link="/login">
+        <ion-icon color="primary" name="person" aria-label="Login"></ion-icon> 
       </ion-button>
 
-      <ion-button v-if="loginStateVSC && loginStateVPIS && loginStateHSP" @click="logout">
-        <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon>
+      <ion-button id="logout-button" v-if="loginStateVSC" @click="logout">
+        <ion-icon color="primary" name="logout" aria-label="Logout"></ion-icon> 
       </ion-button>
     </ion-buttons>
 
