@@ -1,8 +1,8 @@
-const { createAxiosClient, fetchHTML } = require("../../utils/helpers.cjs");
-const { verifySession } = require("./vpisHelpers.cjs");
+const VPISPortalService = require("../../services/VPISPortalService.cjs");
+const { fetchHTML } = require("../../utils/helpers.cjs");
 
 /**
- * Hauptfunktion: Liest das komplette Kalender-HTML, extrahiert den Header,
+ * Liest das komplette Kalender-HTML, extrahiert den Header,
  * die Wochenlinks, die Tabellenstruktur und zusätzlich die Termine
  * (z. B. den Stundenplan) für die aktuell gewählte Kalenderwoche.
  *
@@ -10,11 +10,12 @@ const { verifySession } = require("./vpisHelpers.cjs");
  * Andernfalls wird die aktuelle Woche (aus dem Header) verwendet.
  */
 const scrapeMyCalendar = async (req, res) => {
-  if (!verifySession(req, res)) return;
-  const calendarDataURL = `https://vpis.fh-swf.de/${req.session.vpisSemester}/student.php3/${req.session.vpisToken}/view_meinplan`;
-
+  const vpisService = VPISPortalService.verifySession(req, res);
+  if (!vpisService) return;
+  
   try {
-    const client = createAxiosClient(req.session.vpisCookies);
+    const client = vpisService.createAxiosClient();
+    const calendarDataURL = `https://vpis.fh-swf.de/${vpisService.semester}/student.php3/${vpisService.token}/view_meinplan`;
     const $ = await fetchHTML(calendarDataURL, client);
 
     // Extrahiert Kalenderüberschrift und alle KW-Links
@@ -27,7 +28,7 @@ const scrapeMyCalendar = async (req, res) => {
     const week = req.query.week || calendarData.currentWeek;
 
     // Lädt die Termine-Seite (z. B. Stundenplan mit Veranstaltungen) für die gewählte Woche
-    const termineData = await scrapeTermineForWeek(week, req.session);
+    const termineData = await scrapeTermineForWeek(week, vpisService, client);
 
     res.status(200).json({
       data: { calendarData, tableStructure, termineData }
@@ -251,9 +252,8 @@ const scrapeTermineWithDays = ($) => {
  * @param {string} week - Kalenderwoche (z. B. "2025W04")
  * @param {object} reqSession - Session-Objekt mit den Feldern vpisSemester, vpisToken, vpisCookies
  */
-const scrapeTermineForWeek = async (week, reqSession) => {
-  const termineURL = `https://vpis.fh-swf.de/${reqSession.vpisSemester}/student.php3/${reqSession.vpisToken}/view_meinplan?ViewType=Plan&Template=2021&KW=${week}`;
-  const client = createAxiosClient(reqSession.vpisCookies);
+const scrapeTermineForWeek = async (week, vpisService, client) => {
+  const termineURL = `https://vpis.fh-swf.de/${vpisService.semester}/student.php3/${vpisService.token}/view_meinplan?ViewType=Plan&Template=2021&KW=${week}`;
   const $ = await fetchHTML(termineURL, client);
 
   const termine = scrapeTermineWithDays($);

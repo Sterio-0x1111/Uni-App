@@ -1,5 +1,4 @@
 const axios = require("axios");
-const cheerio = require("cheerio");
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 

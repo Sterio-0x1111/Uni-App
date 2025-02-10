@@ -92,7 +92,7 @@ const logoutFromHSP = async (req, res) => {
         req.session.loggedInHSP = false;
         req.session.hspCookies = undefined;
 
-        res.status(200).json({ data });
+        res.status(200).json({ message: "HSP: Erfolgreich ausgeloggt." });
       } else {
         console.log("Logout fehlgeschlagen.");
         res.status(500).json({ message: "HSP Logout fehlgeschlagen." });

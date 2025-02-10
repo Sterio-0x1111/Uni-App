@@ -32,6 +32,7 @@ app.use(
     saveUninitialized: false, // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
     cookie: {
       secure: false,
+      sameSite: 'none',
       httpOnly: true,
       maxAge: 1000 * 60 * 20, // 20 min
     },
