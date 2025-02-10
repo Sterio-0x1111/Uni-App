@@ -46,6 +46,7 @@ export function useRegisteredExams() {
     onMounted(async () => {
         try {
             const courseStore = useCourseStore();
+            await courseStore.fetchCourses();
 
             degrees.value = courseStore.degrees;
             selectedDegree.value = (degrees.value.length === 1) ? degrees.value[0] : degrees.value[1];
