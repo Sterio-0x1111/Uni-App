@@ -45,36 +45,14 @@ class VPISPortalService extends Portal {
   }
 
   static fromSession(sessionData) {
-    // Falls noch gar nichts in der Session
-    if (!sessionData) return new VPISPortalService(false, new CookieJar());
-
-    // CookieJar aus JSON wiederherstellen
-    let jar;
-    if (sessionData.cookies)
-      jar = CookieJar.deserializeSync(sessionData.cookies);
-    else jar = new CookieJar();
-
-    // Instanz bauen
-    const instance = new VPISPortalService(sessionData.loginState, jar);
-
-    // Semester & Token übernehmen
-    instance.semester = sessionData.semester || null;
-    instance.token = sessionData.token || null;
-
+    const instance = super.fromSession(sessionData, VPISPortalService);
+    instance.#semester = sessionData.semester || null;
+    instance.#token = sessionData.token || null;
     return instance;
   }
 
-  /**
-   * Statische Methode, die aus req.session eine Instanz erzeugt und ggf. 401 zurückgibt.
-   */
   static verifySession(req, res) {
-    const vpisService = VPISPortalService.fromSession(req.session.vpis);
-
-    if (!vpisService.loginState) {
-      res.status(401).json({ message: "Nicht eingeloggt. Bitte zuerst anmelden." });
-      return null;
-    }
-    return vpisService;
+    return super.verifySession(req, res, "vpis", VPISPortalService);
   }
 
   /**
@@ -116,8 +94,9 @@ class VPISPortalService extends Portal {
       this.#semester = parts[3]; // z.B. "WS2024"
       this.#token = parts[5]; // z.B. "abc123token"
 
-      // Erfolg prüfen
       const html = loginResponse.data;
+
+      // Prüfen, ob der Login erfolgreich war
       if (
         html.includes("<th>Datum / Uhrzeit</th>") ||
         html.includes("H&ouml;rer-<br/>status")
@@ -152,8 +131,6 @@ class VPISPortalService extends Portal {
 
       if (resp.data.includes("neu anmelden")) {
         this._loginState = false;
-
-        // Cookies zurücksetzen
         this.cookies = new CookieJar();
         return "VPIS: Erfolgreich ausgeloggt.";
       } else {

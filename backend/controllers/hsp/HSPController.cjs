@@ -1,109 +1,45 @@
-require("dotenv").config();
-const cheerio = require("cheerio");
-const { createAxiosClient } = require("../../utils/helpers.cjs");
+const HSPPortalService = require("../../services/HSPPortalService.cjs");
+const Portal = require("../../services/Portal.cjs");
 const { CookieJar } = require("tough-cookie");
 
+// Login für HSP
 const loginToHSP = async (req, res) => {
-    if (!req.session.loggedInHSP) {
-        const { username, password } = req.body;
-        const loginPageURL = process.env.HSP_LOGIN_URL;
+  // Wenn Session schon existiert, Service aus Session wiederherstellen
+  const existingService = req.session?.hsp
+    ? HSPPortalService.fromSession(req.session.hsp)
+    : new HSPPortalService(false, new CookieJar());
 
-        try {
-            const cookieJar = new CookieJar();
-            const client = createAxiosClient(cookieJar);
+  // Falls bereits eingeloggt
+  if (existingService.loginState) {
+    return res.json({ message: "HSP: Bereits eingeloggt." });
+  }
 
-            // Initiale GET-Anfrage
-            const initialResponse = await client.get(loginPageURL);
-            const $ = cheerio.load(initialResponse.data);
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ message: "Benutzername/Passwort fehlen" });
+  }
 
-            // ViewState und Tokens extrahieren
-            const viewState = $('input[name="javax.faces.ViewState"]').val();
-            const authenticityToken = $('input[name="authenticity_token"]').val(); // Optional
-            const ajaxToken = $('input[name="ajaxToken"]').val();
+  try {
+    const hspService = new HSPPortalService(false, new CookieJar());
+    await hspService.login({ username, password });
 
-            // Login-Daten erstellen
-            const loginData = new URLSearchParams();
-            loginData.append("userInfo", "");
-            loginData.append("ajax-token", ajaxToken);
-            loginData.append("javax.faces.ViewState", viewState);
-            loginData.append("asdf", username);
-            loginData.append("fdsa", password);
-            loginData.append("submit", "Anmelden");
-
-            // POST-Anfrage zum Login
-            const loginResponse = await client.post(
-                "https://hochschulportal.fh-swf.de/qisserver/rds?state=user&type=1&category=auth.login",
-                loginData.toString(),
-                {
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "User-Agent": "Mozilla/5.0",
-                        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                        Referer: loginPageURL,
-                    },
-                }
-            );
-
-            const html = loginResponse.data;
-
-            // Prüfen, ob der Login erfolgreich war
-            if (html.includes("Chiporello-Bild-Upload")) {
-              // Session-Daten speichern
-              req.session.loggedInHSP = true;
-              req.session.user = { username };
-              req.session.hspCookies = cookieJar;
-              req.session.authenticityToken = authenticityToken;
-              req.session.viewState = viewState;
-              req.session.save();
-              res.json({ message: "SUCCESS" });
-            } else {
-                res.status(401).json({ message: "FAILURE" });
-            }
-        } catch (error) {
-            console.error("Failed to login to HSP:", error);
-            res.status(500).json({ message: "Login failed", error: error.message });
-        }
+    // Wenn success => loginState == true
+    if (hspService.loginState) {
+      req.session.loggedInHSP = true;
+      // Service in die Session serialisieren
+      req.session.hsp = hspService.toSession();
+      return res.json({ message: "SUCCESS" });
     } else {
-        res.json({ message: "HSP: Bereits eingeloggt." });
+      return res.status(401).json({ message: "FAILURE" });
     }
+  } catch (error) {
+    return res.status(500).json({ message: "Login failed", error: error.message });
+  }
 };
 
+// Logout für HSP
 const logoutFromHSP = async (req, res) => {
-  if (req.session.loggedInHSP) {
-    const client = createAxiosClient(req.session.hspCookies);
-
-    const url = process.env.HSP_LOGIN_URL;
-    const response = await client.get(url);
-    const initialData = response.data;
-    const $ = cheerio.load(response.data);
-
-    const filteredLinks = $("a").filter(function () {
-      return $(this).text().includes("bmelden");
-    });
-
-    const logoutURL = "https://hochschulportal.fh-swf.de" + filteredLinks.first().attr("href");
-
-    try {
-      const response = await client.get(logoutURL);
-      const data = response.data;
-
-      if (data.includes("sukzessive")) {
-        console.log("HSP: Erfolgreich ausgeloggt.");
-        req.session.loggedInHSP = false;
-        req.session.hspCookies = undefined;
-
-        res.status(200).json({ message: "HSP: Erfolgreich ausgeloggt." });
-      } else {
-        console.log("Logout fehlgeschlagen.");
-        res.status(500).json({ message: "HSP Logout fehlgeschlagen." });
-      }
-    } catch (error) {
-      console.log("HSP: Fehler beim Ausloggen.\n", error);
-      res.status(500).json({ data: initialData });
-    }
-  } else {
-    res.status(200).json({ message: "HSP bereits ausgeloggt." });
-  }
+    return Portal.logoutService(req, res, HSPPortalService, "hsp", "HSP");
 };
 
 module.exports = { loginToHSP, logoutFromHSP };
