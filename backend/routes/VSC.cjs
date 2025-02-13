@@ -1,5 +1,5 @@
 const express = require("express");
-const { loginToVSC, loginToVSC2, logoutFromVSC, getExamResults, getExamResults2, getRegisteredExams, getDegreesAndCourses, getExamsData } = require("../controllers/VSCController.cjs");
+const { loginToVSC, loginToVSC2, logoutFromVSC, getExamResults, getExamResults2, getRegisteredExams, getDegreesAndCourses, getExamsData } = require("../controllers/vsc/VSCController.cjs");
 const router = express.Router();
 
 router.post('/login', loginToVSC);

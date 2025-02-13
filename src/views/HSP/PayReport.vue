@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <IonHeader>
-      <toolbar-menu :menuTitle="toolbarTitle" iconName="person" />
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="cash" />
     </IonHeader>
 
     <IonContent :fullscreen="true">
@@ -125,20 +125,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from '@vue/reactivity';
+import { onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
-import { 
-  IonPage, IonSpinner, IonHeader, IonToolbar, IonTitle, IonContent, 
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-  IonGrid, IonRow, IonCol, IonText, IonLoading 
-} from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol, IonText } from '@ionic/vue';
 import loadingOverlay from '../LoadingOverlay.vue';
 import toolbarMenu from "../ToolbarMenu.vue";
 
 const loading = ref<boolean>(true);
 const error = ref<string | null>(null);
 const data = ref<any>(null);
-const toolbarTitle = 'Bezahlen & Rückmelden';
+const toolbarTitle = 'Rückmeldung';
 
 // Methode zum Laden der Zahlungen
 const loadPayments = async () => {

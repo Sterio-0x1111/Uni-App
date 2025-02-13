@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <ToolbarMenu menuTitle="Semesterzeiten" />
+            <ToolbarMenu menuTitle="Semesterzeiten" iconName="time" />
         </ion-header>
 
         <ion-content>

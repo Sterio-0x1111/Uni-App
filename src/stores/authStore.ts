@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', {
 
             const vpsiURL = "http://localhost:3000/api/vpis/login";
             const vpisResponse = await axios.post(vpsiURL, { username: username, password: password }, { withCredentials: true });
-
+            
             this.isLoggedInVSC = vscResponse.status === 200;
             this.isLoggedInHSP = hspResponse.status === 200;
             this.isLoggedInVPIS = vpisResponse.status === 200;
@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('auth', {
                 const vpisURL = "http://localhost:3000/api/vpis/logout";
                 const vpisResponse = await axios.get(vpisURL, { withCredentials: true });
 
-                if(vscResponse.status === 200 && hspResponse.status === 200 && vpisResponse.status === 200){
+                if(vscResponse.status === 200 && hspResponse.status === 200 && vpisResponse.status === 200) {
                     this.isLoggedInVSC = false;
                     this.isLoggedInHSP = false;
                     this.isLoggedInVPIS = false;
@@ -65,14 +65,14 @@ export const useAuthStore = defineStore('auth', {
                     alert('Sie wurden vom VSC, HSP und VPIS ausgeloggt.');
                     window.location.reload();
                 }
-            } catch(error){
+            } catch(error) {
                 console.log('Fehler beim automatischen Logout.', error);
             }
         },
         async getStates(){
             try {
                 const response = await axios.get('http://localhost:3000/api/states', { withCredentials: true });
-                if(response.status === 200){
+                if (response.status === 200) {
                     const data = response.data;
                     this.isLoggedInVSC = data.stateVSC;
                     this.isLoggedInHSP = data.stateHSP;
@@ -96,7 +96,7 @@ export const useAuthStore = defineStore('auth', {
             }
             this.logoutTimer = setTimeout(() => {
                 this.logout();
-            }, 1000 * 60 * 25); // 25 Minuten
+            }, 1000 * 60 * 20); // 20 Minuten
             console.log('Logout-Timer gesetzt.');
         },
       
@@ -111,4 +111,4 @@ export const useAuthStore = defineStore('auth', {
     persist: {
         storage: sessionStorage,
     }
-})
+});

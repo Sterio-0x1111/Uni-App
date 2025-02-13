@@ -15,7 +15,6 @@ const semesterService = SemesterService.instance;
  */ 
 const getSemesterDates = async (req, res) => {
     const semesterDates = await SemesterService.getSemesterDates();
-    
     res.status(200).json({ table: semesterDates });
     /*try{
         const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';

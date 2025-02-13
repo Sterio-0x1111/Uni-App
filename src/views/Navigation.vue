@@ -1,14 +1,14 @@
 <template>
   <IonPage>
     <IonHeader>
-      <toolbar-menu :menuTitle="toolbarTitle" iconName="compass" />
+      <toolbar-menu id="toolbar" menuTitle="Menü" iconName="compass" />
     </IonHeader>
 
-    <IonContent>
+    <IonContent id="navigation-content">
       <IonList class="light-list">
         <!-- Öffentliche Routen -->
         <h3>Öffentliche Seiten</h3>
-        <IonButton class="custom-button" v-for="route in publicRoutes" :key="route.id" @click="navigateTo(route.path)">
+        <IonButton class="custom-button" v-for="route in publicRoutes" :key="route.id" @click="navigateTo(route.path)" :id="route.id">
           <span>
             <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
           </span>
@@ -18,7 +18,7 @@
         <!-- HSP-geschützte Routen -->
         <div v-if="loginStateHSP">
           <h3>HSP-Bereich</h3>
-          <IonButton class="custom-button" v-for="route in hspRoutes" :key="route.id" @click="navigateTo(route.path)">
+          <IonButton class="custom-button" v-for="route in hspRoutes" :key="route.id" @click="navigateTo(route.path)" :id="route.id">
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
@@ -32,7 +32,7 @@
         <!-- VSC-geschützte Routen -->
         <div v-if="loginStateVSC">
           <h3>VSC-Bereich</h3>
-          <IonButton class="custom-button" v-for="route in vscRoutes" :key="route.id" @click="navigateTo(route.path)">
+          <IonButton class="custom-button" v-for="route in vscRoutes" :key="route.id" @click="navigateTo(route.path)" :id="route.id">
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
@@ -46,7 +46,7 @@
         <!-- VPIS-geschützte Routen -->
         <div v-if="loginStateVPIS">
           <h3>VPIS-Bereich</h3>
-          <IonButton class="custom-button" v-for="route in vpisRoutes" :key="route.id" @click="navigateTo(route.path)">
+          <IonButton class="custom-button" v-for="route in vpisRoutes" :key="route.id" @click="navigateTo(route.path)" :id="route.id">
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
@@ -83,27 +83,12 @@ const routes = computed(() => {
     { id: 4, title: "Prüfungspläne", icon: 'calendar', path: "/vpisPruefungsplaene", requiresAuth: false, authType: null },
     { id: 5, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: true, authType: 'VPIS' },
     { id: 6, title: "Veranstaltungsplanende", icon: 'information', path: "/vpisPlaner", requiresAuth: false, authType: null },
-    { id: 7, title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
-    { id: 8, title: "Rückmeldung", icon: 'document-text', path: "/payReport", requiresAuth: true, authType: 'HSP' },
-    { id: 9, title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
-    { id: 10, title: "Nachrichten", icon: 'newspaper', path: "/news", requiresAuth: true, authType: 'VPIS' },
+    { id: 'information-button', title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
+    { id: 'feedback-button', title: "Rückmeldung", icon: 'cash', path: "/payReport", requiresAuth: true, authType: 'HSP' },
+    { id: 'exam-button', title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
+    { id: 'messages-button', title: "Nachrichten", icon: 'newspaper', path: "/news", requiresAuth: true, authType: 'VPIS' },
   ]
 });
-
-import { addIcons } from 'ionicons'; 
-import { key, location, restaurant, time, calendar, documentText, information, newspaper } from 'ionicons/icons'; 
-addIcons({ 
-  'key': key,
-  'location': location,
-  'restaurant': restaurant,
-  'time': time,
-  'calendar': calendar,
-  'document-text': documentText,
-  'information': information,
-  'newspaper': newspaper,
-});
-
-const toolbarTitle = ref("Menü");
 
 const publicRoutes = computed(() => {
   return routes.value.filter(route => !route.requiresAuth);

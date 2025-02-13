@@ -1,9 +1,10 @@
+const HSPPortalService = require("../services/HSPPortalService.cjs");
+const VPISPortalService = require("../services/VPISPortalService.cjs");
+
 const getLoginStates = (req, res) => {
     const stateVSC = req.session.loggedInVSC || false;
-    const stateHSP = req.session.loggedInHSP || false;
-    const stateVPIS = req.session.loggedInVPIS || false;
-
-    console.log('States: ', req.session.loggedInVSC);
+    const stateHSP = HSPPortalService.verifySession(req, res) !== null;
+    const stateVPIS = VPISPortalService.verifySession(req, res) !== null;
 
     res.status(200).json({
         stateVSC,

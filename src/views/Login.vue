@@ -1,32 +1,39 @@
 <template>
-    <ion-page>
-        <ion-header>
-            <toolbar-menu :menuTitle="toolbarTitle" iconName="login" />
-        </ion-header>
+  <ion-page>
+    <ion-header>
+      <toolbar-menu :menuTitle="toolbarTitle" iconName="login" />
+    </ion-header>
 
-        <ion-content>
-            <loadingOverlay :isLoading="loading" />
-            <ion-card>
-                <ion-card-header>
-                    <ion-card-title>Anmeldung</ion-card-title>
-                </ion-card-header>
+    <ion-content>
+      <loadingOverlay id="loading" :isLoading="loading" message="Login..." />
 
-                <ion-card-content>
-                    <ion-item>
-                        <ion-label position="stacked">Username</ion-label>
-                        <ion-input v-model="username" type="text" required></ion-input>
-                    </ion-item>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Anmeldung</ion-card-title>
+        </ion-card-header>
 
-                    <ion-item>
-                        <ion-label position="stacked">Password</ion-label>
-                        <ion-input v-model="password" type="password" required></ion-input>
-                    </ion-item>
+        <ion-card-content>
+          <div v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
 
-                    <ion-button class="custom-button" expand="block" @click="handleLogin">Anmelden</ion-button>
-                </ion-card-content>
-            </ion-card>
-        </ion-content>
-    </ion-page>
+          <ion-item>
+            <ion-label position="stacked">Username</ion-label>
+            <ion-input v-model="username" type="text" id="username" required></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input v-model="password" type="password" id="password" required></ion-input>
+          </ion-item>
+
+          <ion-button class="custom-button" id="login" expand="block" @click="handleLogin">
+            Anmelden
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -35,46 +42,56 @@ import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, I
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import { useCourseStore } from '@/stores/courseStore';
 import ToolbarMenu from './ToolbarMenu.vue';
 import loadingOverlay from './LoadingOverlay.vue';
 
-const toolbarTitle = "Login"
+const toolbarTitle = "Login";
 const authStore = useAuthStore();
 const router = useRouter();
-const username = ref(null);
-const password = ref(null);
-const loading = ref(false);
 
-onMounted(() => {
-    
-});
+const username = ref('');
+const password = ref('');
+const loading = ref(false);
+const errorMessage = ref<string | null>(null);
 
 const handleLogin = async () => {
-    try {
-        loading.value = true;
-        const login = await authStore.centralLogin(username.value, password.value);
+  errorMessage.value = null;
+  
+  if (!username.value || !password.value) {
+    errorMessage.value = 'Bitte füllen Sie alle Felder aus.';
+    return;
+  }
 
-        if(login){
-            console.log('Frontend Login erfolgreich!', login);
-            alert('Sie sind jetzt eingeloggt!');
-            await useCourseStore().fetchCourses();
-            router.push('/navigation');
-        } else {
-            console.log('Frontend Login fehlgeschlagen.');
-            alert('Login fehlgeschlagen.');
-        }
-    } catch(error){
-        console.log('Fehler beim Login.', error);
-    } finally {
-        loading.value = false;
+  try {
+    loading.value = true;
+    const login = await authStore.centralLogin(username.value, password.value);
+
+    if (login) {
+      alert('Sie sind jetzt eingeloggt!');
+      router.push('/navigation');
+    } else {
+      alert('Login fehlgeschlagen.');
+      errorMessage.value = 'Falscher Benutzername oder falsches Passwort.';
     }
-}
+  } catch (error) {
+    console.log('Fehler beim Login.', error);
+    errorMessage.value = 'Ein Fehler ist aufgetreten oder Falscher Benutzername / falsches Passwort. Bitte versuchen Sie es später erneut.';
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <style scoped>
 ion-item {
-    --highlight-heighth: 20px;
-    margin-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+/* Styling für die Fehlermeldung */
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: bold;
 }
 </style>

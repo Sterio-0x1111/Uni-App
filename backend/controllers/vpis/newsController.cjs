@@ -1,14 +1,14 @@
-const { createAxiosClient, fetchHTML } = require("../../utils/helpers.cjs");
-const { verifySession } = require("./vpisHelpers.cjs");
+const VPISPortalService = require("../../services/VPISPortalService.cjs");
+const { fetchHTML } = require("../../utils/helpers.cjs");
 
 const scrapeMyNews = async (req, res) => {
-  if (!verifySession(req, res)) return;
-  const newsDataURL = `https://vpis.fh-swf.de/${req.session.vpisSemester}/student.php3/${req.session.vpisToken}/showmsglist?Template=2021`;
+  const vpisService = VPISPortalService.verifySession(req, res);
+  if (!vpisService) return;
+  const newsDataURL = `https://vpis.fh-swf.de/${vpisService.semester}/student.php3/${vpisService.token}/showmsglist?Template=2021`;
 
   try {
-    const client = createAxiosClient(req.session.vpisCookies);
+    const client = vpisService.createAxiosClient();
     const $ = await fetchHTML(newsDataURL, client);
-
     const messages = [];
 
     // Alle Nachrichten aus der Tabelle extrahieren
@@ -40,11 +40,12 @@ const scrapeMyNews = async (req, res) => {
 };
 
 const scrapeMyMessage = async (req, res) => {
-  if (!verifySession(req, res)) return;
-  const messageURL = `https://vpis.fh-swf.de/${req.session.vpisSemester}/student.php3/${req.session.vpisToken}/msgread?msg=${req.params.msgID}&Template=2021`;
+  const vpisService = VPISPortalService.verifySession(req, res);
+  if (!vpisService) return;
+  const messageURL = `https://vpis.fh-swf.de/${vpisService.semester}/student.php3/${vpisService.token}/msgread?msg=${req.params.msgID}&Template=2021`;
 
   try {
-    const client = createAxiosClient(req.session.vpisCookies);
+    const client = vpisService.createAxiosClient();
     const $ = await fetchHTML(messageURL, client);
 
     // Betreff extrahieren
@@ -79,16 +80,7 @@ const scrapeMyMessage = async (req, res) => {
 
     const messageContent = $("article.wysiwyg").html()?.trim() || "";
 
-    res.json({
-      subject,
-      dateTime,
-      sender,
-      fachbereich,
-      modul,
-      veranstaltung,
-      messageContent,
-    });
-
+    res.json({ subject, dateTime, sender, fachbereich, modul, veranstaltung, messageContent });
   } catch (error) {
     res.status(500).json({ message: "Fehler beim Laden der Nachricht", error: error.message });
   }

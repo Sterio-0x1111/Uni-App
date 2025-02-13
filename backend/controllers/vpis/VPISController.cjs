@@ -1,11 +1,9 @@
-require("dotenv").config();
-const cheerio = require("cheerio");
-const { fetchHTML, handleError, checkLink, createAxiosClient } = require("../../utils/helpers.cjs");
+const VPISPortalService = require("../../services/VPISPortalService.cjs");
+const Portal = require("../../services/Portal.cjs");
 const { CookieJar } = require("tough-cookie");
-const VPIS_LOGIN_URL = process.env.VPIS_LOGIN_URL;
-const SEMESTER_ARCHIV = process.env.SEMESTER_ARCHIV;
+const { fetchHTML, handleError, checkLink } = require("../../utils/helpers.cjs");
+require("dotenv").config();
 
-// Login für VPIS
 /*
 const loginToVPIS = async (req, res) => {
   const { username, password, semester } = req.body;
@@ -64,102 +62,14 @@ const loginToVPIS = async (req, res) => {
 };
 */
 
+// Login für VPIS
 const loginToVPIS = async (req, res) => {
-  if (!req.session.loggedInVPIS) {
-    const { username, password } = req.body;
-
-    try {
-      const cookieJar = new CookieJar();
-      const client = createAxiosClient(cookieJar);
-
-      // Initiale GET-Anfrage für aktuelles semester (Redirect)
-      const aktuellResponse = await client.get(VPIS_LOGIN_URL);
-      const $ = cheerio.load(aktuellResponse.data);
-      const baseURL = 'https://vpis.fh-swf.de/' + $('form.vpis-form1').attr('action');
-
-      // Login-Daten erstellen
-      const loginData = new URLSearchParams();
-      loginData.append("Template", "2021");
-      loginData.append("availwidth", 1920);
-      loginData.append("screenwidth", 1920);
-      loginData.append("windowouterwidth", 1918);
-      loginData.append("windowinnerwidth", 1200);
-      loginData.append("benutzerkennung", username);
-      loginData.append("passwd", password);
-      loginData.append("submit", "");
-
-      // POST-Anfrage zum Login
-      const loginResponse = await client.post(baseURL, loginData.toString(), {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "User-Agent": "Mozilla/5.0",
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          Referer: baseURL,
-        },
-      });
-      const parts = loginResponse.request.res.responseUrl.split('/');
-      const semester = parts[3];
-      const token = parts[5];
-      const html = loginResponse.data;
-
-      // Prüfen, ob der Login erfolgreich war (2 unterschiedliche Seiten)
-      if (html.includes("<th>Datum / Uhrzeit</th>") || html.includes("H&ouml;rer-<br/>status")) {
-        // Session-Daten speichern
-        req.session.loggedInVPIS = true;
-        req.session.user = { username };
-        req.session.vpisCookies = cookieJar;
-        req.session.vpisToken = token;
-        req.session.vpisSemester = semester;
-        req.session.save();
-        res.json({ message: "SUCCESS" });
-      } else {
-        res.status(401).json({ message: "FAILURE" });
-      }
-    } catch (error) {
-      console.error("Failed to login to VPIS:", error);
-      res.status(500).json({ message: "Login failed", error: error.message });
-    }
-  } else {
-    res.json({ message: "VPIS: Bereits eingeloggt." });
-  }
+    return Portal.loginService(req, res, VPISPortalService, "vpis", "VPIS");
 };
 
+// Logout für VPIS
 const logoutFromVPIS = async (req, res) => {
-  if (req.session.loggedInVPIS) {
-    const client = createAxiosClient(req.session.vpisCookies);
-
-    const url = process.env.VPIS_LOGIN_URL;
-    const response = await client.get(url);
-    const initialData = response.data;
-    const $ = cheerio.load(response.data);
-
-    const filteredLinks = $("a").filter(function () {
-      return $(this).text().includes("bmelden");
-    });
-    const logoutURL = "https://vpis.fh-swf.de/" + req.session.vpisSemester + "/student.php3/" + req.session.vpisToken + "/logout?Template=2021";
-
-    try {
-      const response = await client.get(logoutURL);
-      const data = response.data;
-
-      if (data.includes("neu anmelden")) {
-        console.log("VPIS: Erfolgreich ausgeloggt.");
-        req.session.loggedInVPIS = false;
-        req.session.vpisCookies = undefined;
-
-        res.status(200).json({ data });
-      } else {
-        console.log("Logout fehlgeschlagen.");
-        res.status(500).json({ message: "VPIS Logout fehlgeschlagen." });
-      }
-    } catch (error) {
-      console.log("VPIS: Fehler beim Ausloggen.\n", error);
-      res.status(500).json({ data: initialData });
-    }
-  } else {
-    res.status(200).json({ message: "VPIS bereits ausgeloggt." });
-  }
+    return Portal.logoutService(req, res, VPISPortalService, "vpis", "VPIS");
 };
 
 // Funktion zum Abrufen der aktuellen Semester
@@ -169,7 +79,7 @@ const getSemesters = async (req, res) => {
       "https://vpis.fh-swf.de/index.php/de/vpis/vpis_semester_archiv.php"
     );
     let semesters = await extractSemesters($);
-    semesters = await addNewerSemester(semesters); // Aufruf von `addNewerSemester` mit `await`
+    semesters = await addNewerSemester(semesters);
 
     res.json(semesters); // Rückgabe der Semesterinformationen
   } catch (error) {

@@ -14,7 +14,6 @@
       <toolbarMenu :menuTitle="toolbarTitle" iconName="newspaper" />
     </IonHeader>
 
-    <!-- Content -->
     <IonContent class="ion-padding">
       <!-- Zeige Fehleranzeige, falls errorMessage gesetzt ist -->
       <div v-if="errorMessage" class="error-message">

@@ -1,7 +1,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <toolbar-menu menuTitle="Mensaplan" />
+            <toolbar-menu menuTitle="Mensaplan" iconName="restaurant" />
         </ion-header>
 
         <ion-content>
