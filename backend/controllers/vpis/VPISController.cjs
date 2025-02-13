@@ -114,7 +114,7 @@ const logoutFromVPIS = async (req, res) => {
 
     // Aktualisierten Service (jetzt: loginState=false) zurück in Session
     req.session.vpis = vpisService.toSession();
-    console.log("VSC: Erfolgreich ausgeloggt.");
+    console.log("VPIS: Erfolgreich ausgeloggt.");
     return res.status(200).json({ message: result });
   } catch (error) {
     console.error("VPIS: Fehler beim Ausloggen.\n", error);

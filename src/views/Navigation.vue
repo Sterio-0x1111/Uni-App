@@ -81,12 +81,12 @@ const routes = computed(() => {
     { id: 2, title: "Lagepläne", icon: 'location', path: "/locations", requiresAuth: false, authType: null },
     { id: 3, title: "Fachbereichstermine", icon: 'calendar', path: "/departments", requiresAuth: false, authType: null },
     { id: 4, title: "Prüfungspläne", icon: 'calendar', path: "/vpisPruefungsplaene", requiresAuth: false, authType: null },
-    { id: 5, title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: true, authType: 'VPIS' },
+    { id: 'calendar-button', title: "Wochenplan", icon: 'calendar', path: "/calendar", requiresAuth: true, authType: 'VPIS' },
     { id: 6, title: "Veranstaltungsplanende", icon: 'information', path: "/vpisPlaner", requiresAuth: false, authType: null },
     { id: 'information-button', title: "Studieninformationen", icon: 'person', path: "/PersonalInformation", requiresAuth: true, authType: 'HSP' },
     { id: 'feedback-button', title: "Rückmeldung", icon: 'cash', path: "/payReport", requiresAuth: true, authType: 'HSP' },
     { id: 'exam-button', title: "Meine Prüfungen", icon: 'document-text', path: "/exams", requiresAuth: true, authType: 'VSC' },
-    { id: 'messages-button', title: "Nachrichten", icon: 'newspaper', path: "/news", requiresAuth: true, authType: 'VPIS' },
+    { id: 'news-button', title: "Nachrichten", icon: 'newspaper', path: "/news", requiresAuth: true, authType: 'VPIS' },
   ]
 });
 

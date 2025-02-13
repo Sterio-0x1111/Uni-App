@@ -50,24 +50,12 @@ describe('Navigationstests', () => {
 
   // TC0016
   it('Ruft die Loginseite auf und versucht sich mit gültigen Credentials einzuloggen. Danach wird Meine Prüfungen Button auf Navigation angeklickt und dorthin navigiert.', () => {
-    cy.visit('/login');
-    cy.get('#username').type(Cypress.env('USERNAME'));
-    cy.get('#password').type(Cypress.env('PASSWORD'));
-    cy.get('#login').click();
-    cy.on('window:alert', (text) => {
-      expect(text).to.equal('Sie sind jetzt eingeloggt!');
-    });
-    cy.url({ timeout: 20000 }).should('include', '/navigation');
-    cy.get('#navigation-content').then(($content) => {
-      $content[0].scrollToBottom(); // Native Ionic-Methode
-    });
-    cy.get('#exam-button').should('be.visible').click();
+    navigateWithLogin('#exam-button', '/exams');
   });
 
   // TC0017
   it('Ruft Meine Prüfungen über URL und ohne Login auf.', () => {
-    cy.visit('/exams');
-    cy.url().should('include', '/navigation');
+    navigateWithURL('/exams');
   });
 
   // TC0018
@@ -90,12 +78,11 @@ describe('Navigationstests', () => {
 
   // TC0019
   it('Ruft Notenspiegel über URL und ohne Login auf.', () => {
-    cy.visit('/exams/results');
-    cy.url().should('include', '/navigation');
+    navigateWithURL('/exams/results');
   });
 
   // TC0020
-  it('Ruft Meine Prüfungen und Notenspiegel mit Login auf.', () => {
+  it('Ruft Meine Prüfungen und Angemeldete Prüfungen mit Login auf.', () => {
     cy.visit('/login');
     cy.get('#username').type(Cypress.env('USERNAME'));
     cy.get('#password').type(Cypress.env('PASSWORD'));
@@ -114,7 +101,87 @@ describe('Navigationstests', () => {
 
   // TC0021
   it('Ruft Angemeldete Prüfungen über URL und ohne Login auf.', () => {
-    cy.visit('/exams/registered');
+    navigateWithURL('/exams/registered');
+  });
+
+  // TC0022
+  it('Ruft Studieninformationen mit Login auf.', () => {
+    navigateWithLogin('#information-button', '/PersonalInformation');
+  });
+
+  // TC0023
+  it('Ruft Studieninformationen über URL und ohne Login auf.', () => {
+    navigateWithURL('/PersonalInformation');
+  });
+
+  // TC0024
+  it('Ruft Rückmeldung mit Login auf.', () => {
+    navigateWithLogin('#feedback-button', 'payReport');
+  });
+
+  // TC0025
+  it('Ruft Rückmeldung über URL und ohne Login auf.', () => {
+    navigateWithURL('/payReport');
+  });
+
+  // TC0026
+  it('Ruft Nachrichten mit Login auf.', () => {
+    navigateWithLogin('#news-button', '/news');
+  });
+
+  // TC0027
+  it('Ruft Nachrichten über URL und ohne Login auf.', () => {
+    navigateWithURL('/news');
+  });
+
+  // TC0028
+  it('Ruft Wochenplan mit Login auf.', () => {
+    navigateWithLogin('#calendar-button', '/calendar');
+  });
+
+  // TC0029
+  it('Ruft Wochenplan über URL und ohne Login auf.', () => {
+    navigateWithURL('/calendar');
+  });
+
+  // TC0030
+  it('Ruft Startseite auf, klickt auf Navigation, navigiert zu Navigationsseite.', () => {
+    cy.visit('/home');
+    cy.get('#toolbar').within(() => {
+      cy.get('#navigation-button', { timeout: 10000 }).should('be.visible').click();
+    });
     cy.url().should('include', '/navigation');
   });
+
+  // TC0030
+  it('Ruft Startseite auf, klickt auf Navigation, navigiert zu Navigationsseite.', () => {
+    cy.visit('/home');
+    cy.get('#toolbar').within(() => {
+      cy.get('#login-button', { timeout: 10000 }).should('be.visible').click();
+    });
+    cy.url().should('include', '/login');
+  });
+
+
 });
+
+const navigateWithLogin = (element, url) => {
+  cy.visit('/login');
+  cy.get('#username').type(Cypress.env('USERNAME'));
+  cy.get('#password').type(Cypress.env('PASSWORD'));
+  cy.get('#login').click();
+  cy.on('window:alert', (text) => {
+    expect(text).to.equal('Sie sind jetzt eingeloggt!');
+  });
+  cy.url({ timeout: 20000 }).should('include', '/navigation');
+  cy.get('#navigation-content').then(($content) => {
+    $content[0].scrollToBottom(); // Native Ionic-Methode
+  });
+  cy.get(element).should('be.visible').click();
+  cy.url().should('include', url);
+}
+
+const navigateWithURL = (url) => {
+  cy.visit(url);
+  cy.url().should('include', '/navigation');
+}

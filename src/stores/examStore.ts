@@ -10,12 +10,12 @@ export const useExamStore = defineStore('exams', {
         slScores:        [] as string[],
         pkScores:        [] as string[],
         registeredExams: [] as string[],
-        authStore: useAuthStore()
+        //authStore: useAuthStore()
     }), 
     actions: {
         async loadScores(category: string, selectedDegree: string, selectedCourse: string) : Promise<string[]> {
             try {
-              if(this.scores.length === 0 && this.authStore.isLoggedInVSC){
+              if(this.scores.length === 0){
                 const url = `http://localhost:3000/api/vsc/exams/${category}/${selectedDegree}/${selectedCourse}`;
                 const response = await axios.get(url, { withCredentials: true });
                 if (response.status !== 200) {
@@ -39,7 +39,7 @@ export const useExamStore = defineStore('exams', {
         },
         async loadRegisteredExams(category: string, selectedDegree: string, selectedCourse: string) : Promise<object> {
           try {
-            if(this.registeredExams.length === 0 && this.authStore.isLoggedInVSC){
+            if(this.registeredExams.length === 0){
               const url = `http://localhost:3000/api/vsc/exams/${category}/${selectedDegree}/${selectedCourse}`;
               const response = await axios.get(url, { withCredentials: true });
               if (response.status !== 200) {

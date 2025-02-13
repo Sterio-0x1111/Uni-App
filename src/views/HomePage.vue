@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header :translucent="true">
-      <toolbar-menu menuTitle="Startseite" iconName="home" />
+      <toolbar-menu id="toolbar" menuTitle="Startseite" iconName="home" />
     </ion-header>
 
     <ion-content :fullscreen="true">

@@ -5,12 +5,10 @@
         </ion-header>
 
         <ion-content>
-            <CustomToggle v-model="showSelection" />
-            <span v-if="showSelection">
-                <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
+            <CustomToggle id="toggle" v-model="showSelection" />
+            <span id="toggle-container" v-if="showSelection">
                 <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
                 <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
-                
 
                 <ion-item>
                     <ion-select class="selection" v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
