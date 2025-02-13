@@ -93,14 +93,58 @@ class Portal {
   }
 
   /**
+   * Universelle Login-Funktion für alle Portale
+   */
+  static async loginService(req, res, PortalClass, sessionKey, serviceName) {
+    // Falls eine Session existiert, aus der Session wiederherstellen
+    const existingService = req.session?.[sessionKey]
+      ? PortalClass.fromSession(req.session[sessionKey])
+      : new PortalClass(false, new CookieJar());
+
+    // Falls bereits eingeloggt
+    if (existingService.loginState) {
+      return res.json({ message: `${serviceName}: Bereits eingeloggt.` });
+    }
+
+    // Login-Daten aus dem Request holen
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "Benutzername/Passwort fehlen" });
+    }
+
+    try {
+      const portalService = new PortalClass(false, new CookieJar());
+      await portalService.login({ username, password });
+
+      // Wenn success => loginState == true
+      if (portalService.loginState) {
+        // Service in die Session serialisieren
+        req.session[sessionKey] = portalService.toSession();
+        return res.json({ message: `${serviceName}: SUCCESS` });
+      } else {
+        return res.status(401).json({ message: "FAILURE" });
+      }
+    } catch (error) {
+      console.error(`${serviceName}: Fehler beim Login`, error);
+      return res.status(500).json({ message: "Login fehlgeschlagen", error: error.message });
+    }
+  }
+
+  /**
    * Universelle Logout-Funktion für alle Portale
    */
   static async logoutService(req, res, PortalClass, sessionKey, serviceName) {
-    if (!req.session?.[sessionKey]) return res.status(200).json({ message: `${serviceName} bereits ausgeloggt.` });
+    if (!req.session?.[sessionKey])
+      return res
+        .status(200)
+        .json({ message: `${serviceName} bereits ausgeloggt.` });
     const serviceInstance = PortalClass.fromSession(req.session[sessionKey]);
 
     // Falls schon ausgeloggt
-    if (!serviceInstance || !serviceInstance.loginState) return res.status(200).json({ message: `${serviceName} bereits ausgeloggt.` });
+    if (!serviceInstance || !serviceInstance.loginState)
+      return res
+        .status(200)
+        .json({ message: `${serviceName} bereits ausgeloggt.` });
 
     try {
       // Logout durchführen

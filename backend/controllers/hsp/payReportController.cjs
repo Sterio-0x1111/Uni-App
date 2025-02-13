@@ -1,12 +1,13 @@
 const cheerio = require("cheerio");
-const { createAxiosClient } = require("../../utils/helpers.cjs");
-const { verifySession, extractFlowExecutionKey } = require("./hspHelpers.cjs");
+const HSPPortalService = require("../../services/HSPPortalService.cjs");
+const { extractFlowExecutionKey } = require("./hspHelpers.cjs");
 
 /**
  * Funktion zum Scrapen der Zahlungen und Rückmeldungen.
  */
 const scrapePayments = async (req, res) => {
-  if (!verifySession(req, res)) return;
+  const hspService = HSPPortalService.verifySession(req, res);
+  if (!hspService) return;
 
   const paymentsURL = "https://hochschulportal.fh-swf.de/qisserver/pages/cs/sys/portal/hisinoneStartPage.faces";
 
@@ -24,7 +25,7 @@ const scrapePayments = async (req, res) => {
   }).toString();
 
   try {
-    const client = createAxiosClient(req.session.hspCookies);
+    const client = hspService.createAxiosClient();
 
     // POST-Anfrage an die Zahlungen-URL
     const response = await client.post(paymentsURL, postData, {
@@ -75,10 +76,11 @@ const scrapePayments = async (req, res) => {
  * Funktion zum Scrapen von Zahlungen.
  */
 const payReport = async (req, res) => {
-  if (!verifySession(req, res)) return;
+  const hspService = HSPPortalService.verifySession(req, res);
+  if (!hspService) return;
 
   try {
-    const client = createAxiosClient(req.session.hspCookies);
+    const client = hspService.createAxiosClient();
 
     // Schritt 1: Initialer GET-Request, um den aktuellen FlowExecutionKey zu erhalten
     const initialGetUrl = "https://hochschulportal.fh-swf.de/qisserver/pages/cm/exa/enrollment/info/start.xhtml" +

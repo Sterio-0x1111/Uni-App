@@ -64,38 +64,7 @@ const loginToVPIS = async (req, res) => {
 
 // Login für VPIS
 const loginToVPIS = async (req, res) => {
-  // Wenn Session schon existiert, Service aus Session wiederherstellen
-  const existingService = req.session?.vpis 
-    ? VPISPortalService.fromSession(req.session.vpis)
-    : new VPISPortalService(false, new CookieJar());
-
-  // Falls bereits eingeloggt
-  if (existingService.loginState) {
-    return res.json({ message: "VPIS: Bereits eingeloggt." });
-  }
-
-  // Credentials aus dem Body
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: "Benutzername/Passwort fehlen" });
-  }
-
-  try {
-    const vpisService = new VPISPortalService(false, new CookieJar());
-    await vpisService.login({ username, password });
-
-    // Wenn success => loginState == true
-    if (vpisService.loginState) {
-      // Service in die Session serialisieren
-      req.session.vpis = vpisService.toSession(); 
-      return res.json({ message: "SUCCESS" });
-    } else {
-      return res.status(401).json({ message: "FAILURE" });
-    }
-  } catch (error) {
-    console.error("Failed to login to VPIS:", error);
-    return res.status(500).json({ message: "Login failed", error: error.message });
-  }
+    return Portal.loginService(req, res, VPISPortalService, "vpis", "VPIS");
 };
 
 // Logout für VPIS

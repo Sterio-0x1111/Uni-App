@@ -1,13 +1,14 @@
 const cheerio = require("cheerio");
-const { createAxiosClient } = require("../../utils/helpers.cjs");
-const { verifySession } = require("./hspHelpers.cjs");
+const HSPPortalService = require("../../services/HSPPortalService.cjs");
 
 const scrapeMyS = async (req, res) => {
-  if (!verifySession(req, res)) return;
-  const payReportURL = "https://hochschulportal.fh-swf.de/qisserver/pages/cm/exa/enrollment/info/start.xhtml?_flowId=studyservice-flow&_flowExecutionKey=e1s1";
+  const hspService = HSPPortalService.verifySession(req, res);
+  if (!hspService) return;
+  
+  const PURL = "https://hochschulportal.fh-swf.de/qisserver/pages/cm/exa/enrollment/info/start.xhtml?_flowId=studyservice-flow&_flowExecutionKey=e1s1";
 
   try {
-    const client = createAxiosClient(req.session.hspCookies);
+    const client = hspService.createAxiosClient();
 
     // Prüfen, ob die Anfrage bereits gesendet wurde
     if (!req.session.isPostRequestDone) {
@@ -28,7 +29,7 @@ const scrapeMyS = async (req, res) => {
       formData.append("javax.faces.ViewState", "e1s1");
       formData.append("studyserviceForm", "studyserviceForm");
 
-      const response = await client.post(payReportURL, formData.toString(), {
+      const response = await client.post(PURL, formData.toString(), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "User-Agent": "Mozilla/5.0",
@@ -82,13 +83,14 @@ const scrapeMyS = async (req, res) => {
 };
 
 const scrapeMyInfo = async (req, res) => {
-  if (!verifySession(req, res)) return;
+  const hspService = HSPPortalService.verifySession(req, res);
+  if (!hspService) return;
   
   if (!req.session.isPostRequestDone) contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e1s1";
   else contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e2s1";
 
   try {
-    const client = createAxiosClient(req.session.hspCookies);
+    const client = hspService.createAxiosClient();
 
     const formData = new URLSearchParams();
     formData.append("_flowId", "showOwnContactData-flow");
