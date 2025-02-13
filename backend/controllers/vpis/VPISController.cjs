@@ -1,4 +1,5 @@
 const VPISPortalService = require("../../services/VPISPortalService.cjs");
+const Portal = require("../../services/Portal.cjs");
 const { CookieJar } = require("tough-cookie");
 const { fetchHTML, handleError, checkLink } = require("../../utils/helpers.cjs");
 require("dotenv").config();
@@ -63,66 +64,12 @@ const loginToVPIS = async (req, res) => {
 
 // Login für VPIS
 const loginToVPIS = async (req, res) => {
-  // Wenn Session schon existiert, Service aus Session wiederherstellen
-  const existingService = VPISPortalService.fromSession(req.session.vpis);
-
-  // Falls bereits eingeloggt
-  if (existingService.loginState) {
-    return res.json({ message: "VPIS: Bereits eingeloggt." });
-  }
-
-  // Credentials aus dem Body
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: "Benutzername/Passwort fehlen" });
-  }
-
-  try {
-    // Neue Instanz
-    const vpisService = new VPISPortalService(false, new CookieJar());
-
-    // Login durchführen
-    await vpisService.login({ username, password });
-
-    // Wenn success => loginState == true
-    if (vpisService.loginState) {
-      // Service in die Session serialisieren
-      req.session.vpis = vpisService.toSession(); 
-      return res.json({ message: "SUCCESS" });
-    } else {
-      return res.status(401).json({ message: "FAILURE" });
-    }
-  } catch (error) {
-    console.error("Failed to login to VPIS:", error);
-    return res.status(500).json({ message: "Login failed", error: error.message });
-  }
+    return Portal.loginService(req, res, VPISPortalService, "vpis", "VPIS");
 };
 
 // Logout für VPIS
 const logoutFromVPIS = async (req, res) => {
-  // Service-Objekt aus Session holen
-  const vpisService = VPISPortalService.fromSession(req.session.vpis);
-
-  // Falls schon ausgeloggt
-  if (!vpisService.loginState) {
-    return res.status(200).json({ message: "VPIS bereits ausgeloggt." });
-  }
-
-  try {
-    // Logout durchführen
-    const result = await vpisService.logout();
-
-    // Aktualisierten Service (jetzt: loginState=false) zurück in Session
-    req.session.vpis = vpisService.toSession();
-    console.log("VPIS: Erfolgreich ausgeloggt.");
-    return res.status(200).json({ message: result });
-  } catch (error) {
-    console.error("VPIS: Fehler beim Ausloggen.\n", error);
-    return res.status(500).json({ 
-      message: "VPIS Logout fehlgeschlagen.", 
-      error: error.message 
-    });
-  }
+    return Portal.logoutService(req, res, VPISPortalService, "vpis", "VPIS");
 };
 
 // Funktion zum Abrufen der aktuellen Semester
@@ -132,7 +79,7 @@ const getSemesters = async (req, res) => {
       "https://vpis.fh-swf.de/index.php/de/vpis/vpis_semester_archiv.php"
     );
     let semesters = await extractSemesters($);
-    semesters = await addNewerSemester(semesters); // Aufruf von `addNewerSemester` mit `await`
+    semesters = await addNewerSemester(semesters);
 
     res.json(semesters); // Rückgabe der Semesterinformationen
   } catch (error) {

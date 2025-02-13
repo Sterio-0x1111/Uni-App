@@ -24,8 +24,8 @@ describe("VPIS Tests", () => {
     beforeEach(() => {
       // Einmaliger Login-Aufruf:
       cy.request("POST", `${baseUrl}/login`, {
-        username: "user",
-        password: "pass",
+        username: Cypress.env("USERNAME"),
+        password: Cypress.env("PASSWORD"),
       }).then((loginResp) => {
         expect(loginResp.status).to.eq(200);
         expect(loginResp.body).to.have.property("message", "SUCCESS");
