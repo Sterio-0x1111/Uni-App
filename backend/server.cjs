@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { CookieJar } = require("tough-cookie");
 
 const session = require("express-session");
 
@@ -17,8 +16,8 @@ const app = express();
 // Middlewars
 app.use(
   cors({
-    //origin: "http://localhost:5173", 
-    origin: "http://localhost:8100", // Frontend-URL
+    origin: "http://localhost:5173", 
+    // origin: "http://localhost:8100", // Frontend-URL
     credentials: true, // Cookies und andere Anmeldeinformationen zulassen
   })
 );
@@ -32,7 +31,6 @@ app.use(
     saveUninitialized: false, // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
     cookie: {
       secure: false,
-      //sameSite: 'none',
       httpOnly: true,
       maxAge: 1000 * 60 * 20, // 20 min
     },
@@ -46,7 +44,7 @@ app.use(
  * Diese Middleware erstellt ein CookieJar pro Benutzer
  * und einen benutzerspezifischen Axios Client,
  * sodass der Benutzer anfrageübergreifend eingeloggt bleibt.
- */
+ 
 app.use((req, res, next) => {
   
   if (!req.session.hspCookies) {
@@ -59,6 +57,25 @@ app.use((req, res, next) => {
 
   next();
 });
+
+
+const checkSessionDestroy = (req, res, next) => {
+  if (req.session && req.session.states) {
+    const { stateVSC, stateHSP, stateVPIS } = req.session.states;
+
+    if (!stateVSC && !stateHSP && !stateVPIS) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session konnte nicht gelöscht werden:", err);
+        }
+      });
+    }
+  }
+  next();
+};
+
+app.use(checkSessionDestroy);
+*/
 
 // Routes
 app.use('/api/departments', require('./routes/departments.cjs'));

@@ -55,6 +55,10 @@ class VPISPortalService extends Portal {
     return super.verifySession(req, res, "vpis", VPISPortalService);
   }
 
+  static verify(req) {
+    return super.verify(req, "vpis", VPISPortalService);
+  }
+
   /**
    *  Login
    */
