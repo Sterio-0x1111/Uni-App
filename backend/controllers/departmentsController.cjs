@@ -4,58 +4,22 @@ const cheerio = require('cheerio');
 const DepartmentService = require('../services/DepartmentService.cjs');
 
 /**
- * Funktion zum Laden von auswählbaren Fachbereichen.
+ * Endpunkt zum Laden der Fachbereiche.
  * 
- * Der Endpunkt lädt die verfügbaren Fachbereiche 
- * und kategorisiert diese manuell, 
- * um sie später besser verarbeiten zu können.
+ * Der Endpunkt nutzt die Klasse DepartmentService 
+ * und lädt die im Frontend auswählbaren Fachbereiche.
+ * 
+ * @async 
+ * @function getDepartments
+ * 
+ * @param {object} req - Anfrageobjekt
+ * @param {object} res - Antwortobjekt, enthält die verfügbaren Fachbereiche
+ * 
+ * @returns {Promise<void>} - Sendet stattdessen eine JSON Antwort mit den Departments und ihren Parsing Type
  */
 const getDepartments = async (req, res) => {
     const departments = await DepartmentService.getDepartments();
-    console.log('DEPARTMENTS');
-    console.log(departments);
-
-    if(departments.length > 0){
-        res.status(200).json({ departments: departments });
-    } else {
-        res.status(204).json({ departments: departments });
-    }
-    
-    /*try {
-        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
-        const response = await axios.get(url);
-
-        // Kategorisierung der Fachbereiche zur späteren Unterscheidung und Verarbeitung
-        const linkCases = ['FB Informatik und Naturwissenschaften', 'FB Maschinenbau: Präsenzstudium'];
-        const textCases = ['FB Agrarwirtschaft', 'FB Bildungs- und Gesellschaftswissenschaften', 'FB Elektrische Energietechnik'];
-        
-        const departments = [];
-        const $ = cheerio.load(response.data);
-
-        $('select option').each((index, department) => {
-            const departmentValue = $(department).val();
-            let type = 'simple'; // regulärer Fall, einfache Tabelle
-            if(linkCases.includes(departmentValue)){
-                type = 'link'; // Sonderfall 1: für Tabellen, die auf andere Tabellen verlinken
-            }
-
-            if(textCases.includes(departmentValue)){
-                type = 'text'; // Sonderfall 2: für nicht tabellarische Listendarstellung
-            }
-            departments.push({ department: departmentValue, type });
-        });
-        departments.shift(); // erstes Element ist 'Fachbereich auswählen!', wird nicht benötigt
-
-        if(departments.length > 0){
-            res.status(200).json({ departments });
-        } else {
-            res.status(204).json({ message: 'Keine Fachbereiche gefunden.' });
-        }
-        
-    } catch(error){
-        console.log(error);
-        res.status(500).json({ message: 'Fehler beim Laden der verfügbaren Fachbereiche. ' + error });
-    }*/
+    (departments.length > 0) ? res.status(200).json({ departments: departments }) : res.status(204).json({ departments: departments });
 }
 
 /**
@@ -72,7 +36,7 @@ const getDepartmentDatesAsTable = async (req, res) => {
     const { department } = req.body;
     const tableData = await DepartmentService.getDepartmentDatesAsTable(department);
     res.status(200).json({ tableData });
-    
+
     /*const { department } = req.body;
     try {
         const getDepartmentsURL = 'http://localhost:3000/api/departments';
@@ -139,7 +103,7 @@ const getDepartmentDatesAsText = async (req, res) => {
         $(section).find('h4').each((index, heading) => {
             const headingText = $(heading).text().trim();
             const part = $(heading).nextUntil('h4').toArray().map(el => $.html(el)).join('');
-            
+
             const $2 = cheerio.load(part);
             const strongs = [];
 
@@ -170,7 +134,7 @@ const getDepartmentDatesAsText = async (req, res) => {
         });
         res.status(200).json({ content });
 
-    } catch(error){
+    } catch (error) {
         console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
         res.status(500).json({ error: error });
     }
@@ -204,7 +168,7 @@ const filterDepartmentTables = ($, department) => {
         })
         return tableData;
 
-    } catch(error){
+    } catch (error) {
         console.log('Fehler beim Filtern von Tabellen.', error);
         return null;
     }
@@ -273,7 +237,7 @@ const filterDepartmentTablesByLink = async (req, res) => {
     const { tables, dates } = await DepartmentService.filterDepartmentTablesByLink(url);
 
     res.status(200).json({ tables, dates });
-    
+
     /*try {
         console.log('By Link');
         const { url } = req.body;
@@ -357,7 +321,7 @@ const filterExternalDepartmentTables = ($, dates) => {
         });
         return tableData;
 
-    } catch(error){
+    } catch (error) {
         console.log('Fehler beim Laden der externen Tabellen.', error);
     }
 }
@@ -389,7 +353,7 @@ const filterDepartmentDatesAsList = async ($, department) => {
             const headingText = $(heading).text().trim();
             const part = $(heading).nextUntil('h4').toArray().map(el => $.html(el)).join('');
             const $2 = cheerio.load(part);
-            
+
             const strongs = [];
 
             $2('strong').each((index, strong) => {
@@ -424,7 +388,7 @@ const filterDepartmentDatesAsList = async ($, department) => {
         });
         return content;
 
-    } catch(error){
+    } catch (error) {
         console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
         res.status(500).json({ error: error });
     }
