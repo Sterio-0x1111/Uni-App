@@ -44,6 +44,7 @@ export function useRegisteredExams() {
     })
 
     onMounted(async () => {
+        console.log('REGISTERED MOUNTED');
         try {
             const courseStore = useCourseStore();
             await courseStore.fetchCourses();
