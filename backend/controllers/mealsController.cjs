@@ -20,11 +20,7 @@ const getDates = async (req, res) => {
   const location = req.params.loc.toLowerCase();
   try {
     const options = await MealsService.getDates(location);
-    if (options.length > 0) {
-      res.status(200).json({ options });
-    } else {
-      res.status(204).json({ options });
-    }
+    (options.length > 0) ? res.status(200).json({ options }) : res.status(204).json({ options });
 
   } catch (error) {
     res.status(500).json({ message: 'Fehler beim Laden der Auswahloption.', error });

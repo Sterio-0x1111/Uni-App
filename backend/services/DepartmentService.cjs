@@ -6,6 +6,18 @@ class DepartmentService {
 
     }
 
+    /**
+     * Methode zum Filtern der verfügbaren Fachbereiche.
+     * 
+     * Die statische Methode lädt die verfügbaren Fachbereiche 
+     * und ordnet diese in Kategorien ein, 
+     * damit hinterher über diese Kategorie die korrekte Filtermethode ausgewählt werden kann.
+     * 
+     * @async
+     * @function getDepartments
+     * 
+     * @returns {Promise<any[] | undefined>} deparments - die geladenen Fachbereiche mit zugewiesener Kategorie
+     */
     static async getDepartments() {
         try {
             const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
@@ -48,7 +60,6 @@ class DepartmentService {
             departments.pop();  // letztes Element entfernen 'all'
 
             return departments;
-
         } catch (error) {
             console.log(error);
         }
@@ -87,6 +98,18 @@ class DepartmentService {
         }
     }
 
+    /**
+     * Methode zum Laden und Filtern von Text in Listen.
+     * 
+     * Die Methode lädt die Daten 
+     * und filtert den Text aus 
+     * Listen heraus.
+     * @async 
+     * @function getDepartmentDatesAsText
+     * 
+     * @param {string} department - Fachbereich, dessen Daten geladen werden sollen
+     * @returns {Promise<{} | undefined>} content - enthält die gefilterten Daten in aufwändig aufbereiter Form
+     */
     static async getDepartmentDatesAsText(department) {
         try {
             const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';

@@ -28,7 +28,7 @@ export const useSemesterStore = defineStore('semester', {
                 if(this.feedbackDates.length === 0){
                     console.log('Semester Store 1: if');
                     const response = await axios.get('http://localhost:3000/api/semester/feedback');
-                    const data = response.data;
+                    const data = response.data; 
                     this.feedbackDates = data;
                 }
                 return this.feedbackDates;
