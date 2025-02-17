@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
                 }
                 
 
-            } catch(error){
+            } catch(error) {
 
             }
         }, 
