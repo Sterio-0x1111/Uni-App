@@ -34,7 +34,6 @@ const options = {
 // Middlewars
 app.use(
   cors({
-    //origin: "http://localhost:5173", 
     origin: ['http://localhost:8100', 'http://localhost:5173'], // Frontend-URL
     credentials: true, // Cookies und andere Anmeldeinformationen zulassen
     allowedHeaders: ["Content-Type", "Authorization"],
