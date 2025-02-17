@@ -1,7 +1,20 @@
 require("dotenv").config();
 const express = require("express");
+const crypto = require("crypto");
+const https = require("https");
+const fs = require("fs");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const { CookieJar } = require("tough-cookie");
+//const RedisStore = require("connect-redis").default;
+//const { createClient } = require("redis");
+const helmet = require("helmet");
+const csurf = require("csurf");
+const rateLimit = require("express-rate-limit");
+
+// Redis-Client erstellen
+/*const redisClient = createClient({ url: "redis://localhost:6379" });
+redisClient.connect().catch(console.err);*/
 
 const session = require("express-session");
 
@@ -11,14 +24,19 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const PORT = process.env.PORT;
 const app = express();
+const cryptoKey = crypto.randomBytes(32).toString("hex");
 
+const options = {
+  key: fs.readFileSync("certs/privkey.pem"),
+  cert: fs.readFileSync("certs/cert.crt"),
+};
 
 // Middlewars
 app.use(
   cors({
-    origin: "http://localhost:5173", 
-    // origin: "http://localhost:8100", // Frontend-URL
+    origin: ['http://localhost:8100', 'http://localhost:5173'], // Frontend-URL
     credentials: true, // Cookies und andere Anmeldeinformationen zulassen
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(bodyParser.json()); // JSON-Body-Parsing aktivieren
@@ -26,17 +44,23 @@ app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten u
 
 app.use(
   session({
-    secret: "geheimesSchlüsselwort", // Ein geheimer Schlüssel, um die Session zu signieren
+    secret: cryptoKey, // Ein geheimer Schlüssel, um die Session zu signieren
     resave: false, // Verhindert das Speichern von Session-Daten, wenn nichts geändert wurde
     saveUninitialized: false, // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
     cookie: {
       secure: false,
+      sameSite: 'strict',
       httpOnly: true,
       maxAge: 1000 * 60 * 20, // 20 min
     },
+    //store: new RedisStore({ client: redisClient }),
     store: new session.MemoryStore(),
   })
 );
+
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+app.use(helmet());
+//app.use(csurf());
 
 /**
  * Middleware zum Session Handling.
@@ -128,10 +152,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Interner Serverfehler." });
 });
 
-// für Fall, dass .env noch nicht funktioniert
-/*const PORT2 = 3000;
-app.listen(PORT2, () => {
-  console.log(`Server läuft auf Port ${PORT2}.`);
+/*https.createServer(options, app).listen(PORT, () => {
+  console.log(`HTTPS Server läuft auf Port ${PORT}.`);
 });*/
 
 app.listen(PORT, () => {

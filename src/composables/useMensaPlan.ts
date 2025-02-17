@@ -1,7 +1,8 @@
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { useLocationStore } from '@/stores/locationStore'
 import { useMensaStore } from '@/stores/mensaStore'
+import { onUnmounted } from 'vue';
 
 export function useMensaPlan() {
     //const mensaStore = useMensaStore()
@@ -144,6 +145,8 @@ export function useMensaPlan() {
             await loadSelectionOptions();
         }*/
     })
+
+    
 
     return {
         showSelection,

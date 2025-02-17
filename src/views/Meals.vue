@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonItemDivider, IonLoading } from '@ionic/vue';
@@ -91,6 +91,14 @@ const {
     loadMensaPlan
 } = useMensaPlan();
 
+onBeforeUnmount(() => {
+    console.log("Before");
+    // Wenn es eine laufende Geolokalisierung gibt, abbrechen
+    loading.value = false;
+    if (navigator.geolocation) {
+        window.location.reload();
+    }
+})
 
 // Reaktive Variablen
 

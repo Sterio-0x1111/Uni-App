@@ -1,17 +1,23 @@
 require('dotenv').config();
-const { createAxiosClient, getAndParseHTML } = require("../../utils/helpers.cjs");
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { wrapper } = require('axios-cookiejar-support');
-const { CookieJar } = require('tough-cookie');
 const VSCPortalService = require('../../services/VSCPortalService.cjs');
+const Portal = require('../../services/Portal.cjs');
+
+/**
+ * Controller zum Abwickeln von VSC Operationen.
+ * 
+ * Unterstützte Funktionen:
+ * - Login
+ * - Logout
+ * - Abschlüsse und Studiengänge laden 
+ * - Prüfungsdaten laden
+ */
 
 /**
  * Endpunkt zur Abwicklung des Logins im VSC.
  * 
  * Der Endpunkt nimmt über den Request die Credentials des Nutzers entgegen 
- * und erstellt eine Instanz von VSCPortalService, 
- * um den Login durchzuuführen. Im Erfolgsfall werden 
+ * und nutzt den zentralen Login Servcer der Superklasse.
+ * Im Erfolgsfall werden 
  * die Cookies in Session gespeichert.
  * 
  * @async
@@ -23,7 +29,8 @@ const VSCPortalService = require('../../services/VSCPortalService.cjs');
  * @returns { Promise<void> } - Sendet stattdessen eine Antwort an den Client zurük.
  */
 const loginToVSC2 = async (req, res) => {
-    if (!req.session.vsc) {
+    return Portal.loginService(req, res, VSCPortalService, "vsc", "VSC");
+    /*if (!req.session.vsc) {
         try {
             const { username, password } = req.body;
 
@@ -49,7 +56,7 @@ const loginToVSC2 = async (req, res) => {
         }
     } else {
         res.status(200).json({ message: 'VSC: Bereits eingeloggt.' });
-    }
+    }*/
 }
 
 /**
@@ -57,7 +64,7 @@ const loginToVSC2 = async (req, res) => {
  * 
  * Der Endpunkt prüft, ob der Nutzer eingeloggt ist. 
  * Falls der Nutzer eingeloggt ist, wird der Logout über 
- * eine VSCPortalService Instanz durchgeführt. 
+ * den zentralen Logout Service und einer VSCPortalService Instanz durchgeführt. 
  * Bei erfolgreichem Logout werden die Session Daten gelöscht und es wird eine Erfolgsantwort gesendet.
  * Andernfalls werden Fehlermeldungen zurückgegeb. 
  * 
@@ -69,11 +76,15 @@ const loginToVSC2 = async (req, res) => {
  * @returns { Promise<void> } - Gibt stattdessen eine JSON Antwort zurück.
  */
 const logoutFromVSC = async (req, res) => {
-    if(req.session.vsc){
+    console.log('Logout Service');
+    return Portal.logoutService(req, res, VSCPortalService, "vsc", "VSC");
+    
+    /*if(req.session.vsc){
         try {
-            const vscPortal = new VSCPortalService();
-            const cookies = req.session.vsc;
-            vscPortal.cookies = cookies;
+            //const vscPortal = new VSCPortalService();
+            //const cookies = req.session.vsc;
+            //vscPortal.cookies = cookies;
+            const vscPortal = Portal.fromSession(req.session.vsc, VSCPortalService);
             const logout = await vscPortal.logout();
 
             if(logout){
@@ -89,7 +100,7 @@ const logoutFromVSC = async (req, res) => {
         }
     } else {
         res.status(401).json({ message: 'VSC: Nicht eingeloggt.' });
-    }    
+    }*/
 }
 
 /**
@@ -114,8 +125,7 @@ const getExamsData = async (req, res) => {
         const category = req.params.category; // Notenspiegel, Infos über angemeldete Prüfungen
 
         try {
-            const vscPortal = new VSCPortalService();
-            vscPortal.cookies = req.session.vsc;
+            const vscPortal = Portal.fromSession(req.session.vsc, VSCPortalService);
             const data = await vscPortal.getExamsData(category, degree, course);
 
             (data.length > 0) ? res.status(200).json({ data }) : res.status(204).json({ data });
@@ -145,8 +155,7 @@ const getExamsData = async (req, res) => {
  */
 const getDegreesAndCourses = async (req, res) => {
     if(req.session.vsc){
-        const vscPortal = new VSCPortalService();
-        vscPortal.cookies = req.session.vsc;
+        const vscPortal = Portal.fromSession(req.session.vsc, VSCPortalService);
         const result = await vscPortal.getDegreesAndCourses();
         res.status(200).json({ degrees: result.degrees, bachelorPage: result.bachelorPage, masterPage: result.masterPage });
     } else {

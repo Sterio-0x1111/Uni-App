@@ -2,6 +2,16 @@ const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 const SemesterService = require('../services/SemesterService.cjs');
 
 /**
+ * Controller zur Abwicklung von Operationen bezüglich der Semesterzeiten.
+ * 
+ * Unterstützte Funktionen:
+ * - Semesterzeiten laden
+* - Rückmeldefristen laden
+ * 
+ * 
+ */
+
+/**
  * Endpunkt zum Laden der Semesterzeiträume.
  * 
  * Der Endpunkt filtert die Tabelle der Semesterzeiträume, 

@@ -60,7 +60,7 @@ class Portal {
   static fromSession(sessionData, PortalClass) {
     // Falls noch gar nichts in der Session
     if (!sessionData) return new PortalClass(false, new CookieJar());
-
+    
     // CookieJar aus JSON wiederherstellen
     let jar = sessionData.cookies
       ? CookieJar.deserializeSync(sessionData.cookies)
@@ -115,7 +115,7 @@ class Portal {
   static async loginService(req, res, PortalClass, sessionKey, serviceName) {
     // Falls eine Session existiert, aus der Session wiederherstellen
     const existingService = req.session?.[sessionKey]
-      ? PortalClass.fromSession(req.session[sessionKey])
+      ? PortalClass.fromSession(req.session[sessionKey], PortalClass)
       : new PortalClass(false, new CookieJar());
 
     // Falls bereits eingeloggt
@@ -134,7 +134,9 @@ class Portal {
       await portalService.login({ username, password });
 
       // Wenn success => loginState == true
+      console.log(portalService.loginState);
       if (portalService.loginState) {
+        console.log('in steet');
         // Service in die Session serialisieren
         req.session[sessionKey] = portalService.toSession();
         return res.json({ message: `${serviceName}: SUCCESS` });
@@ -157,7 +159,7 @@ class Portal {
       return res
         .status(200)
         .json({ message: `${serviceName} bereits ausgeloggt.` });
-    const serviceInstance = PortalClass.fromSession(req.session[sessionKey]);
+    const serviceInstance = PortalClass.fromSession(req.session[sessionKey], PortalClass);
 
     // Falls schon ausgeloggt
     if (!serviceInstance || !serviceInstance.loginState)
