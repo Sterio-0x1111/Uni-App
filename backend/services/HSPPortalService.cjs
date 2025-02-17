@@ -44,6 +44,10 @@ class HSPPortalService extends Portal {
     return super.verifySession(req, res, "hsp", HSPPortalService);
   }
 
+  static verify(req) {
+    return super.verify(req, "hsp", HSPPortalService);
+  }
+
   /**
    * Login für HSP
    */

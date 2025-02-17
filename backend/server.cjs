@@ -69,7 +69,7 @@ app.use(helmet());
  * Diese Middleware erstellt ein CookieJar pro Benutzer
  * und einen benutzerspezifischen Axios Client,
  * sodass der Benutzer anfrageübergreifend eingeloggt bleibt.
- */
+ 
 app.use((req, res, next) => {
   
   if (!req.session.hspCookies) {
@@ -82,6 +82,25 @@ app.use((req, res, next) => {
 
   next();
 });
+
+
+const checkSessionDestroy = (req, res, next) => {
+  if (req.session && req.session.states) {
+    const { stateVSC, stateHSP, stateVPIS } = req.session.states;
+
+    if (!stateVSC && !stateHSP && !stateVPIS) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session konnte nicht gelöscht werden:", err);
+        }
+      });
+    }
+  }
+  next();
+};
+
+app.use(checkSessionDestroy);
+*/
 
 // Routes
 app.use('/api/departments', require('./routes/departments.cjs'));

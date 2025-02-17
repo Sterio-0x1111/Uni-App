@@ -94,6 +94,22 @@ class Portal {
   }
 
   /**
+   * Überprüft, ob ein Benutzer eingeloggt ist und gibt ein true, false zurück.
+   *
+   * @param {String} sessionKey - Der Key, unter dem die Portal-Daten gespeichert sind (z. B. "hsp" oder "vpis")
+   * @param {Class} PortalClass - Die Portal-Klasse, die instanziiert werden soll
+   * @returns {Object|null} - Die Portal-Instanz oder `null` bei fehlendem Login
+   */
+  static verify(req, sessionKey, PortalClass) {
+    const sessionData = req.session?.[sessionKey];
+    if (!sessionData) return false;
+
+    const portalInstance = PortalClass.fromSession(sessionData);
+    if (!portalInstance.loginState) return false;
+    return true;
+  }
+
+  /**
    * Universelle Login-Funktion für alle Portale
    */
   static async loginService(req, res, PortalClass, sessionKey, serviceName) {
@@ -129,7 +145,9 @@ class Portal {
       }
     } catch (error) {
       console.error(`${serviceName}: Fehler beim Login`, error);
-      return res.status(500).json({ message: "Login fehlgeschlagen", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Login fehlgeschlagen", error: error.message });
     }
   }
 
