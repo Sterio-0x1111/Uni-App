@@ -4,13 +4,8 @@ const cheerio = require('cheerio');
 const { CookieJar } = require('tough-cookie');
 
 class VSCPortalService extends Portal {
-    constructor(loginState = false, cookies = new CookieJar()) {
-        super(loginState, cookies);
-    }
-
-    static fromJSON(jsonString){
-        const data = JSON.parse(jsonString);
-        return new VSCPortalService(data._loginState, data.cookies);
+    constructor(loginState = false, cookies = new CookieJar(), baseURL = process.env.VSC_HOMEPAGE_URL) {
+        super(loginState, cookies, baseURL);
     }
 
     async getAndParseHTML(client, url, keyword, tag = 'a', attribute = 'href') {
@@ -30,6 +25,20 @@ class VSCPortalService extends Portal {
         };
     }
 
+    toSession() {
+        // Gibt ein reines JSON-Objekt zurück
+        return {
+            loginState: this._loginState,
+            cookies: this.cookies.toJSON(), // CookieJar -> JSON
+            baseURL: this.baseURL,
+        };
+    }
+
+    static fromSession(sessionData) {
+        const instance = super.fromSession(sessionData, VSCPortalService);
+        return instance;
+    }
+
     async login(loginPayload) {
         const loginPageURL = 'https://vsc.fh-swf.de/qisserver2/rds?state=user&type=1&category=auth.login&startpage=portal.vm&breadCrumbSource=portal';
         const client = this.createAxiosClient();
@@ -45,6 +54,7 @@ class VSCPortalService extends Portal {
 
             const data = response.data;
             const state = data.includes('Meine Prüfungen');
+            console.log('VSCPortalService: ', state);
             this._loginState = state;
             return state;
 
@@ -58,7 +68,7 @@ class VSCPortalService extends Portal {
     async logout() {
         try {
             const client = this.createAxiosClient();
-            const url = process.env.VSC_HOMEPAGE_URL;
+            const url = this.baseURL;
             const response = await client.get(url);
             const $ = cheerio.load(response.data);
 
@@ -70,8 +80,14 @@ class VSCPortalService extends Portal {
 
             const logoutResponse = await client.get(logoutURL);
             const data = logoutResponse.data;
+            if(data.includes('Sicherheitshinweis')){
+                this._loginState = false;
+                this.cookies = new CookieJar();
+                return true;
+            }
+            return false;
 
-            return (data.includes('Sicherheitshinweis')) ? true : false;
+            //return (data.includes('Sicherheitshinweis')) ? true : false;
         } catch (error) {
             console.log('VSC: Fehler beim Ausloggen.\n', error);
         }
@@ -79,7 +95,57 @@ class VSCPortalService extends Portal {
 
     async getDegreesAndCourses() {
         const client = this.createAxiosClient();
-        const homepageUrl = process.env.VSC_HOMEPAGE_URL;
+        const homepageUrl = this.baseURL;
+        console.log(this.cookies);
+        const availableDegrees = ['Abschluss BA Bachelor'];
+
+        try {
+            const homepageResponse = await this.getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
+            //console.log(homepageResponse.html);
+            const generalInfoResponse = await this.getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
+
+            // Bachelor-Daten abrufen
+            const bachelorData = await this.getDegreeData(client, generalInfoResponse, availableDegrees[0]);
+
+            let masterCourses = null;
+            if (bachelorData.html.includes('Master')) {
+                availableDegrees.push('Abschluss MA Master');
+                masterCourses = await this.getDegreeData(client, generalInfoResponse, availableDegrees[1]);
+            }
+
+            console.log(this.filterCourses(bachelorData.data));
+
+            return {
+                degrees: availableDegrees,
+                bachelorPage: this.filterCourses(bachelorData.data),
+                masterPage: masterCourses ? this.filterCourses(masterCourses.data, true) : null
+            };
+
+        } catch (error) {
+            console.error('Fehler beim Laden der angemeldeten Prüfungen', error);
+            return { error: 'Fehler beim Laden der angemeldeten Prüfungen.' };
+        }
+    }
+
+    /**
+     * Hilfsfunktion für das Abrufen von Studiengangsdaten (Bachelor/Master)
+     */
+    async getDegreeData(client, generalInfoResponse, degree, keyword = 'Diesen Zweig zuklappen') {
+        let degreePage = await this.getAndParseHTML(client, generalInfoResponse.filteredURL, degree);
+        let examsPage = await client.get(degreePage.filteredURL, { withCredentials: true });
+
+        // Falls die Daten nicht direkt verfügbar sind, nochmal abrufen
+        if (!examsPage.data.includes(keyword)) {
+            degreePage = await this.getAndParseHTML(client, generalInfoResponse.filteredURL, degree);
+            examsPage = await client.get(degreePage.filteredURL, { withCredentials: true });
+        }
+
+        return { data: examsPage.data, html: examsPage.data };
+    }
+
+    /*async getDegreesAndCourses() {
+        const client = this.createAxiosClient();
+        const homepageUrl = this.baseURL;
         const availableDegrees = ['Abschluss BA Bachelor'];
 
         try {
@@ -94,7 +160,7 @@ class VSCPortalService extends Portal {
             if (degreeSelectionPage.html.includes('Master')) {
                 availableDegrees.push('Abschluss MA Master');
                 masterPage = await this.getAndParseHTML(client, generalInformationPageResponse.filteredURL, availableDegrees[1]);
-                
+
                 let masterExamsPage = await client.get(degreeSelectionPage.filteredURL, { withCredentials: true });
 
                 if (!masterExamsPage.data.includes('Diesen Zweig zuklappen')) {
@@ -113,8 +179,18 @@ class VSCPortalService extends Portal {
 
             const data = examsPage.data;
 
-            
-            return { degrees: availableDegrees, bachelorPage: data, masterPage: masterData };
+
+            // Filterung
+            const bachelorCourses = this.filterCourses(data);
+            const masterCourses = null;
+
+            if(masterData){
+                masterCourses = this.filterCourses(masterData, true);
+            }
+
+            console.log('GEFILTER: ', bachelorCourses);
+
+            return { degrees: availableDegrees, bachelorPage: bachelorCourses, masterPage: masterCourses };
             //res.status(200).json({ degrees: avaibleDegrees, bachelorPage: data });
 
 
@@ -123,28 +199,28 @@ class VSCPortalService extends Portal {
             console.log('Fehler beim Laden der angemeldeten Prüfungen', error);
             res.status(500).json({ error: 'Fehler beim Laden der angemeldeten Prüfungen.' });
         }
+    }*/
+
+    filterCourses(data, master = false) {
+        const $ = cheerio.load(data);
+        const ul = $('ul.treelist').eq((master) ? 2 : 1);
+        const courses = $(ul).find('li span').map((index, element) => $(element).html().replace(/[\n\t]/g, '').trim()).get();
+        return courses;
     }
 
     async getExamsData(category, degree, course) {
-        console.log('DEBUG');
-        const homepageURL = process.env.VSC_HOMEPAGE_URL;
+        const homepageURL = this.baseURL;
         const client = this.createAxiosClient();
 
         try {
             // navigiere zur richtigen Seite
             const homepageResponse = await this.getAndParseHTML(client, homepageURL, 'Meine Prüfungen');
             const categoryResponse = await this.getAndParseHTML(client, homepageResponse.filteredURL, category);
-            let degreeResponse = await this.getAndParseHTML(client, categoryResponse.filteredURL, degree);
-            let courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
 
-            // falls Liste mit Studiengängen aufgeklappt ist, um korekte Funktionsweise zu gewährleisten
-            if (!courseResponse.data.includes(course)) {
-                degreeResponse = await this.getAndParseHTML(client, categoryResponse.filteredURL, degree);
-                courseResponse = await client.get(degreeResponse.filteredURL, { withCredentials: true });
-            }
+            const res = await this.getDegreeData(client, categoryResponse, degree, course);
 
             // Parsen der Zielseite nach Ergebnistabelle
-            let $ = cheerio.load(courseResponse.data);
+            let $ = cheerio.load(res.data);
 
             const ul = $('ul.treelist').eq((degree.includes('Master')) ? 2 : 1);
             const links = $(ul).find('li a[href]').map((index, element) => $(element).attr('href')).get();
@@ -168,7 +244,6 @@ class VSCPortalService extends Portal {
             })
 
             const clearedTable = tableData.map(item => item.map(item2 => item2.replace(/\t/g, '').replace(/\n/g, '').trim()));
-            console.log('DEBUG 2');
             return clearedTable;
 
         } catch (error) {

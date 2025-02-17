@@ -3,7 +3,7 @@ const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 
 class Portal {
-  constructor(loginState = false, cookies = new CookieJar()) {
+  constructor(loginState = false, cookies = new CookieJar(), baseURL) {
     if (new.target === Portal) {
       throw new Error(
         "Die abstrakte Klasse Portal kann nicht instanziiert werden."
@@ -12,6 +12,7 @@ class Portal {
 
     this._loginState = loginState;
     this.cookies = cookies;
+    this.baseURL = baseURL;
   }
 
   get loginState() {
@@ -59,7 +60,7 @@ class Portal {
   static fromSession(sessionData, PortalClass) {
     // Falls noch gar nichts in der Session
     if (!sessionData) return new PortalClass(false, new CookieJar());
-
+    
     // CookieJar aus JSON wiederherstellen
     let jar = sessionData.cookies
       ? CookieJar.deserializeSync(sessionData.cookies)
@@ -93,12 +94,28 @@ class Portal {
   }
 
   /**
+   * Überprüft, ob ein Benutzer eingeloggt ist und gibt ein true, false zurück.
+   *
+   * @param {String} sessionKey - Der Key, unter dem die Portal-Daten gespeichert sind (z. B. "hsp" oder "vpis")
+   * @param {Class} PortalClass - Die Portal-Klasse, die instanziiert werden soll
+   * @returns {Object|null} - Die Portal-Instanz oder `null` bei fehlendem Login
+   */
+  static verify(req, sessionKey, PortalClass) {
+    const sessionData = req.session?.[sessionKey];
+    if (!sessionData) return false;
+
+    const portalInstance = PortalClass.fromSession(sessionData);
+    if (!portalInstance.loginState) return false;
+    return true;
+  }
+
+  /**
    * Universelle Login-Funktion für alle Portale
    */
   static async loginService(req, res, PortalClass, sessionKey, serviceName) {
     // Falls eine Session existiert, aus der Session wiederherstellen
     const existingService = req.session?.[sessionKey]
-      ? PortalClass.fromSession(req.session[sessionKey])
+      ? PortalClass.fromSession(req.session[sessionKey], PortalClass)
       : new PortalClass(false, new CookieJar());
 
     // Falls bereits eingeloggt
@@ -117,7 +134,9 @@ class Portal {
       await portalService.login({ username, password });
 
       // Wenn success => loginState == true
+      console.log(portalService.loginState);
       if (portalService.loginState) {
+        console.log('in steet');
         // Service in die Session serialisieren
         req.session[sessionKey] = portalService.toSession();
         return res.json({ message: `${serviceName}: SUCCESS` });
@@ -126,7 +145,9 @@ class Portal {
       }
     } catch (error) {
       console.error(`${serviceName}: Fehler beim Login`, error);
-      return res.status(500).json({ message: "Login fehlgeschlagen", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Login fehlgeschlagen", error: error.message });
     }
   }
 
@@ -138,7 +159,7 @@ class Portal {
       return res
         .status(200)
         .json({ message: `${serviceName} bereits ausgeloggt.` });
-    const serviceInstance = PortalClass.fromSession(req.session[sessionKey]);
+    const serviceInstance = PortalClass.fromSession(req.session[sessionKey], PortalClass);
 
     // Falls schon ausgeloggt
     if (!serviceInstance || !serviceInstance.loginState)

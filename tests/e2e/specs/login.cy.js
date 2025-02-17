@@ -67,7 +67,7 @@ describe('Login Tests', () => {
     })
 
     // TC0008
-    /*it('Ruft die Loginseite auf und versucht sich mit gültigen Credentials einzuloggen und sich anschließend wieder auszuloggen..', () => {
+    it('Ruft die Loginseite auf und versucht sich mit gültigen Credentials einzuloggen und sich anschließend wieder auszuloggen..', () => {
         cy.visit('/login');
         cy.get('#username').type(Cypress.env('USERNAME'));
         cy.get('#password').type(Cypress.env('PASSWORD'));
@@ -75,14 +75,16 @@ describe('Login Tests', () => {
         cy.on('window:alert', (text) => {
             expect(text).to.equal('Sie sind jetzt eingeloggt!');
         });
+
         cy.url({ timeout: 20000 }).should('include', '/navigation');
-        //cy.get('#toolbar').should('be.visible');
-        //cy.get('#logout-button').should('be.visible').click();
-        //cy.get('#login-button').should('be.visible');
-        cy.get('.ion-page:not(.ion-page-hidden) #logout-button')
-            .should('be.visible')
-            .click({ multiple: true });
-        cy.url().should('include', '/navigation');
-    })*/
+        cy.get('#toolbar').within(() => {
+            cy.get('#logout-button', { timeout: 10000 }).should('be.visible').click();
+        });
+        cy.on('window:alert', (text) => {
+            expect(text).to.equal('Sie wurden vom VSC, HSP und VPIS ausgeloggt.');
+        });
+
+
+    })
 
 });

@@ -5,12 +5,10 @@
         </ion-header>
 
         <ion-content>
-            <CustomToggle v-model="showSelection" />
-            <span v-if="showSelection">
-                <p class="info-text">Hier finden Sie die täglichen Speisepläne.</p>
+            <CustomToggle id="toggle" v-model="showSelection" />
+            <span id="toggle-container" v-if="showSelection">
                 <p class="info-text" v-if="nextLocation">Nächste Mensa: {{ nextLocation }}</p>
                 <p class="info-text" v-if="nextDistance > -1">Entfernung: {{ nextDistance }} km</p>
-                
 
                 <ion-item>
                     <ion-select class="selection" v-model="selectedMensa" @ionChange="loadSelectionOptions" placeholder="Mensa auswählen">
@@ -62,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonItem, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonItemDivider, IonLoading } from '@ionic/vue';
@@ -93,6 +91,14 @@ const {
     loadMensaPlan
 } = useMensaPlan();
 
+onBeforeUnmount(() => {
+    console.log("Before");
+    // Wenn es eine laufende Geolokalisierung gibt, abbrechen
+    loading.value = false;
+    if (navigator.geolocation) {
+        window.location.reload();
+    }
+})
 
 // Reaktive Variablen
 

@@ -1,18 +1,31 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 const SemesterService = require('../services/SemesterService.cjs');
 
-const semesterService = SemesterService.instance;
+/**
+ * Controller zur Abwicklung von Operationen bezüglich der Semesterzeiten.
+ * 
+ * Unterstützte Funktionen:
+ * - Semesterzeiten laden
+* - Rückmeldefristen laden
+ * 
+ * 
+ */
 
 /**
- * Funktion zum Laden der Semesterzeiträume.
+ * Endpunkt zum Laden der Semesterzeiträume.
  * 
- * Die Funktion filtert die Tabelle der Semesterzeiträume, 
+ * Der Endpunkt filtert die Tabelle der Semesterzeiträume, 
  * indem sie diese zeilenweise durchläuft 
  * und die nötigen Daten extrahiert.
  * 
- * @param req 
- * @param res 
- */ 
+ * @async 
+ * @function getSemesterDates
+ * 
+ * @param {object} req - Anfrageobjekt
+ * @param {object} res - Antwortobjekt
+ * 
+ * @returns {Promise<void>} - stattdessen wird eine JSON Antwort gesendet
+ */
 const getSemesterDates = async (req, res) => {
     const semesterDates = await SemesterService.getSemesterDates();
     res.status(200).json({ table: semesterDates });
@@ -50,43 +63,27 @@ const getSemesterDates = async (req, res) => {
 /**
  * Endpunkt zum Laden der Rückmeldedaten.
  * 
- * Die Funktion greift auf die Informationen zu, 
+ * Der Endpunkt greift auf die Informationen zu, 
  * indem die jeweils spezifischen HTML Elemente 
  * individuell geparst werden.
  * 
- * @param {*} req 
- * @param {*} res 
+ * @async 
+ * @function getFeedbackDates
+ * 
+ * @param {object} req - Anfrageobjekt
+ * @param {object} res - Antwortobjekt
+ * 
+ * @returns {Promise<void>} - Stattdessen wird eine JSON Antwort gesendet
  */
 const getFeedbackDates = async (req, res) => {
     const feedbackDates = await SemesterService.getFeedbackDates();
-    res.status(200).json({ 
-        targetArticle: feedbackDates.targetArticle, 
+    res.status(200).json({
+        targetArticle: feedbackDates.targetArticle,
         headline: feedbackDates.headline,
-        nextSemester: feedbackDates.nextSemester, 
+        nextSemester: feedbackDates.nextSemester,
         nextDate: feedbackDates.nextDate,
         infoText: feedbackDates.infoText
-     });
-
-    /*try{
-        const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
-        const $ = await fetchHTML(url);
-
-        const targetArticle = $('article.wysiwyg').first().html();
-        const headline = $(targetArticle).next('h2').text();
-        const nextSemester = $(targetArticle).next('h3').text();
-        const nextDate = $(targetArticle).next('h4').text();
-        const infoText = $(targetArticle).next('p').text();
-
-        res.status(200).json({ 
-            targetArticle, 
-            headline,
-            nextSemester, 
-            nextDate,
-            infoText
-         });
-
-    } catch(error){
-        console.log('Fehler beim Laden der Rückmeldeinformationen.', error);
-    }*/
+    });
 }
+
 module.exports = { getSemesterDates, getFeedbackDates }

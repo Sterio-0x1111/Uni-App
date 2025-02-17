@@ -1,6 +1,6 @@
 <template>
   <ion-item lines="none">
-    <ion-toggle class="custom-toggle" :checked="modelValue"
+    <ion-toggle id="custom-toggle" class="custom-toggle" :checked="modelValue"
       @ionChange="$emit('update:modelValue', $event.detail.checked)">
       {{ toggleText }}
     </ion-toggle>

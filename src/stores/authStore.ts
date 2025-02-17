@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', {
     }), 
     actions: {
         async centralLogin(username: string, password: string) : Promise<boolean> {
-            const vscURL = 'http://localhost:3000/api/vsc/login2';
+            const vscURL = 'http://localhost:3000/api/vsc/login';
             const vscResponse = await axios.post(vscURL, { username: username, password: password }, { withCredentials: true });
             
             const hspURL = "http://localhost:3000/api/hsp/login";
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
                 }
                 
 
-            } catch(error){
+            } catch(error) {
 
             }
         }, 
