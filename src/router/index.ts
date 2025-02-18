@@ -32,9 +32,9 @@ const requireAuth = (authType: "isLogged" | "VSC" | "HSP" | "VPIS") => (to: Rout
     next({ path: "/navigation" });
   } else if (authType === "VPIS" && !authStore.isLoggedInVPIS) {
     next({ path: "/navigation" });
-  } /* else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  && authStore.isLoggedInVPIS) {
+  } else if (authType === "isLogged" && authStore.isLoggedInHSP && authStore.isLoggedInVSC  && authStore.isLoggedInVPIS) {
     next({ path: "/navigation" });
-  } */ else {
+  } else {
     next();
   }
 };

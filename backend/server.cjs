@@ -1,15 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
-const https = require("https");
 const fs = require("fs");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { CookieJar } = require("tough-cookie");
-//const RedisStore = require("connect-redis").default;
-//const { createClient } = require("redis");
 const helmet = require("helmet");
-const csurf = require("csurf");
 const rateLimit = require("express-rate-limit");
 
 // Redis-Client erstellen
@@ -17,11 +12,10 @@ const rateLimit = require("express-rate-limit");
 redisClient.connect().catch(console.err);*/
 
 const session = require("express-session");
-
 const dotenv = require('dotenv');
 const path = require('path');
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 const PORT = process.env.PORT;
 const app = express();
 const cryptoKey = crypto.randomBytes(32).toString("hex");
