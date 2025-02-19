@@ -1,26 +1,29 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 
+/**
+ * Statische Klasse zur Abwicklung der Semesterlogik.
+ * 
+ * Die Klasse benötigt keinen Zustand, 
+ * weshalb sie statisch deklariert ist. 
+ * Die Funktionen hätten auch direkt im Controlle rrealisiert werden können, 
+ * jedoch wurde diese Klasse erstellt, 
+ * um die Konsistenz und Implementierungsstruktur zu wahren. 
+ * 
+ * @author Emre Burak Koc
+ */
 class SemesterService {
-    //static #instance;
-    //#url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
-    //$ = null;
 
-    constructor(){
-        /*if(SemesterService.#instance){
-            return SemesterService.#instance;
-        }
-        $ = async () => await fetchHTML(this.#url);
-        SemesterService.#instance = this;
-        console.log('constructed');*/
-    }
-
-    /*get instance(){
-        if(!SemesterService.#instance){
-            SemesterService.#instance = this;
-        }
-        return SemesterService.#instance;
-    }*/
-
+    /**
+     * Methode zum Laden der Semesterzeiten.
+     * 
+     * Die Methode lädt die Semesterzeiträume 
+     * und führt eine tablleraische Filterung durch.
+     * 
+     * @async 
+     * @function getSemesterDates
+     * 
+     * @returns {any[]} semesterList - Das Array, dass die geladenen Semesterzeiträume enthält
+     */
     static async getSemesterDates(){
         try{
             const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
@@ -42,18 +45,25 @@ class SemesterService {
                 })
             })
             
-            if(semesterList.length > 0){
-                //res.json({ table: semesterList });
-                console.log('Semesterzeiten wurden erfolgreich übermittelt.');
-                return semesterList;
-            } else {
-                return [];
-            }
+            return semesterList;
         } catch(err){
-            console.log('Fehler beim Laden der Semesterdaten.', err);
+            console.error('Fehler beim Laden der Semesterdaten.', err);
         }
     }
 
+    /**
+     * Methode zum Laden der Rückmeldefristen. 
+     * 
+     * Die Klasse lädt die Zielseite 
+     * und führt eine einfache Filterung durch. 
+     * Die Filterung greift auf simple HTML Tags zurück. 
+     * Aufgrund der gegebenen Struktur kann ein solch einfaches Parsing realisiert werden. 
+     * 
+     * @async
+     * @function getFeedbackDates
+     * 
+     * @returns {object} result - Objekt, dass die gefilterten Informationen zur Rückmeldefrist enthält
+     */
     static async getFeedbackDates(){
         try{
             const url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
@@ -74,10 +84,9 @@ class SemesterService {
             }
 
             return result;
-    
         } catch(error){
-            console.log('Fehler beim Laden der Rückmeldeinformationen.', error);
-            return {};
+            console.error('Fehler beim Laden der Rückmeldeinformationen.', error);
+            return result;
         }
     }
 }

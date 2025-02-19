@@ -1,6 +1,5 @@
 const VPISPortalService = require("../../services/VPISPortalService.cjs");
 const Portal = require("../../services/Portal.cjs");
-const { CookieJar } = require("tough-cookie");
 const { fetchHTML, handleError, checkLink } = require("../../utils/helpers.cjs");
 require("dotenv").config();
 

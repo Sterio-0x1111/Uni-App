@@ -1,10 +1,15 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+/**
+ * Klasse zum Laden von Fachbereichsterminen.
+ * 
+ * Die Klasse bietet Methoden zum Laden 
+ * und Parsen von fachbereichsspezifischen Terminplänen.
+ * 
+ * @author Emre Burak Koc
+ */
 class DepartmentService {
-    constructor() {
-
-    }
 
     /**
      * Methode zum Filtern der verfügbaren Fachbereiche.
@@ -16,7 +21,7 @@ class DepartmentService {
      * @async
      * @function getDepartments
      * 
-     * @returns {Promise<any[] | undefined>} deparments - die geladenen Fachbereiche mit zugewiesener Kategorie
+     * @returns {Promise<any[] | undefined>} deparments - die geladenen Fachbereiche mit zugewiesener Kategorie oder undefined
      */
     static async getDepartments() {
         try {
@@ -61,10 +66,24 @@ class DepartmentService {
 
             return departments;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
+    /**
+     * Allgemeine Methode zum Auswaählen der richtigen Filtermethode.
+     * 
+     * Die Methode lädt alle verfübaren Fachbereiche 
+     * und weist ihnen basierend auf dem Type eine Filterfunktion zu.
+     * Danach wird diese Filterfunktion aufgerufen 
+     * und die gefilterten Daten werden zurückgegeben.
+     * 
+     * @async
+     * @function getDepartmentDatesAsTable
+     * 
+     * @param {string} department - Der ausgewählte Fachbereich, dessen Termine geladen werden sollen
+     * @returns {Promise<any>} - Gibt die gefilterten Termine zurück
+     */
     static async getDepartmentDatesAsTable(department) {
         try {
             const availableDepartments = await DepartmentService.getDepartments();
@@ -94,7 +113,7 @@ class DepartmentService {
             return await filterMethod($, department);
 
         } catch (error) {
-            console.log(`Fehler beim Laden der Termine für den Fachbereich ${department}.`, error);
+            console.error(`Fehler beim Laden der Termine für den Fachbereich ${department}.`, error);
         }
     }
 
@@ -155,25 +174,25 @@ class DepartmentService {
             return content;
 
         } catch (error) {
-            console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
+            console.error('Fehler beim Laden der textuellen Terminübersicht.', error);
         }
     }
 
     /**
- * Funktion zum Filtern der fachbereichsspezifischen Tabellen.
- * 
- * Die Funktion verwendet das präparierte Cheerio Objekt 
- * und den ausgewählten Fachbereich, 
- * um die simple tabellerarische Struktur zu parsen.
- * 
- * @param $
- *  Cheerio Objekt mit geladenem Seitencode
- * @param department
- *  ausgewählter Fachbereich, für den Daten geladen werden sollen
- * 
- * @returns tableData
- *  gefilterte Termintabelle als Array
- */
+     * Methode zum Filtern der fachbereichsspezifischen Tabellen.
+     * 
+     * Die Methode verwendet das präparierte Cheerio Objekt 
+     * und den ausgewählten Fachbereich, 
+     * um die simple tabellerarische Struktur zu parsen.
+     * 
+     * @function filterDepartmentTables
+     * 
+     * @param {CheerioObject} $ - Cheerio Objekt mit geladenem Seitencode
+     * @param {string} department - ausgewählter Fachbereich, für den Daten geladen werden sollen
+     * 
+     * @returns tableData
+     *  gefilterte Termintabelle als Array
+     */
     static filterDepartmentTables($, department) {
         try {
             const tableData = [];
@@ -188,27 +207,26 @@ class DepartmentService {
             return tableData;
 
         } catch (error) {
-            console.log('Fehler beim Filtern von Tabellen.', error);
+            console.error('Fehler beim Filtern von Tabellen.', error);
         }
     }
 
-/**
-* Funktion zum Filtern von fachbereichsspezifischen Tabellen mit Links auf weitere Seiten.
-* 
-* Die Funktion verwendet ein präpariertes Cherio Objekt 
-* und den ausgewählten Fachbereich, 
-* um die spezifischen Tabellen zu filtern, 
-* die selbst keine Daten enthalten, 
-* sondenr auf weitere Tabellen verlinken.
-* 
-* @param $
-*  Cheerio Objekt mit geladenem Seitencode
-* @param department
-*  ausgewählter Fachbereich, für den Daten geladen werden sollen
-* 
-* @returns tableData
-*  gefilterte Termintabelle als Array
-*/
+    /**
+    * Methode zum Filtern von fachbereichsspezifischen Tabellen mit Links auf weitere Seiten.
+    * 
+    * Die Methode verwendet ein präpariertes Cherio Objekt 
+    * und den ausgewählten Fachbereich, 
+    * um die spezifischen Tabellen zu filtern, 
+    * die selbst keine Daten enthalten, 
+    * sondenr auf weitere Tabellen verlinken.
+    * 
+    * @function filterDepartmentTablesWithLinks
+    * 
+    * @param {CheerioObject} $ - Cheerio Objekt mit geladenem Seitencode
+    * @param {string} department - ausgewählter Fachbereich, für den Daten geladen werden sollen
+    * 
+    * @returns tableData - gefilterte Termintabelle als Array
+    */
     static filterDepartmentTablesWithLinks($, department) {
         try {
             const dates = $('table').has(`tr[data-filter="${department}"]`).html();
@@ -234,25 +252,25 @@ class DepartmentService {
             return tableData;
 
         } catch (error) {
-            console.log('Fehler beim Filtern der Tabellen mit Links.', error);
+            console.error('Fehler beim Filtern der Tabellen mit Links.', error);
         }
     }
 
     /**
-     * Endpunkt zum erweiterten Filtern von verlinkten Tabellen.
+     * Methode zum erweiterten Filtern von verlinkten Tabellen.
      * 
-     * Die Funktion erhält eine URL 
+     * Die Methode erhält eine URL 
      * und parst die dort zu findenden 
      * Tabellen mit Terminen.
      * 
-     * @param req
-     *  Anfrage 
-     * @param res
-     *  Antwort
+     * @async 
+     * @function filterDepartmentTablesByLink
+     * 
+     * @param {string} url -  URL zur Seite, die gefiltert werden soll
+     * @returns {object} rows - Objekt, dass die zeilenweise gefilterten Daten entählt
      */
     static async filterDepartmentTablesByLink(url) {
         try {
-            console.log('By Link');
             const response = await axios.get(url);
             const $ = cheerio.load(response.data);
 
@@ -272,11 +290,6 @@ class DepartmentService {
                 $(table).find('td').each((index, element) => {
                     const data = $(element).text().trim();
                     (index % 2 === 0) ? cols1.push(data) : cols2.push(data);
-                    /*if (index % 2 === 0) {
-                        cols1.push($(element).text().trim());
-                    } else {
-                        cols2.push($(element).text().trim());
-                    }*/
                 });
 
                 const rows = cols1.map((col1, index) => {
@@ -308,24 +321,24 @@ class DepartmentService {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error('Fehler beim Filtern der Tabellen mit Links.', error);
         }
     }
 
     /**
-     * Funktion zum Filtern von Terminen als Listen.
+     * Methode zum Filtern von Terminen als Listen.
      * 
-     * Die Funktion nimmt ein Cheerio Objekt 
+     * Die Methode nimmt ein Cheerio Objekt 
      * und den ausgeählten Fachbereich, 
      * um die in Listenform aufgeführten Termine zu laden.
      * 
-     * @param $ 
-     *  Cheerio Objekt, dass die zu filternde Seite enthält
-     * @param department 
-     *  ausgewählter Fachbereich
+     * @async 
+     * @function filterDepartmentDatesAsList
      * 
-     * @returns content
-     *  gefilterter Inhalt
+     * @param {CheerioObject} $ - Cheerio Objekt, dass die zu filternde Seite enthält
+     * @param {string} department -  ausgewählter Fachbereich
+     * 
+     * @returns {object} content - gefilterter Inhalt
      */
     static async filterDepartmentDatesAsList($, department){
         try {
@@ -375,14 +388,28 @@ class DepartmentService {
             return content;
     
         } catch(error){
-            console.log('Fehler beim Laden der textuellen Terminübersicht.', error);
+            console.error('Fehler beim Laden der textuellen Terminübersicht.', error);
         }
     }
 
+    /**
+     * Methode zum Filtern von Moodle Links.
+     * 
+     * Die Methode filtert die Moodle, 
+     * die bei einigen Fachbereichen anstelle von Daten gelistet sind.
+     * Die eigentlichen Termindaten werden auf Moodle bereitgestellt. 
+     * Es wird nur darauf verlinkt, die Filterung wird nicht implementiert, 
+     * da eine Moodle Integration nicht im Rahmen dieses Projekts liegt. 
+     * 
+     * @function filterDepartmentDatesAsMoodleLink
+     * 
+     * @param {CheerioObject} $ - Cheerio Objekt, dass die Seite enthält
+     * @param {string} department - ausgewählter Fachbereich, dessen Moodle Links geladen werden sollen
+     * @returns {object} - Objekt, dass die entsprechenden Links und Beschreibungen enthält 
+     */
     static filterDepartmentDatesAsMoodleLink($, department) {
         try {
             const dates = $('table').has(`tr[data-filter="${department}"]`).html();
-            const baseURL = 'https://www.fh-swf.de'; // zum Vervollständigen von relativen Pfaden
             const tableData = [];
 
             $(dates).find('tr').each((index, element) => {
@@ -396,28 +423,9 @@ class DepartmentService {
                     url
                 })
             });
-
-            /*$(dates).find('tr').each((index, row) => {
-                let name = $(row).text().trim();
-                const sliceIndex = name.indexOf('\n'); // entferne den Standard "Terminplan finden sie hier"
-
-                if (sliceIndex !== -1) {
-                    name = name.slice(0, sliceIndex);
-                }
-
-                const link = $(row).find('a').map((index, a) => {
-                    return {
-                        name,
-                        url: baseURL + $(a).attr('href') // baue URL, da Quellseite relative Pfade verwendet
-                    }
-                }).get(0);
-                tableData.push(link);
-            })*/
-            console.log(tableData);
             return tableData;
-
         } catch (error) {
-            console.log('Fehler beim Filtern der Tabellen mit Links.', error);
+            console.error('Fehler beim Filtern der Tabellen mit Links.', error);
         }
     }
 

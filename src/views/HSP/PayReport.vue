@@ -10,8 +10,8 @@
 
       <!-- Fehleranzeige -->
       <div v-if="error">
-        <IonText color="danger">
-          <p>{{ error }}</p>
+        <IonText v-if="error" color="danger" class="error-message">
+          {{ error }}
         </IonText>
       </div>
 
@@ -192,8 +192,9 @@ onUnmounted(() => {
 
 /* Fehleranzeige Stil */
 .error-message {
-  padding: 16px;
+  padding: 20px;
   text-align: center;
+  font-size: 1.2em;
 }
 
 @media (max-width: 600px) {

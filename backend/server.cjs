@@ -1,15 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
-const https = require("https");
 const fs = require("fs");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { CookieJar } = require("tough-cookie");
-//const RedisStore = require("connect-redis").default;
-//const { createClient } = require("redis");
 const helmet = require("helmet");
-const csurf = require("csurf");
 const rateLimit = require("express-rate-limit");
 
 // Redis-Client erstellen
@@ -17,19 +12,15 @@ const rateLimit = require("express-rate-limit");
 redisClient.connect().catch(console.err);*/
 
 const session = require("express-session");
-
-const dotenv = require('dotenv');
-const path = require('path');
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
-
 const PORT = process.env.PORT;
 const app = express();
 const cryptoKey = crypto.randomBytes(32).toString("hex");
 
-const options = {
+// HTTPS Konfiguration für Zertifikat
+/*const options = {
   key: fs.readFileSync("certs/privkey.pem"),
   cert: fs.readFileSync("certs/cert.crt"),
-};
+};*/
 
 // Middlewars
 app.use(
@@ -44,12 +35,12 @@ app.use(bodyParser.urlencoded({ extended: true })); // URL-codierte Form-Daten u
 
 app.use(
   session({
-    secret: cryptoKey, // Ein geheimer Schlüssel, um die Session zu signieren
-    resave: false, // Verhindert das Speichern von Session-Daten, wenn nichts geändert wurde
-    saveUninitialized: false, // Verhindert das Erstellen von Sessions, die nicht initialisiert sind
+    secret: cryptoKey, // Schlüssel, um Session zu signieren
+    resave: false, // verhindert Speicherung nicht geänderter Session Daten
+    saveUninitialized: false, // verhindert Erstellung von nicht initialisierten Session
     cookie: {
-      secure: false,
-      sameSite: 'strict',
+      secure: false,        // Cookies nur über HTTPS senden, wenn true
+      sameSite: 'strict',   // sendet Cookies nur, wenn Anfrage von der Seite kommt, auf der sie gesetzt wurden
       httpOnly: true,
       maxAge: 1000 * 60 * 20, // 20 min
     },
@@ -58,7 +49,11 @@ app.use(
   })
 );
 
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+// Anfrage Limitierung
+app.use(rateLimit({ 
+  windowMs: 15 * 60 * 1000, //15 min
+  max: 100 // 100 Anfragen pro 15 Minuten, ansonsten Timeout
+}));
 app.use(helmet());
 //app.use(csurf());
 
@@ -152,6 +147,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Interner Serverfehler." });
 });
 
+// HTTPS Server, falls vertrauenswürdiges Zertifikat vorhanden
 /*https.createServer(options, app).listen(PORT, () => {
   console.log(`HTTPS Server läuft auf Port ${PORT}.`);
 });*/

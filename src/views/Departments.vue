@@ -123,14 +123,14 @@
                 <ion-row class="table-row" v-for="(entry, i) in item" :key="i">
                     <ion-col class="table-col" size="6">{{entry.title}}</ion-col>
                     <ion-col class="table-col" size="6">
-                        <ion-list v-for="(v, k) in entry.list" :key="k">
+                        <span v-for="(v, k) in entry.list" :key="k">
                             <ion-item class="table-col">
                                 <span>{{ v.program }}</span>
                             </ion-item>
                             <ion-item class="table-col">
                                 <span>{{ v.date }} </span>
                             </ion-item>
-                        </ion-list>
+                        </span>
                     </ion-col>
                     <ion-item-divider class="custom-divider" />
                 </ion-row>

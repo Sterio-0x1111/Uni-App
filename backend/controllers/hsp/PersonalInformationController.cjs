@@ -3,8 +3,8 @@ const HSPPortalService = require("../../services/HSPPortalService.cjs");
 
 const scrapeMyS = async (req, res) => {
   const hspService = HSPPortalService.verifySession(req, res);
-  if (!hspService) return;
-  
+  if (!HSPPortalService.verify(req, res)) return;
+
   const PURL = "https://hochschulportal.fh-swf.de/qisserver/pages/cm/exa/enrollment/info/start.xhtml?_flowId=studyservice-flow&_flowExecutionKey=e1s1";
 
   try {
@@ -74,9 +74,9 @@ const scrapeMyS = async (req, res) => {
     extractedData.push({ infoData });
     res.status(200).json(extractedData);
   } catch (error) {
-    console.error("Fehler beim Abrufen des PayReports:", error);
+    console.error("Fehler beim Abrufen der Daten:", error);
     res.status(500).json({
-      message: "Fehler beim Laden des PayReports",
+      message: "Fehler beim Abrufen der Daten",
       error: error.message,
     });
   }
@@ -84,7 +84,7 @@ const scrapeMyS = async (req, res) => {
 
 const scrapeMyInfo = async (req, res) => {
   const hspService = HSPPortalService.verifySession(req, res);
-  if (!hspService) return;
+  if (!HSPPortalService.verify(req, res)) return;
   
   if (!req.session.isPostRequestDone) contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e1s1";
   else contactDataURL = "https://hochschulportal.fh-swf.de/qisserver/pages/startFlow.xhtml?_flowId=showOwnContactData-flow&_flowExecutionKey=e2s1";
