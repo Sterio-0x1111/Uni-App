@@ -28,7 +28,7 @@
           </ion-item>
 
           <ion-button class="custom-button" id="login" expand="block" @click="handleLogin">
-            Anmelden
+            <ion-text color="primary">Anmelden</ion-text>
           </ion-button>
         </ion-card-content>
       </ion-card>

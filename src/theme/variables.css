@@ -10,6 +10,12 @@ http://ionicframework.com/docs/theming/ */
     --ion-color-secondary: #3dc2ff;
 }
 
+@media (prefers-color-scheme: light) {
+    :root {
+        --color: red;
+    }
+}
+
 /*@media (prefers-color-scheme: dark) {
     body.dark {
         --ion-accordion-background: #f8f9fa;
@@ -123,7 +129,7 @@ http://ionicframework.com/docs/theming/ */
 /* für die angepassten Buttons */
 .custom-button {
     --background: transparent;
-    --color: #ffffff;
+    
     --padding-start: 20px;
     --padding-end: 20px;
     --padding-top: 20px;

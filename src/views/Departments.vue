@@ -164,7 +164,7 @@
                   <span class="table-col">{{ obj.link }}</span>
                   <ion-col class="table-col" size="12" size-sm="12" size-md="12" size-lg="12">
                     <ion-button class="custom-button" :href="obj.url" target="_blank">
-                      Zu Moodle wechseln
+                      <ion-text color="primary">Zu Moodle wechseln</ion-text>
                     </ion-button>
                   </ion-col>
                 </ion-row>

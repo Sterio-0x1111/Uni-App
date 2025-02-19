@@ -11,7 +11,7 @@
           <span>
             <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
           </span>
-          <span class="button-text">{{ route.title }}</span>
+          <span class="button-text"><ion-text color="primary">{{ route.title }}</ion-text></span>
         </IonButton>
 
         <!-- HSP-geschützte Routen -->
@@ -21,7 +21,7 @@
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
-            <span class="button-text">{{ route.title }}</span>
+            <span class="button-text"><ion-text color="primary">{{ route.title }}</ion-text></span>
             <span class="auth-type-label">
             </span>
             <IonIcon name="key" slot="end" />
@@ -35,7 +35,7 @@
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
-            <span class="button-text">{{ route.title }}</span>
+            <span class="button-text"><ion-text color="primary">{{ route.title }}</ion-text></span>
             <span class="auth-type-label">
             </span>
             <IonIcon name="key" slot="end" />
@@ -49,7 +49,7 @@
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
-            <span class="button-text">{{ route.title }}</span>
+            <span class="button-text"><ion-title color="primary">{{ route.title }}</ion-title></span>
             <span class="auth-type-label">
             </span>
             <IonIcon name="key" slot="end" />
