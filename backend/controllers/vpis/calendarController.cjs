@@ -11,7 +11,7 @@ const { fetchHTML } = require("../../utils/helpers.cjs");
  */
 const scrapeMyCalendar = async (req, res) => {
   const vpisService = VPISPortalService.verifySession(req, res);
-  if (!vpisService) return;
+  if (!VPISPortalService.verify(req, res)) return;
   
   try {
     const client = vpisService.createAxiosClient();

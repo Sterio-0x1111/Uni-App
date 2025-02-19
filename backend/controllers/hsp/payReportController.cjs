@@ -7,7 +7,7 @@ const { extractFlowExecutionKey } = require("./hspHelpers.cjs");
  */
 const scrapePayments = async (req, res) => {
   const hspService = HSPPortalService.verifySession(req, res);
-  if (!hspService) return;
+  if (!HSPPortalService.verify(req, res)) return;
 
   const paymentsURL = "https://hochschulportal.fh-swf.de/qisserver/pages/cs/sys/portal/hisinoneStartPage.faces";
 
@@ -77,7 +77,7 @@ const scrapePayments = async (req, res) => {
  */
 const payReport = async (req, res) => {
   const hspService = HSPPortalService.verifySession(req, res);
-  if (!hspService) return;
+  if (!HSPPortalService.verify(req, res)) return;
 
   try {
     const client = hspService.createAxiosClient();
@@ -172,10 +172,3 @@ const payReport = async (req, res) => {
 };
 
 module.exports = { scrapePayments, payReport };
-
-// const serializedCookies = cookieJar.serializeSync();
-// req.session.hspCookies = serializedCookies;
-// req.session.save();
-
-// const { CookieJar } = require("tough-cookie");
-// const jar = CookieJar.deserializeSync(req.session.hspCookies);

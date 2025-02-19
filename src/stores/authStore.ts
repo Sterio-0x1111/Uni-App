@@ -24,45 +24,40 @@ export const useAuthStore = defineStore('auth', {
             this.isLoggedInHSP = hspResponse.status === 200;
             this.isLoggedInVPIS = vpisResponse.status === 200;
 
-            if(this.isLoggedInHSP && this.isLoggedInVSC && this.isLoggedInVPIS){
+            if(this.isLoggedInHSP || this.isLoggedInVSC || this.isLoggedInVPIS){
                 this.setLogoutTimer();
                 return true;
             }
             
             return false;
         },
-        async login(){ // vsc
-            try {
-                const vscURL = 'http://localhost:3000/api/vsc/logout';
-                const vscResponse = await axios.get(vscURL, { withCredentials: true });
-
-                if(vscResponse.status === 200){
-                    this.isLoggedInVSC = false;
-                    alert('Sie wurden ausgeloggt.');
-                }
-                
-
-            } catch(error){
-
-            }
-        }, 
         async logout() : Promise<void>{
             try {
-                const vscURL = 'http://localhost:3000/api/vsc/logout';
-                const vscResponse = await axios.get(vscURL, { withCredentials: true });
+                let vscResponse;
+                let hspResponse;
+                let vpisResponse;
 
-                const hspURL = "http://localhost:3000/api/hsp/logout";
-                const hspResponse = await axios.get(hspURL, { withCredentials: true });
-
-                const vpisURL = "http://localhost:3000/api/vpis/logout";
-                const vpisResponse = await axios.get(vpisURL, { withCredentials: true });
-
-                if(vscResponse.status === 200 && hspResponse.status === 200 && vpisResponse.status === 200) {
+                if (this.isLoggedInVSC) {
+                    const vscURL = 'http://localhost:3000/api/vsc/logout';
+                    vscResponse = await axios.get(vscURL, { withCredentials: true });
                     this.isLoggedInVSC = false;
+                }
+
+                if (this.isLoggedInHSP) {
+                    const hspURL = "http://localhost:3000/api/hsp/logout";
+                    hspResponse = await axios.get(hspURL, { withCredentials: true });
                     this.isLoggedInHSP = false;
+                }
+
+                if (this.isLoggedInVPIS) {
+                    const vpisURL = "http://localhost:3000/api/vpis/logout";
+                    vpisResponse = await axios.get(vpisURL, { withCredentials: true });
                     this.isLoggedInVPIS = false;
+                }
+
+                if (!this.isLoggedInVSC && !this.isLoggedInVPIS && !this.isLoggedInHSP ) {
                     this.cancelLogoutTimer();
-                    alert('Sie wurden vom VSC, HSP und VPIS ausgeloggt.');
+                    alert('Sie sind ausgeloggt!');
                     window.location.reload();
                 }
             } catch(error) {

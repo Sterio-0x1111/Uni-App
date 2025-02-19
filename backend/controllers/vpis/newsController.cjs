@@ -3,7 +3,7 @@ const { fetchHTML } = require("../../utils/helpers.cjs");
 
 const scrapeMyNews = async (req, res) => {
   const vpisService = VPISPortalService.verifySession(req, res);
-  if (!vpisService) return;
+  if (!VPISPortalService.verify(req, res)) return;
   const newsDataURL = `https://vpis.fh-swf.de/${vpisService.semester}/student.php3/${vpisService.token}/showmsglist?Template=2021`;
 
   try {
@@ -41,7 +41,7 @@ const scrapeMyNews = async (req, res) => {
 
 const scrapeMyMessage = async (req, res) => {
   const vpisService = VPISPortalService.verifySession(req, res);
-  if (!vpisService) return;
+  if (!VPISPortalService.verify(req, res)) return;
   const messageURL = `https://vpis.fh-swf.de/${vpisService.semester}/student.php3/${vpisService.token}/msgread?msg=${req.params.msgID}&Template=2021`;
 
   try {
