@@ -5,7 +5,7 @@
     </IonHeader>
 
     <IonContent id="navigation-content">
-      <IonList class="light-list">
+      <IonList class="custom-list">
         <!-- Öffentliche Routen -->
         <h3>Öffentliche Seiten</h3>
         <IonButton class="custom-button" v-for="route in publicRoutes" :key="route.id" @click="navigateTo(route.path)" :id="route.id">
@@ -157,12 +157,10 @@ h3 {
   flex: 1;
 }
 
-.light-list {
-  --background: #ffffff;
-  /* Heller Hintergrund */
+IonList {
   --ion-item-background: #ffffff;
-  /* Heller Hintergrund für Items */
   --ion-item-color: #000000;
-  /* Schwarzer Text */
+  --ion-background-color: #ffffff;
+  --color: #000000;
 }
 </style>

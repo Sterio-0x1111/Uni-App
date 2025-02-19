@@ -1,11 +1,25 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+/**
+ * Die Klasse enthält statische Methoden zum Laden von Mensa- und Speiseinformationen.
+ * 
+ * @author Emre Burak Koc
+ */
+
 class MealsService {
-    constructor() {
-
-    }
-
+ 
+    /**
+     * Methode zum Laden der Datumsinformationen für Menüs.
+     * 
+     * Die Methode lädt die für einen Standort verfügbaren Daten.
+     * 
+     * @async 
+     * @function getDates
+     * 
+     * @param {*} loc - Standort, für den die Daten geladen werden
+     * @returns {Promise<any[]>} dateSelection - Die verfügbaren Daten für einen Mensastandort
+     */
     static async getDates(loc) {
         try {
             const url = `https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/${loc}`;
@@ -34,6 +48,20 @@ class MealsService {
         }
     }
 
+    /**
+     * Methode zum Laden der Speisepläne.
+     * 
+     * Die Methode lädt die für einen Standort 
+     * an einem bestimmten Datum verfügbaren Speisepläne.
+     * 
+     * @async
+     * @function getMeals
+     * 
+     * @param {string} location - Standort, für den die Speisepläne geladen werden
+     * @param {string} date - Datum, an dem die zu ladenden Speisepläne verfügbar sind
+     * 
+     * @returns {Promise<any[]>} mealsTable - die geladenen Speisepläne
+     */
     static async getMeals(location, date) {
         try {
             const url = `https://www.stwdo.de/mensa-cafes-und-catering/fh-suedwestfalen/${location}/${date}`;
@@ -72,7 +100,7 @@ class MealsService {
 
             return mealsTable;
         } catch (err) {
-            console.log('Fehler beim Laden der Daten.', err);
+            console.error('Fehler beim Laden der Daten.', err);
         }
     }
 }

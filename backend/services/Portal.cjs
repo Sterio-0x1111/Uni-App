@@ -2,6 +2,15 @@ const axios = require("axios");
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 
+/**
+ * Abstrakte Klasse zur Zentralisierung von Anmeldeportalen.
+ * 
+ * Die Klasse bietet abstrakte Methoden zur Durchführung von Login und Logout, 
+ * welche von den abgeleiteten Klassen implementiert werden mpssen.
+ * 
+ * @author Emre Burak Koc
+ * @author Fabian Mersch
+ */
 class Portal {
   constructor(loginState = false, cookies = new CookieJar(), baseURL) {
     if (new.target === Portal) {
@@ -33,6 +42,8 @@ class Portal {
    * Die Methode wird aufgerufen,
    * um die unterschiedlichen Clients
    * für die verschiedenen Login Seiten zu erstellen.
+   * 
+   * @returns {axios.AxiosInstance} - Gewrappter Client, der Cookies speichert und für die Request genutzt wird
    **/
   createAxiosClient() {
     return wrapper(

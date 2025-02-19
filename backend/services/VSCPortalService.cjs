@@ -3,11 +3,46 @@ const Portal = require('./Portal.cjs');
 const cheerio = require('cheerio');
 const { CookieJar } = require('tough-cookie');
 
+/**
+ * Klasse zur Abwicklung des VSC Logins und Logouts.
+ * 
+ * Die Klasse bietet Methoden zum Authentifizieren im VSC.
+ * Außerdem werden Methoden bereitgestellt, 
+ * die Daten aus dem VSC laden.
+ * 
+ * @author Emre Burak Koc
+ */
 class VSCPortalService extends Portal {
+    /**
+     * Konstruktor zum Initialisieren eines VSCPortalService Objekts.
+     * 
+     * Der Konstruktor nimmt die Parameter entgegen 
+     * und ruft die Superklasse auf, 
+     * um die Instanziierung durchuzuführen.
+     * 
+     * @param {boolean} loginState - Status, ob man eingeloggt ist oder nicht
+     * @param {CookieJar} cookies - Die Cookies, falls Objekt aus Session geladen wird
+     * @param {string} baseURL - Die Basis URL, von der aus begonnen wird
+     */
     constructor(loginState = false, cookies = new CookieJar(), baseURL = process.env.VSC_HOMEPAGE_URL) {
         super(loginState, cookies, baseURL);
     }
 
+    /**
+     * Hilfsmethode zum Navigieren zur Zielseite.
+     * 
+     * DIe Methode parst einige Links von der VSC Seite, 
+     * um sich dadurch zu navigieren und die richtige Seite zu erreichen, 
+     * auf der Zieldaten zu finden sind. 
+     * 
+     * @param {axios.AxiosInstance} client - Axios Client zur Durchführung von Requests mit Cookies
+     * @param {string} url - Die aufzurufende URL
+     * @param {string} keyword - Das Schlüsselwort, nach dem gesucht werden soll, um den Link holen
+     * @param {string} tag - Der HTML Tag, nach dem gesucht werden soll
+     * @param {string} attribute - Das HTML Attribut, nach dem gesucht werden soll
+     * 
+     * @returns {object} - Link zur nächsten Seite (Navigation) und vorherige HTML Seite
+     */
     async getAndParseHTML(client, url, keyword, tag = 'a', attribute = 'href') {
         const response = await client.get(url);
         const html = response.data;
@@ -16,7 +51,6 @@ class VSCPortalService extends Portal {
         const filteredLinks = $(tag).filter(function () {
             return $(this).text().includes(keyword);
         });
-        //console.log(filteredLinks);
 
         const filteredURL = filteredLinks.first().attr('href');
         return {
@@ -25,6 +59,15 @@ class VSCPortalService extends Portal {
         };
     }
 
+    /**
+     * Methode zur Erstellung des Objektzustands.
+     * 
+     * Die Methode erstellt ein Objekt, 
+     * welches den Zustand der Instanz repräsentiert 
+     * und zur Speicherung in der Session genutzt wird, 
+     * sodass hinterher eine Instanz  wiederhergestellt werden kann. 
+    * @returns 
+     */
     toSession() {
         // Gibt ein reines JSON-Objekt zurück
         return {
@@ -96,12 +139,10 @@ class VSCPortalService extends Portal {
     async getDegreesAndCourses() {
         const client = this.createAxiosClient();
         const homepageUrl = this.baseURL;
-        console.log(this.cookies);
         const availableDegrees = ['Abschluss BA Bachelor'];
 
         try {
             const homepageResponse = await this.getAndParseHTML(client, homepageUrl, 'Meine Prüfungen');
-            //console.log(homepageResponse.html);
             const generalInfoResponse = await this.getAndParseHTML(client, homepageResponse.filteredURL, 'Info über angemeldete Prüfungen');
 
             // Bachelor-Daten abrufen
@@ -112,8 +153,6 @@ class VSCPortalService extends Portal {
                 availableDegrees.push('Abschluss MA Master');
                 masterCourses = await this.getDegreeData(client, generalInfoResponse, availableDegrees[1]);
             }
-
-            console.log(this.filterCourses(bachelorData.data));
 
             return {
                 degrees: availableDegrees,
@@ -128,7 +167,21 @@ class VSCPortalService extends Portal {
     }
 
     /**
-     * Hilfsfunktion für das Abrufen von Studiengangsdaten (Bachelor/Master)
+     * Hilfsfunktion zum Abruf von Studiengangsdaten.
+     * 
+     * Die Methode führt die in Navigation fort 
+     * und sorgt dafür, dass die Liste auf der Seite 
+     * korrekt zugeklappt und aufgeklappt wird.
+     * 
+     * @async
+     * @function getDegreeData
+     * 
+     * @param {AxiosInstance} client - Der Axios Client, mit denen die Anfragen durchgeführt werden
+     * @param {string} generealInfoResponse - Die Seite, auf die Studiengänge gefiltert werden
+     * @param {string} degree - Der Abschluss, dessen Studiengänge geladen werden sollen (Bachelor / Master)
+     * @param {string} keyword - Der Begriff nach dem gesucht wird, um das Listenverhalten korrekt zu steuern
+     * 
+     * @returns {object} {} - Das Ergebnisobjekt, dass die Ergebnisseite enthält
      */
     async getDegreeData(client, generalInfoResponse, degree, keyword = 'Diesen Zweig zuklappen') {
         let degreePage = await this.getAndParseHTML(client, generalInfoResponse.filteredURL, degree);

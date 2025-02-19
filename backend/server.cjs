@@ -26,6 +26,7 @@ const PORT = process.env.PORT;
 const app = express();
 const cryptoKey = crypto.randomBytes(32).toString("hex");
 
+// HTTPS Konfiguration für Zertifikat
 const options = {
   key: fs.readFileSync("certs/privkey.pem"),
   cert: fs.readFileSync("certs/cert.crt"),
@@ -152,6 +153,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Interner Serverfehler." });
 });
 
+// HTTPS Server, falls vertrauenswürdiges Zertifikat vorhanden
 /*https.createServer(options, app).listen(PORT, () => {
   console.log(`HTTPS Server läuft auf Port ${PORT}.`);
 });*/

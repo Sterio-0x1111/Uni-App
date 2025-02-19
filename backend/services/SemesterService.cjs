@@ -1,18 +1,6 @@
 const { fetchHTML, handleError } = require("../utils/helpers.cjs");
 
 class SemesterService {
-    //static #instance;
-    //#url = 'https://www.fh-swf.de/de/studierende/studienorganisation/vorlesungszeiten/vorlesungzeit.php';
-    //$ = null;
-
-    constructor(){
-        /*if(SemesterService.#instance){
-            return SemesterService.#instance;
-        }
-        $ = async () => await fetchHTML(this.#url);
-        SemesterService.#instance = this;
-        console.log('constructed');*/
-    }
 
     /*get instance(){
         if(!SemesterService.#instance){
