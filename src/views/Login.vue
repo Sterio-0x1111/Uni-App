@@ -18,13 +18,17 @@
           </div>
 
           <ion-item>
-            <ion-label position="stacked">Username</ion-label>
-            <ion-input v-model="username" type="text" id="username" required></ion-input>
+            <IonText color="secundary">
+              <ion-label position="stacked">Username</ion-label>
+              <ion-input v-model="username" type="text" id="username" required></ion-input>
+            </IonText>
           </ion-item>
 
           <ion-item>
-            <ion-label position="stacked">Password</ion-label>
-            <ion-input v-model="password" type="password" id="password" required></ion-input>
+            <IonText color="secundary">
+              <ion-label position="stacked">Password</ion-label>
+              <ion-input v-model="password" type="password" id="password" required></ion-input>
+            </IonText>
           </ion-item>
 
           <ion-button class="custom-button" id="login" expand="block" @click="handleLogin">
@@ -38,7 +42,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
-import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonText } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';

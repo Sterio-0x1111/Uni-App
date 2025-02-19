@@ -49,7 +49,7 @@
             <span>
               <IonIcon color="primary" :name="route.icon" slot="iconOnly" size="large" class="button-icon" />
             </span>
-            <span class="button-text"><ion-title color="primary">{{ route.title }}</ion-title></span>
+            <span class="button-text"><ion-text color="primary">{{ route.title }}</ion-text></span>
             <span class="auth-type-label">
             </span>
             <IonIcon name="key" slot="end" />
@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonIcon } from "@ionic/vue";
+import {IonPage, IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonButton, IonIcon, IonText } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import ToolbarMenu from "./ToolbarMenu.vue";
 import { useAuthStore } from "@/stores/authStore";
