@@ -18,14 +18,14 @@
           </div>
 
           <ion-item>
-            <IonText color="system-text">
+            <IonText style="color: var(--my-text-color)">
               <ion-label position="stacked">Username</ion-label>
               <ion-input v-model="username" type="text" id="username" required></ion-input>
             </IonText>
           </ion-item>
 
           <ion-item>
-            <IonText color="system-text">
+            <IonText style="color: var(--my-text-color)">
               <ion-label position="stacked">Password</ion-label>
               <ion-input v-model="password" type="password" id="password" required></ion-input>
             </IonText>
