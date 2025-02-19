@@ -36,7 +36,9 @@
                                         <IonAccordion v-for="(contact, i) in department.contacts" :key="i">
                                             <IonItem slot="header" lines="none">
                                                 <IonLabel>
-                                                    <h3>{{ contact.name || 'Kontaktname nicht verfügbar' }}</h3>
+                                                    <IonText color="primary">
+                                                        <h3>{{ contact.name || 'Kontaktname nicht verfügbar' }}</h3>
+                                                    </IonText>
                                                 </IonLabel>
                                             </IonItem>
                                             <div slot="content">
