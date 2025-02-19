@@ -8,7 +8,6 @@
 <script setup lang="ts">
 import { IonSpinner } from '@ionic/vue';
 
-// Definiert die Props für die Komponente
 const props = defineProps({
     isLoading: {
         type: Boolean,
@@ -28,19 +27,28 @@ const props = defineProps({
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    /* Halbtransparentes weißes Overlay */
+    /* Hintergrund-Farbe für Hellmodus */
+    background-color: rgba(150, 150, 150, 0.7);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     /* Über allen anderen Elementen */
+    color: #161616;
+}
+
+/* Für den Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .loading-overlay {
+        /* Dunklere Hintergrund-Farbe */
+        background-color: rgba(50, 50, 50, 0.85);
+        color: #f3f3f3;
+    }
 }
 
 .loading-overlay p {
     margin-top: 10px;
     font-size: 16px;
-    color: #333;
 }
 </style>

@@ -147,7 +147,6 @@ class Portal {
       // Wenn success => loginState == true
       console.log(portalService.loginState);
       if (portalService.loginState) {
-        console.log('in steet');
         // Service in die Session serialisieren
         req.session[sessionKey] = portalService.toSession();
         return res.json({ message: `${serviceName}: SUCCESS` });
