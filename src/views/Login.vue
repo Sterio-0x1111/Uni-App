@@ -18,14 +18,14 @@
           </div>
 
           <ion-item>
-            <IonText color="secundary">
+            <IonText color="system-text">
               <ion-label position="stacked">Username</ion-label>
               <ion-input v-model="username" type="text" id="username" required></ion-input>
             </IonText>
           </ion-item>
 
           <ion-item>
-            <IonText color="secundary">
+            <IonText color="system-text">
               <ion-label position="stacked">Password</ion-label>
               <ion-input v-model="password" type="password" id="password" required></ion-input>
             </IonText>
@@ -91,7 +91,14 @@ ion-item {
   margin-bottom: 20px;
 }
 
-/* Styling für die Fehlermeldung */
+:root {
+  --my-text-color: #000;
+}
+
+:root[theme=dark] {
+  --my-text-color: #fff;
+}
+
 .error-message {
   color: red;
   margin-bottom: 10px;
