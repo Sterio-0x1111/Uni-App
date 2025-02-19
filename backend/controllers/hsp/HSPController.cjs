@@ -1,6 +1,5 @@
 const HSPPortalService = require("../../services/HSPPortalService.cjs");
 const Portal = require("../../services/Portal.cjs");
-const { CookieJar } = require("tough-cookie");
 
 // Login für HSP
 const loginToHSP = async (req, res) => {
