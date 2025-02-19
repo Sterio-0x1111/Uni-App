@@ -5,7 +5,6 @@
     </IonHeader>
 
     <IonContent id="navigation-content">
-      <IonList class="custom-list">
         <!-- Öffentliche Routen -->
         <h3>Öffentliche Seiten</h3>
         <IonButton class="custom-button" v-for="route in publicRoutes" :key="route.id" @click="navigateTo(route.path)" :id="route.id">
@@ -56,7 +55,6 @@
             <IonIcon name="key" slot="end" />
           </IonButton>
         </div>
-      </IonList>
     </IonContent>
   </IonPage>
 </template>
@@ -155,12 +153,5 @@ h3 {
 
 .button-text {
   flex: 1;
-}
-
-IonList {
-  --ion-item-background: #ffffff;
-  --ion-item-color: #000000;
-  --ion-background-color: #ffffff;
-  --color: #000000;
 }
 </style>

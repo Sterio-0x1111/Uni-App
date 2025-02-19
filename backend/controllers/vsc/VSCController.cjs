@@ -30,33 +30,6 @@ const Portal = require('../../services/Portal.cjs');
  */
 const loginToVSC2 = async (req, res) => {
     return Portal.loginService(req, res, VSCPortalService, "vsc", "VSC");
-    /*if (!req.session.vsc) {
-        try {
-            const { username, password } = req.body;
-
-            const loginPayload = new URLSearchParams();
-            loginPayload.append('asdf', username);
-            loginPayload.append('fdsa', password);
-            loginPayload.append('submit', 'Anmelden');
-
-            const vscPortal = new VSCPortalService();
-            const state = await vscPortal.login(loginPayload);
-
-            if (state) {
-                req.session.vsc = vscPortal.cookies;
-                req.session.loggedInVSC = true;
-                req.session.save();
-                res.status(200).json({ message: 'VSC: Erfolgreich eingeloggt!' });
-            } else {
-                res.status(401).json({ message: 'VSC: Login fehlgeschlagen.' });
-            }
-        } catch (error) {
-            console.log('Fehler beim Login VSC.', error);
-            res.status(500).json({ message: 'Fehler beim Login im VSC.' });
-        }
-    } else {
-        res.status(200).json({ message: 'VSC: Bereits eingeloggt.' });
-    }*/
 }
 
 /**
@@ -76,31 +49,7 @@ const loginToVSC2 = async (req, res) => {
  * @returns { Promise<void> } - Gibt stattdessen eine JSON Antwort zurück.
  */
 const logoutFromVSC = async (req, res) => {
-    console.log('Logout Service');
     return Portal.logoutService(req, res, VSCPortalService, "vsc", "VSC");
-    
-    /*if(req.session.vsc){
-        try {
-            //const vscPortal = new VSCPortalService();
-            //const cookies = req.session.vsc;
-            //vscPortal.cookies = cookies;
-            const vscPortal = Portal.fromSession(req.session.vsc, VSCPortalService);
-            const logout = await vscPortal.logout();
-
-            if(logout){
-                console.log('VSC: Erfolgreich ausgeloggt.');
-                req.session.loggedInVSC = false;
-                req.session.vsc = null;
-                res.status(200).json({ message: 'VSC: Erfolgreich ausgeloggt.' });
-            } else {
-                console.log('VSC: Nicht ausgeloggt!');
-            }
-        } catch(error){
-            res.status(500).json({ message: 'VSC: Logout fehlgeschlagen.' });
-        }
-    } else {
-        res.status(401).json({ message: 'VSC: Nicht eingeloggt.' });
-    }*/
 }
 
 /**
