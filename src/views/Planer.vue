@@ -144,7 +144,6 @@ onMounted(fetchDepartments);
 .info-link {
     display: inline-block;
     margin-top: 10px;
-    color: var(--ion-color-primary);
     text-decoration: none;
 }
 
