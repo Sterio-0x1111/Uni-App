@@ -18,13 +18,13 @@
           </div>
 
           <ion-item>
-            <ion-label position="stacked" style="color: var(--my-text-color)">Username</ion-label>
-            <ion-input v-model="username" type="text" id="username" style="color: var(--my-text-color)" required></ion-input>
+            <ion-label position="stacked" color="secondary">Username</ion-label>
+            <ion-input v-model="username" type="text" id="username" color="secondary" required></ion-input>
           </ion-item>
 
           <ion-item>
-            <ion-label position="stacked" style="color: var(--my-text-color)">Password</ion-label>
-            <ion-input v-model="password" type="password" id="password" style="color: var(--my-text-color)" required></ion-input>
+            <ion-label position="stacked" color="secondary">Password</ion-label>
+            <ion-input v-model="password" type="password" id="password" color="secondary" required></ion-input>
           </ion-item>
 
           <ion-button class="custom-button" id="login" expand="block" @click="handleLogin">
